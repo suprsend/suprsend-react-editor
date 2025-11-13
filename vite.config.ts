@@ -1,4 +1,3 @@
-import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, loadEnv, type LibraryFormats } from 'vite';
 import react from '@vitejs/plugin-react';
 import dts from 'vite-plugin-dts';
@@ -28,7 +27,6 @@ export default defineConfig(({ mode }) => {
         outDir: 'dist/types',
         tsconfigPath: './tsconfig.app.json',
       }),
-      tailwindcss(),
     ],
     build: {
       outDir: CJSBuild ? 'dist/cjs' : 'dist/es',
