@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv, type LibraryFormats } from 'vite';
 import react from '@vitejs/plugin-react';
+import svgr from 'vite-plugin-svgr';
 import dts from 'vite-plugin-dts';
 import pkg from './package.json';
 import path from 'path';
@@ -23,6 +24,7 @@ export default defineConfig(({ mode }) => {
           plugins: ['react-require'],
         },
       }),
+      svgr(),
       dts({
         outDir: 'dist/types',
         tsconfigPath: './tsconfig.app.json',
