@@ -38,24 +38,45 @@ import {
 } from '@/components/ui/tooltip';
 import Editor from '@monaco-editor/react';
 
+const EMAIL_EDITORS = [
+  { name: 'Design Editor', id: 'design_editor' },
+  { name: 'Plain Text', id: 'plain_text' },
+];
+
 export default function EmailChannel() {
-  const [emailEditorType, setEmailEditorType] = useState<'design' | 'html'>(
+  const [designEditorType, setDesignEditorType] = useState<'design' | 'html'>(
     'design'
   );
-  const [otherSettingsOpen, setOtherSettingsOpen] = useState(false);
+  const [emailEditorType, setEmailEditorType] = useState<string>(
+    EMAIL_EDITORS[0].id
+  );
+  const [activeEmailEditors, setActiveEmailEditors] = useState<string[]>([
+    EMAIL_EDITORS[0].id,
+  ]);
   const [emailSettingsOpen, setEmailSettingsOpen] = useState(false);
+  const [otherSettingsOpen, setOtherSettingsOpen] = useState(false);
 
   return (
     <div className="suprsend-p-3">
       <div className="">
         <div className="suprsend-flex suprsend-items-center suprsend-justify-between">
           <div className="suprsend-flex suprsend-mb-[-1px] suprsend-z-50">
-            <div className="suprsend-border suprsend-rounded-md suprsend-rounded-b-none suprsend-flex suprsend-items-center suprsend-gap-3 suprsend-border-b-background suprsend-px-3">
-              <span className="suprsend-text-primary suprsend-font-medium">
-                Design Editor
-              </span>
-              <X className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground" />
-            </div>
+            {EMAIL_EDITORS.map((editor) => (
+              <div
+                className={cn(
+                  'suprsend-flex suprsend-items-center suprsend-gap-3 suprsend-border-b-background suprsend-px-3 suprsend-cursor-pointer',
+                  editor.id === emailEditorType &&
+                    'suprsend-border suprsend-rounded-md suprsend-rounded-b-none'
+                )}
+                onClick={() => setEmailEditorType(editor.id)}
+                key={editor.id}
+              >
+                <span className="suprsend-text-primary suprsend-font-medium ">
+                  {editor.name}
+                </span>
+                <X className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground" />
+              </div>
+            ))}
 
             <Button
               variant="ghost"
@@ -73,11 +94,11 @@ export default function EmailChannel() {
                 type="button"
                 className={cn(
                   'suprsend-px-3 suprsend-py-1 suprsend-text-sm suprsend-rounded-md suprsend-flex suprsend-items-center suprsend-gap-2',
-                  emailEditorType === 'design' &&
+                  designEditorType === 'design' &&
                     'suprsend-bg-white suprsend-shadow'
                 )}
                 onClick={() => {
-                  setEmailEditorType('design');
+                  setDesignEditorType('design');
                 }}
               >
                 <Brush className="suprsend-h-3 suprsend-w-3" /> Design
@@ -86,11 +107,11 @@ export default function EmailChannel() {
                 type="button"
                 className={cn(
                   'suprsend-px-3 suprsend-py-1 suprsend-text-sm suprsend-rounded-md suprsend-flex suprsend-items-center suprsend-gap-2',
-                  emailEditorType === 'html' &&
+                  designEditorType === 'html' &&
                     'suprsend-bg-white suprsend-shadow'
                 )}
                 onClick={() => {
-                  setEmailEditorType('html');
+                  setDesignEditorType('html');
                 }}
               >
                 <CodeXml className="suprsend-h-3 suprsend-w-3" /> HTML
@@ -103,8 +124,8 @@ export default function EmailChannel() {
                   className="!suprsend-h-7 !suprsend-px-2 suprsend-border suprsend-rounded-md"
                   aria-label="edit"
                 >
-                  <Clipboard className="suprsend-h-4 suprsend-w-4" />
-                  <ChevronDown className="suprsend-h-3.5 suprsend-w-3.5" />
+                  <Clipboard className="suprsend-h-4 suprsend-w-4 suprsend-text-muted-foreground" />
+                  <ChevronDown className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -142,7 +163,7 @@ export default function EmailChannel() {
           </div>
           <Dialog open={emailSettingsOpen} onOpenChange={setEmailSettingsOpen}>
             <DialogTrigger asChild>
-              <Pencil className="suprsend-h-3.5 suprsend-w-3.5 suprsend-cursor-pointer" />
+              <Pencil className="suprsend-h-3.5 suprsend-w-3.5 suprsend-cursor-pointer suprsend-text-muted-foreground" />
             </DialogTrigger>
             <EmailMetaModal
               otherSettingsOpen={otherSettingsOpen}

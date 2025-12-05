@@ -88,16 +88,18 @@ const CHANNELS: Channel[] = [
 ];
 
 export function SuprSendTemplateEditor() {
-  const [selectedId, setSelectedId] = useState<string | number>('email');
+  const [selectedChannel, setSelectedChannel] = useState<string | number>(
+    'email'
+  );
 
   return (
     <div>
       <TabBar
         options={CHANNELS}
-        selectedId={selectedId}
-        onTabClick={(id) => setSelectedId(id)}
+        selectedChannel={selectedChannel}
+        onTabClick={(id) => setSelectedChannel(id)}
       />
-      <EmailChannel />
+      {selectedChannel === 'email' && <EmailChannel />}
     </div>
   );
 }

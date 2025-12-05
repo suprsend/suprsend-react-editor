@@ -24,7 +24,7 @@ interface TabOption {
 
 interface TabBarProps {
   options: TabOption[];
-  selectedId: string | number;
+  selectedChannel: string | number;
   onTabClick?: (id: string | number) => void;
 }
 
@@ -92,21 +92,21 @@ function ActionButtons() {
   return (
     <div className="suprsend-flex suprsend-items-center suprsend-self-end suprsend-gap-2 suprsend-mr-2 suprsend-mb-1">
       <Button variant="outline" className="!suprsend-py-0 !suprsend-h-8">
-        <FileText className="suprsend-h-2.5 suprsend-w-2.5" />
+        <FileText className="suprsend-h-2.5 suprsend-w-2.5 suprsend-text-muted-foreground" />
       </Button>
 
       <Button
         variant="outline"
         className="suprsend-gap-1 !suprsend-py-0 !suprsend-h-8"
       >
-        <FlaskConical className="suprsend-h-2.5 suprsend-w-2.5" />
+        <FlaskConical className="suprsend-h-2.5 suprsend-w-2.5 suprsend-text-muted-foreground" />
         <span className="suprsend-text-xs">Test</span>
       </Button>
     </div>
   );
 }
 
-export function TabBar({ options, selectedId, onTabClick }: TabBarProps) {
+export function TabBar({ options, selectedChannel, onTabClick }: TabBarProps) {
   return (
     <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-flex-grow suprsend-gap-4 suprsend-border-b suprsend-border-border suprsend-overflow-x-scroll">
       <div className="suprsend-flex suprsend-items-center suprsend-mt-5">
@@ -114,7 +114,7 @@ export function TabBar({ options, selectedId, onTabClick }: TabBarProps) {
           <TabItem
             key={tab.id}
             tab={tab}
-            isSelected={selectedId === tab.id}
+            isSelected={selectedChannel === tab.id}
             onTabClick={onTabClick}
           />
         ))}
