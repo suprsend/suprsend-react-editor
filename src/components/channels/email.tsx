@@ -11,6 +11,8 @@ import {
   HelpCircle,
   Info,
   ExternalLink,
+  Smartphone,
+  TvMinimal,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -43,6 +45,7 @@ import {
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
 import EmailEditor from 'react-email-editor';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const EMAIL_EDITORS = [
   { name: 'Design Editor', id: 'design_editor' },
@@ -65,9 +68,23 @@ export default function EmailChannel() {
   const [otherSettingsOpen, setOtherSettingsOpen] = useState(false);
   const [htmlSwitchModalOpen, setHtmlSwitchModalOpen] = useState(false);
 
+  const missingEditor = EMAIL_EDITORS.find(
+    (editor) => !activeEmailEditors.includes(editor.id)
+  );
+  let tooltipText = '';
+  if (missingEditor?.id === 'plain_text') {
+    tooltipText = 'Add Plain text';
+  } else if (missingEditor?.id === 'design_editor') {
+    if (designEditorType === 'design') {
+      tooltipText = 'Add Design Editor';
+    } else {
+      tooltipText = 'Add HTML Editor';
+    }
+  }
+
   return (
     <div className="suprsend-p-3">
-      <div className="">
+      <div>
         <div className="suprsend-flex suprsend-items-center suprsend-justify-between">
           <div className="suprsend-flex suprsend-mb-[-1px] suprsend-z-50">
             {emailEditors.map((editor) => {
@@ -90,64 +107,69 @@ export default function EmailChannel() {
                   >
                     {editor.name}
                   </span>
-                  {activeEmailEditors.length > 1 && (
-                    <X
-                      className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground suprsend-cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const newActiveEditors = activeEmailEditors.filter(
-                          (id) => id !== editor.id
-                        );
-                        setActiveEmailEditors(newActiveEditors);
-                        // If closing the currently active editor, switch to the remaining one
-                        if (
-                          editor.id === emailEditorType &&
-                          newActiveEditors.length > 0
-                        ) {
-                          setEmailEditorType(newActiveEditors[0]);
-                        }
-                      }}
-                    />
-                  )}
+                  {activeEmailEditors.length > 1 &&
+                    editor.id === emailEditorType && (
+                      <X
+                        className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground suprsend-cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const newActiveEditors = activeEmailEditors.filter(
+                            (id) => id !== editor.id
+                          );
+                          setActiveEmailEditors(newActiveEditors);
+                          // If closing the currently active editor, switch to the remaining one
+                          if (
+                            editor.id === emailEditorType &&
+                            newActiveEditors.length > 0
+                          ) {
+                            setEmailEditorType(newActiveEditors[0]);
+                          }
+                        }}
+                      />
+                    )}
                 </div>
               );
             })}
 
             {activeEmailEditors.length < EMAIL_EDITORS.length && (
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="add-tab"
-                className="suprsend-ml-1 hover:suprsend-rounded-b-none hover:suprsend-border-b"
-                onClick={() => {
-                  const missingEditor = EMAIL_EDITORS.find(
-                    (editor) => !activeEmailEditors.includes(editor.id)
-                  );
-                  if (missingEditor) {
-                    setActiveEmailEditors((prev) => [
-                      ...prev,
-                      missingEditor.id,
-                    ]);
-                    setEmailEditorType(missingEditor.id);
-                  }
-                }}
-              >
-                <Plus className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground" />
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="add-tab"
+                      className="suprsend-ml-1 hover:suprsend-rounded-b-none hover:suprsend-border-b"
+                      onClick={() => {
+                        const missingEditor = EMAIL_EDITORS.find(
+                          (editor) => !activeEmailEditors.includes(editor.id)
+                        );
+                        if (missingEditor) {
+                          setActiveEmailEditors((prev) => [
+                            ...prev,
+                            missingEditor.id,
+                          ]);
+                          setEmailEditorType(missingEditor.id);
+                        }
+                      }}
+                    >
+                      <Plus className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{tooltipText}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
           </div>
 
           {emailEditorType === 'design_editor' && (
-            <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
-              <div className="suprsend-inline-flex suprsend-bg-gray-100 suprsend-rounded-md suprsend-p-0.5">
-                <button
-                  type="button"
-                  className={cn(
-                    'suprsend-px-3 suprsend-py-1 suprsend-text-sm suprsend-rounded-md suprsend-flex suprsend-items-center suprsend-gap-2',
-                    designEditorType === 'design' &&
-                      'suprsend-bg-white suprsend-shadow'
-                  )}
-                  onClick={() => {
+            <div className="suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-mt-[-10px]">
+              <Tabs
+                value={designEditorType}
+                onValueChange={(value) => {
+                  if (value === 'design') {
                     setDesignEditorType('design');
                     const editedEmailEditors = emailEditors.map((editor) => {
                       if (editor.id === 'design_editor') {
@@ -156,24 +178,25 @@ export default function EmailChannel() {
                       return editor;
                     });
                     setEmailEditors(editedEmailEditors);
-                  }}
-                >
-                  <Brush className="suprsend-h-3 suprsend-w-3" /> Design
-                </button>
-                <button
-                  type="button"
-                  className={cn(
-                    'suprsend-px-3 suprsend-py-1 suprsend-text-sm suprsend-rounded-md suprsend-flex suprsend-items-center suprsend-gap-2',
-                    designEditorType === 'html' &&
-                      'suprsend-bg-white suprsend-shadow'
-                  )}
-                  onClick={() => {
-                    setHtmlSwitchModalOpen(true);
-                  }}
-                >
-                  <CodeXml className="suprsend-h-3 suprsend-w-3" /> HTML
-                </button>
-              </div>
+                  }
+                }}
+              >
+                <TabsList className="suprsend-h-auto suprsend-p-0.5">
+                  <TabsTrigger value="design" className="suprsend-gap-2">
+                    <Brush className="suprsend-h-3 suprsend-w-3" /> Design
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="html"
+                    className="suprsend-gap-2"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setHtmlSwitchModalOpen(true);
+                    }}
+                  >
+                    <CodeXml className="suprsend-h-3 suprsend-w-3" /> HTML
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -233,16 +256,38 @@ export default function EmailChannel() {
         </div>
       </div>
 
-      <div className="suprsend-px-3 suprsend-bg-blue-50 suprsend-text-gray-700 suprsend-text-xs suprsend-py-1.5 suprsend-flex suprsend-items-center suprsend-justify-between suprsend-mt-1 suprsend-rounded">
-        <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
-          <Info className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600" />
-          <span>
-            For devices that block HTML emails, we’ll automatically create and
-            send a plain text version using your email content.
-          </span>
+      {emailEditorType === 'design_editor' && designEditorType === 'design' && (
+        <div className="suprsend-px-3 suprsend-bg-blue-50 suprsend-text-gray-700 suprsend-text-xs suprsend-py-1.5 suprsend-flex suprsend-items-center suprsend-justify-between suprsend-my-1 suprsend-rounded">
+          <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+            <Info className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600" />
+            <span>
+              For devices that block HTML emails, we’ll automatically create and
+              send a plain text version using your email content.
+            </span>
+          </div>
+          <X className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600" />
         </div>
-        <X className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600" />
-      </div>
+      )}
+      {emailEditorType === 'design_editor' && designEditorType === 'html' && (
+        <div className="suprsend-px-3 suprsend-bg-blue-50 suprsend-text-gray-700 suprsend-text-xs suprsend-py-1.5 suprsend-flex suprsend-items-center suprsend-justify-between suprsend-my-1 suprsend-rounded">
+          <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+            <Info className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600" />
+            <span>
+              All html tags and CSS properties aren’t allowed by certain email
+              clients and will strip your email.{' '}
+              <a
+                href="https://docs.suprsend.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="suprsend-underline"
+              >
+                Refer to documentation.
+              </a>
+            </span>
+          </div>
+          <X className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600" />
+        </div>
+      )}
 
       <EmailTemplatePlayground
         designEditorType={designEditorType}
@@ -389,8 +434,10 @@ function EmailMetaModal({
 
                         <TooltipContent side="top">
                           <p>
-                            This JSON defines the layout and content of the
-                            email.
+                            Use it to create interactive email and take quick
+                            actions within the email. Examples include: Replying
+                            to meeting invite, tracking delivery status, event
+                            reservation etc.
                           </p>
                         </TooltipContent>
                       </Tooltip>
@@ -506,11 +553,12 @@ function EmailTemplatePlayground({
 }
 
 function TextEditors({ type }: { type: 'html' | 'plaintext' }) {
+  const [activePreviewTab, setActivePreviewTab] = useState<
+    'desktop' | 'mobile'
+  >('desktop');
+
   return (
-    <ResizablePanelGroup
-      direction="horizontal"
-      className="suprsend-border suprsend-m-2"
-    >
+    <ResizablePanelGroup direction="horizontal" className="suprsend-border">
       <ResizablePanel
         defaultSize={50}
         className="suprsend-overflow-hidden mt-1 suprsend-h-[580px]"
@@ -542,9 +590,31 @@ function TextEditors({ type }: { type: 'html' | 'plaintext' }) {
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={50}>
         <div>
-          <div className="suprsend-p-2 suprsend-border-b">
-            <p className="suprsend-text-sm suprsend-font-medium">Preview</p>
+          <div className="suprsend-border-b suprsend-flex suprsend-items-center suprsend-justify-between">
+            <div className="suprsend-p-2">
+              <p className="suprsend-text-sm suprsend-font-medium">Preview</p>
+            </div>
+            <div className="suprsend-mr-2">
+              <Tabs
+                defaultValue="desktop"
+                className=""
+                onValueChange={(value) =>
+                  setActivePreviewTab(value as 'desktop' | 'mobile')
+                }
+              >
+                <TabsList className="!suprsend-h-7">
+                  <TabsTrigger value="desktop" className="h-5">
+                    <TvMinimal className="suprsend-w-3 suprsend-h-3" />
+                  </TabsTrigger>
+                  <TabsTrigger value="mobile" className="h-5">
+                    <Smartphone className="suprsend-w-3 suprsend-h-3" />
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
           </div>
+          {activePreviewTab === 'desktop' && <p>Desktop preview</p>}
+          {activePreviewTab === 'mobile' && <p>Mobile preview</p>}
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>
