@@ -190,7 +190,9 @@ export default function EmailChannel() {
                     className="suprsend-gap-2"
                     onClick={(e) => {
                       e.preventDefault();
-                      setHtmlSwitchModalOpen(true);
+                      if (designEditorType !== 'html') {
+                        setHtmlSwitchModalOpen(true);
+                      }
                     }}
                   >
                     <CodeXml className="suprsend-h-3 suprsend-w-3" /> HTML

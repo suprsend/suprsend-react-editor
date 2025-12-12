@@ -1,11 +1,5 @@
 import { type ReactNode, useState } from 'react';
-import {
-  MoreVertical,
-  Trash2,
-  Plus,
-  FileText,
-  FlaskConical,
-} from 'lucide-react';
+import { MoreVertical, Trash2, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,6 +27,8 @@ interface TabBarProps {
   options: TabOption[];
   selectedChannel: string | number;
   onTabClick?: (id: string | number) => void;
+  ChannelsTabActionComponent?: React.ComponentType;
+  liveMode?: boolean;
 }
 
 interface TabItemProps {
@@ -154,25 +150,13 @@ function DisableChannelModal({
   );
 }
 
-function ActionButtons() {
-  return (
-    <div className="suprsend-flex suprsend-items-center suprsend-self-end suprsend-gap-2 suprsend-mr-2 suprsend-mb-1">
-      <Button variant="outline" className="!suprsend-py-0 !suprsend-h-8">
-        <FileText className="suprsend-h-2.5 suprsend-w-2.5 suprsend-text-muted-foreground" />
-      </Button>
-
-      <Button
-        variant="outline"
-        className="suprsend-gap-1 !suprsend-py-0 !suprsend-h-8"
-      >
-        <FlaskConical className="suprsend-h-2.5 suprsend-w-2.5 suprsend-text-muted-foreground" />
-        <span className="suprsend-text-xs">Test</span>
-      </Button>
-    </div>
-  );
-}
-
-export function TabBar({ options, selectedChannel, onTabClick }: TabBarProps) {
+export function TabBar({
+  options,
+  selectedChannel,
+  onTabClick,
+  ChannelsTabActionComponent,
+  liveMode,
+}: TabBarProps) {
   return (
     <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-flex-grow suprsend-gap-4 suprsend-border-b suprsend-border-border suprsend-overflow-x-scroll">
       <div className="suprsend-flex suprsend-items-center suprsend-mt-5">
@@ -185,15 +169,16 @@ export function TabBar({ options, selectedChannel, onTabClick }: TabBarProps) {
           />
         ))}
 
-        <button
-          onClick={() => {}}
-          className="suprsend-ml-2 suprsend-p-1 suprsend-rounded hover:suprsend-bg-accent"
-        >
-          <Plus className="suprsend-size-5 suprsend-text-muted-foreground" />
-        </button>
+        {!liveMode && (
+          <button
+            onClick={() => {}}
+            className="suprsend-ml-2 suprsend-p-1 suprsend-rounded hover:suprsend-bg-accent"
+          >
+            <Plus className="suprsend-size-5 suprsend-text-muted-foreground" />
+          </button>
+        )}
       </div>
-
-      <ActionButtons />
+      {ChannelsTabActionComponent && <ChannelsTabActionComponent />}
     </div>
   );
 }
