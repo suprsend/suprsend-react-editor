@@ -54,7 +54,7 @@ function TabItem({ tab, isSelected, onTabClick }: TabItemProps) {
     <>
       <div
         className={cn(
-          'suprsend-relative suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-py-1.5 suprsend-pl-3 suprsend-text-sm suprsend-font-medium suprsend-cursor-pointer',
+          'suprsend-relative suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-py-1.5 suprsend-pl-3 suprsend-text-sm suprsend-font-medium suprsend-cursor-pointer suprsend-flex-shrink-0',
           isSelected
             ? 'suprsend-text-primary'
             : 'suprsend-text-muted-foreground'
@@ -158,21 +158,23 @@ export function TabBar({
   liveMode,
 }: TabBarProps) {
   return (
-    <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-flex-grow suprsend-gap-4 suprsend-border-b suprsend-border-border suprsend-overflow-x-scroll">
-      <div className="suprsend-flex suprsend-items-center suprsend-mt-5">
-        {options?.map((tab) => (
-          <TabItem
-            key={tab.id}
-            tab={tab}
-            isSelected={selectedChannel === tab.id}
-            onTabClick={onTabClick}
-          />
-        ))}
+    <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-flex-grow suprsend-gap-4 suprsend-border-b suprsend-border-border">
+      <div className="suprsend-flex suprsend-items-center suprsend-mt-5 suprsend-min-w-0 suprsend-flex-1">
+        <div className="suprsend-flex suprsend-items-center suprsend-overflow-x-auto suprsend-min-w-0 suprsend-max-w-full">
+          {options?.map((tab) => (
+            <TabItem
+              key={tab.id}
+              tab={tab}
+              isSelected={selectedChannel === tab.id}
+              onTabClick={onTabClick}
+            />
+          ))}
+        </div>
 
         {!liveMode && (
           <button
             onClick={() => {}}
-            className="suprsend-ml-2 suprsend-p-1 suprsend-rounded hover:suprsend-bg-accent"
+            className="suprsend-ml-2 suprsend-p-1 suprsend-rounded hover:suprsend-bg-accent suprsend-flex-shrink-0"
           >
             <Plus className="suprsend-size-5 suprsend-text-muted-foreground" />
           </button>

@@ -545,7 +545,7 @@ function EmailTemplatePlayground({
 }) {
   if (emailEditorType === 'design_editor') {
     if (designEditorType === 'design') {
-      return <EmailEditor minHeight={'580px'} />;
+      return <EmailEditor minHeight={'583px'} />;
     } else {
       return <TextEditors type="html" />;
     }
