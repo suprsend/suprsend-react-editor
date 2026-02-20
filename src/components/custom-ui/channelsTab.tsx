@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from 'react';
-import { MoreVertical, Trash2, Plus } from 'lucide-react';
+import { MoreVertical, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,6 +15,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import type { ChannelId } from '@/types';
+import AndroidPushIcon from '@/assets/androidPushChannel.svg?react';
+import EmailIcon from '@/assets/emailChannel.svg?react';
+import InappIcon from '@/assets/inboxChannel.svg?react';
+import IOSPushIcon from '@/assets/iosPushChannel.svg?react';
+import MSTeamsIcon from '@/assets/maTeamsChannel.svg?react';
+import SlackIcon from '@/assets/slackChannel.svg?react';
+import SMSIcon from '@/assets/smsChannel.svg?react';
+import WebpushIcon from '@/assets/webPushChannel.svg?react';
+import WhatsappIcon from '@/assets/whatsappChannel.svg?react';
 
 interface TabOption {
   id: string | number;
@@ -24,7 +34,7 @@ interface TabOption {
 }
 
 interface TabBarProps {
-  options: TabOption[];
+  channels: ChannelId[];
   selectedChannel: string | number;
   onTabClick?: (id: string | number) => void;
   ChannelsTabActionComponent?: React.ComponentType;
@@ -36,6 +46,70 @@ interface TabItemProps {
   isSelected: boolean;
   onTabClick?: (id: string | number) => void;
 }
+
+interface Channel {
+  id: ChannelId;
+  label: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+}
+
+const CHANNELS: Channel[] = [
+  {
+    id: 'android',
+    label: 'Android Push',
+    icon: <AndroidPushIcon className="suprsend-w-3.5 suprsend-h-3.5" />,
+    onClick: () => {},
+  },
+  {
+    id: 'email',
+    label: 'Email',
+    icon: <EmailIcon className="suprsend-w-3.5 suprsend-h-3.5" />,
+    onClick: () => {},
+  },
+  {
+    id: 'inbox',
+    label: 'In-app Inbox',
+    icon: <InappIcon className="suprsend-w-3.5 suprsend-h-3.5" />,
+    onClick: () => {},
+  },
+  {
+    id: 'ios',
+    label: 'iOS Push',
+    icon: <IOSPushIcon className="suprsend-w-3.5 suprsend-h-3.5" />,
+    onClick: () => {},
+  },
+  {
+    id: 'msteams',
+    label: 'MS Teams',
+    icon: <MSTeamsIcon className="suprsend-w-3.5 suprsend-h-3.5" />,
+    onClick: () => {},
+  },
+  {
+    id: 'slack',
+    label: 'Slack',
+    icon: <SlackIcon className="suprsend-w-3.5 suprsend-h-3.5" />,
+    onClick: () => {},
+  },
+  {
+    id: 'sms',
+    label: 'SMS',
+    icon: <SMSIcon className="suprsend-w-3.5 suprsend-h-3.5" />,
+    onClick: () => {},
+  },
+  {
+    id: 'webpush',
+    label: 'Web Push',
+    icon: <WebpushIcon className="suprsend-w-3.5 suprsend-h-3.5" />,
+    onClick: () => {},
+  },
+  {
+    id: 'whatsapp',
+    label: 'Whatsapp',
+    icon: <WhatsappIcon className="suprsend-w-3.5 suprsend-h-3.5" />,
+    onClick: () => {},
+  },
+];
 
 function TabItem({ tab, isSelected, onTabClick }: TabItemProps) {
   const icon = tab.icon;
@@ -150,18 +224,16 @@ function DisableChannelModal({
   );
 }
 
-export function TabBar({
-  options,
-  selectedChannel,
-  onTabClick,
-  ChannelsTabActionComponent,
-  liveMode,
-}: TabBarProps) {
+export function TabBar({ channels, selectedChannel, onTabClick }: TabBarProps) {
+  const channelMetaData = CHANNELS.filter((channel) =>
+    channels.includes(channel.id)
+  );
+
   return (
     <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-flex-grow suprsend-gap-4 suprsend-border-b suprsend-border-border">
       <div className="suprsend-flex suprsend-items-center suprsend-mt-5 suprsend-min-w-0 suprsend-flex-1">
         <div className="suprsend-flex suprsend-items-center suprsend-overflow-x-auto suprsend-min-w-0 suprsend-max-w-full">
-          {options?.map((tab) => (
+          {channelMetaData?.map((tab) => (
             <TabItem
               key={tab.id}
               tab={tab}
@@ -170,17 +242,7 @@ export function TabBar({
             />
           ))}
         </div>
-
-        {!liveMode && (
-          <button
-            onClick={() => {}}
-            className="suprsend-ml-2 suprsend-p-1 suprsend-rounded hover:suprsend-bg-accent suprsend-flex-shrink-0"
-          >
-            <Plus className="suprsend-size-5 suprsend-text-muted-foreground" />
-          </button>
-        )}
       </div>
-      {ChannelsTabActionComponent && <ChannelsTabActionComponent />}
     </div>
   );
 }
