@@ -63,6 +63,19 @@ export interface EmailMetaDataFormValues {
   email_markup: string;
 }
 
+export interface IEmailBody {
+  raw?: { html?: string; text?: string };
+  type?: string;
+  designer?: {
+    html?: string;
+    text?: string;
+    design_json?: Record<string, unknown>;
+    display_conditions?: unknown[];
+  };
+  preheader?: string;
+  email_markup?: string;
+}
+
 export interface IEmailContent {
   from_name?: string;
   from_address?: string;
@@ -71,9 +84,18 @@ export interface IEmailContent {
   bcc?: string;
   reply_to?: string;
   extra_to?: string;
-  body?: { preheader?: string; email_markup?: string };
+  body?: IEmailBody;
+  templating_language?: string;
 }
 
 export interface IEmailContentResponse {
-  content?: IEmailContent;
+  content: IEmailContent;
+}
+
+export type EmailContentPayload = {
+  content: IEmailContent;
+};
+
+export interface UpdateVariantContentParams extends GetVariantDetailsParams {
+  payload: EmailContentPayload;
 }

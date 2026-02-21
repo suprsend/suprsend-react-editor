@@ -58,7 +58,7 @@ export default function SuprSendTemplateEditor({
     );
   }
 
-  if (!selectedChannel) {
+  if (!selectedChannel || !variantData) {
     return <p>Loading...</p>;
   }
   return (

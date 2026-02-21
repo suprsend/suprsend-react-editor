@@ -16,6 +16,7 @@ export function useAutosave<T extends FieldValues>({
   const debounceMsRef = useRef(debounceMs);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirstRender = useRef(true);
+  const lastSavedRef = useRef<string>('');
 
   onSaveRef.current = onSave;
   debounceMsRef.current = debounceMs;
@@ -24,14 +25,19 @@ export function useAutosave<T extends FieldValues>({
     const subscription = watch((data) => {
       if (isFirstRender.current) {
         isFirstRender.current = false;
+        lastSavedRef.current = JSON.stringify(data);
         return;
       }
+
+      const serialized = JSON.stringify(data);
+      if (serialized === lastSavedRef.current) return;
 
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
 
       timeoutRef.current = setTimeout(() => {
+        lastSavedRef.current = serialized;
         onSaveRef.current(data as T);
       }, debounceMsRef.current);
     });

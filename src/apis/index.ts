@@ -1,7 +1,11 @@
-import { QueryClient, useQuery } from '@tanstack/react-query';
+import { QueryClient, useQuery, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
-import type { GetVariantDetailsParams } from '@/types';
-import { createQueryParams } from '@/lib/utils';
+import type {
+  GetVariantDetailsParams,
+  EmailContentPayload,
+  UpdateVariantContentParams,
+} from '@/types';
+import { createQueryParams, deepMerge } from '@/lib/utils';
 
 const API_BASE_URL = 'https://stagingapi2.suprsend.com';
 
@@ -61,5 +65,60 @@ export const useVariantDetails = ({
         conditions,
         workspaceUid,
       }),
+  });
+};
+
+const updateVariantContent = async ({
+  templateSlug,
+  chanelSlug,
+  variantId,
+  workspaceUid,
+  conditions,
+  locale,
+  tenantId,
+  payload,
+}: UpdateVariantContentParams) => {
+  const qp = createQueryParams({ conditions, locale, tenantId });
+  const url = `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}/content/${qp}`;
+  const resp = await axiosInst.patch(url, payload);
+  return resp.data;
+};
+
+export const useUpdateVariantContent = ({
+  templateSlug,
+  chanelSlug,
+  variantId,
+  workspaceUid,
+  conditions,
+  locale,
+  tenantId,
+}: GetVariantDetailsParams) => {
+  const queryKey = [
+    `template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}`,
+  ];
+
+  return useMutation({
+    mutationFn: (payload: EmailContentPayload) =>
+      updateVariantContent({
+        templateSlug,
+        chanelSlug,
+        variantId,
+        workspaceUid,
+        conditions,
+        locale,
+        tenantId,
+        payload,
+      }),
+    onSuccess: (_data, payload) => {
+      queryClient.setQueryData(
+        queryKey,
+        (old: Record<string, unknown> | undefined) => {
+          if (!old) return old;
+          const updated = structuredClone(old);
+          deepMerge(updated, payload as unknown as Record<string, unknown>);
+          return updated;
+        }
+      );
+    },
   });
 };

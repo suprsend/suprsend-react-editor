@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
   Info,
@@ -28,12 +28,13 @@ import {
 import { useAutosave } from '@/lib/useAutosave';
 import type {
   EmailMetaDataFormValues,
+  EmailContentPayload,
   IEmailContentResponse,
 } from '@/types';
 
 export interface IEmailSettingsPreviewBannerProps {
   variantData: IEmailContentResponse;
-  onSave: (data: EmailMetaDataFormValues) => void;
+  onSave: (payload: EmailContentPayload) => void;
   variables?: Record<string, unknown>;
 }
 
@@ -88,7 +89,7 @@ interface EmailMetaDataModalProps {
   otherSettingsOpen: boolean;
   setOtherSettingsOpen: (open: boolean) => void;
   variantData: IEmailContentResponse;
-  onSave: (data: EmailMetaDataFormValues) => void;
+  onSave: (payload: EmailContentPayload) => void;
   variables: Record<string, unknown>;
 }
 
@@ -116,7 +117,17 @@ function EmailMetaDataModal({
     },
   });
 
-  useAutosave({ watch, onSave });
+  const handleAutosave = useCallback(
+    (data: EmailMetaDataFormValues) => {
+      const { preheader, email_markup, ...rest } = data;
+      const content: EmailContentPayload['content'] = { ...rest };
+      content.body = { preheader, email_markup };
+      onSave({ content });
+    },
+    [onSave]
+  );
+
+  useAutosave({ watch, onSave: handleAutosave, debounceMs: 0 });
 
   return (
     <DialogContent className="!suprsend-max-w-3xl suprsend-p-0 !suprsend-max-h-[90vh] !suprsend-overflow-y-auto !suprsend-border-0">
@@ -185,8 +196,8 @@ function EmailMetaDataModal({
             <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
               <Info className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600 suprsend-shrink-0" />
               <span>
-                Value for the above fields will be picked from vendor settings if
-                left blank
+                Value for the above fields will be picked from vendor settings
+                if left blank
               </span>
             </div>
             <X

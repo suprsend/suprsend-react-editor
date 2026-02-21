@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import {
   X,
   Plus,
@@ -33,7 +33,12 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EditorTopBanner } from './TopBanners';
 import HtmlSwitchModal from './HTMLEditorSwitchModal';
 import EmailSettingsPreviewBanner from './EditMetaData';
-import type { IEmailContentResponse } from '@/types';
+import { useUpdateVariantContent } from '@/apis';
+import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
+import type {
+  IEmailContentResponse,
+  EmailContentPayload,
+} from '@/types';
 
 const EDITOR_TYPE_OPTIONS = [
   { name: 'Design Editor', id: 'design_editor' },
@@ -52,17 +57,78 @@ interface EmailChannelProps {
 }
 
 export default function EmailChannel({ variantData }: EmailChannelProps) {
-  const [designEditorType, setDesignEditorType] =
-    useState<DesignEditorType>('design');
-  const [editorTypeList, setEditorTypeList] =
-    useState<IEditorTypeList[]>(EDITOR_TYPE_OPTIONS);
+  const {
+    templateSlug,
+    variantId,
+    workspaceUid,
+    conditions,
+    locale,
+    tenantId,
+  } = useTemplateEditorContext();
+  const { mutate } = useUpdateVariantContent({
+    templateSlug,
+    chanelSlug: 'email',
+    variantId,
+    workspaceUid,
+    conditions,
+    locale,
+    tenantId,
+  });
+
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveContent = useCallback(
+    (payload: EmailContentPayload) => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        mutate(payload);
+      }, 500);
+    },
+    [mutate]
+  );
+
+  const bodyType = variantData?.content?.body?.type;
+  const initialDesignEditorType: DesignEditorType =
+    bodyType === 'raw' ? 'html' : 'design';
+
+  const [designEditorType, setDesignEditorType] = useState<DesignEditorType>(
+    initialDesignEditorType
+  );
+  const [editorTypeList, setEditorTypeList] = useState<IEditorTypeList[]>(() =>
+    EDITOR_TYPE_OPTIONS.map((opt) =>
+      opt.id === 'design_editor' && initialDesignEditorType === 'html'
+        ? { ...opt, name: 'HTML Editor' }
+        : opt
+    )
+  );
 
   const [editorType, setEditorType] = useState<string>(
     EDITOR_TYPE_OPTIONS[0].id
   );
-  const [activeEditorTypes, setActiveEditorTypes] = useState<string[]>([
-    EDITOR_TYPE_OPTIONS[0].id,
-  ]);
+  const [activeEditorTypes, setActiveEditorTypes] = useState<string[]>(() => {
+    const types = [EDITOR_TYPE_OPTIONS[0].id];
+    const body = variantData?.content?.body;
+    const hasPlainText = body?.type === 'raw'
+      ? !!body?.raw?.text
+      : !!body?.designer?.text;
+    if (hasPlainText) {
+      types.push('plain_text');
+    }
+    return types;
+  });
+
+  // Sync design/html switch from server data after fetch
+  useEffect(() => {
+    if (!bodyType) return;
+    const type: DesignEditorType = bodyType === 'raw' ? 'html' : 'design';
+    setDesignEditorType(type);
+    setEditorTypeList((prev) =>
+      prev.map((opt) =>
+        opt.id === 'design_editor'
+          ? { ...opt, name: type === 'html' ? 'HTML Editor' : 'Design Editor' }
+          : opt
+      )
+    );
+  }, [bodyType]);
 
   const [htmlSwitchModalOpen, setHtmlSwitchModalOpen] = useState(false);
 
@@ -106,7 +172,7 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
                   >
                     {editor.name}
                   </span>
-                  {activeEditorTypes.length > 1 && editor.id === editorType && (
+                  {editor.id === 'plain_text' && editor.id === editorType && (
                     <X
                       className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground suprsend-cursor-pointer"
                       onClick={(e) => {
@@ -115,12 +181,11 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
                           (id) => id !== editor.id
                         );
                         setActiveEditorTypes(newActiveEditors);
-                        // If closing the currently active editor, switch to the remaining one
-                        if (
-                          editor.id === editorType &&
-                          newActiveEditors.length > 0
-                        ) {
-                          setEditorType(newActiveEditors[0]);
+                        setEditorType(newActiveEditors[0]);
+                        if (designEditorType === 'design') {
+                          saveContent({ content: { body: { designer: { text: '' } } } });
+                        } else {
+                          saveContent({ content: { body: { raw: { text: '' } } } });
                         }
                       }}
                     />
@@ -169,6 +234,7 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
                 onValueChange={(value) => {
                   if (value === 'design') {
                     setDesignEditorType('design');
+                    mutate({ content: { body: { type: 'designer' } } });
                     const editedEmailEditors = editorTypeList.map((editor) => {
                       if (editor.id === 'design_editor') {
                         return { ...editor, name: 'Design Editor' };
@@ -229,9 +295,7 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
 
         <EmailSettingsPreviewBanner
           variantData={variantData}
-          onSave={(data) => {
-            console.log('Payload:', data);
-          }}
+          onSave={saveContent}
         />
       </div>
 
@@ -244,6 +308,8 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
         <EmailTemplatePlayground
           designEditorType={designEditorType}
           editorType={editorType}
+          variantData={variantData}
+          saveContent={saveContent}
         />
       </div>
 
@@ -252,6 +318,7 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
         onOpenChange={setHtmlSwitchModalOpen}
         onProceed={() => {
           setDesignEditorType('html');
+          mutate({ content: { body: { type: 'raw' } } });
           const editedEmailEditors = editorTypeList.map((editor) => {
             if (editor.id === 'design_editor') {
               return { ...editor, name: 'HTML Editor' };
@@ -268,12 +335,57 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
 interface IEmailTemplatePlayground {
   designEditorType: DesignEditorType;
   editorType: string;
+  variantData: IEmailContentResponse;
+  saveContent: (payload: EmailContentPayload) => void;
 }
 
 function EmailTemplatePlayground({
   designEditorType,
   editorType,
+  variantData,
+  saveContent,
 }: IEmailTemplatePlayground) {
+  const body = variantData?.content?.body;
+
+  const handleEditorChange = useCallback(
+    (type: 'html' | 'text', value: string) => {
+      if (type === 'html') {
+        const currentRaw = body?.raw;
+        saveContent({
+          content: {
+            body: {
+              raw: {
+                html: value,
+                text: currentRaw?.text ?? '',
+              },
+            },
+          },
+        });
+      } else if (designEditorType === 'design') {
+        saveContent({
+          content: { body: { designer: { text: value } } },
+        });
+      } else {
+        const currentRaw = body?.raw;
+        saveContent({
+          content: {
+            body: {
+              raw: {
+                html: currentRaw?.html ?? '',
+                text: value,
+              },
+            },
+          },
+        });
+      }
+    },
+    [saveContent, body?.raw, designEditorType]
+  );
+
+  const plainTextValue = designEditorType === 'design'
+    ? (body?.designer?.text ?? '')
+    : (body?.raw?.text ?? '');
+
   if (editorType === 'design_editor') {
     if (designEditorType === 'design') {
       return (
@@ -283,14 +395,32 @@ function EmailTemplatePlayground({
         />
       );
     } else {
-      return <TextEditors type="html" />;
+      return (
+        <TextEditors
+          type="html"
+          value={body?.raw?.html ?? ''}
+          onChange={(v) => handleEditorChange('html', v)}
+        />
+      );
     }
   } else {
-    return <TextEditors type="plaintext" />;
+    return (
+      <TextEditors
+        type="plaintext"
+        value={plainTextValue}
+        onChange={(v) => handleEditorChange('text', v)}
+      />
+    );
   }
 }
 
-function TextEditors({ type }: { type: 'html' | 'plaintext' }) {
+interface TextEditorsProps {
+  type: 'html' | 'plaintext';
+  value: string;
+  onChange: (value: string) => void;
+}
+
+function TextEditors({ type, value, onChange }: TextEditorsProps) {
   const [activePreviewTab, setActivePreviewTab] = useState<
     'desktop' | 'mobile'
   >('desktop');
@@ -302,6 +432,8 @@ function TextEditors({ type }: { type: 'html' | 'plaintext' }) {
         className="suprsend-overflow-hidden mt-1 suprsend-h-full"
       >
         <CodeMirrorEditor
+          value={value}
+          onChange={onChange}
           language={type === 'html' ? 'html' : undefined}
           className="suprsend-h-full suprsend-border-0 suprsend-rounded-none"
         />
