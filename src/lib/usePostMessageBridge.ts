@@ -14,7 +14,7 @@ type HandlerMap = Record<string, MessageHandler[]>;
  *   bridge.post("PONG", { message: "Hi!" });
  */
 export function usePostMessageBridge(
-  iframeRef: RefObject<HTMLIFrameElement> | null,
+  iframeRef: RefObject<HTMLIFrameElement | null> | null,
   allowedOrigin = '*'
 ) {
   const handlers = useRef<HandlerMap>({});

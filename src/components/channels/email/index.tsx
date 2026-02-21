@@ -5,19 +5,12 @@ import {
   Brush,
   CodeXml,
   Clipboard,
-  ChevronDown,
   Smartphone,
   TvMinimal,
 } from 'lucide-react';
 import CodeMirrorEditor from '@/components/custom-ui/CodeMirrorEditor';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   TooltipProvider,
   Tooltip,
@@ -35,6 +28,7 @@ import HtmlSwitchModal from './HTMLEditorSwitchModal';
 import EmailSettingsPreviewBanner from './EditMetaData';
 import { useUpdateVariantContent } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
+import { usePostMessageBridge } from '@/lib/usePostMessageBridge';
 import type {
   IEmailContentResponse,
   EmailContentPayload,
@@ -172,7 +166,7 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
                   >
                     {editor.name}
                   </span>
-                  {editor.id === 'plain_text' && editor.id === editorType && (
+                  {activeEditorTypes.length > 1 && editor.id === editorType && (
                     <X
                       className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground suprsend-cursor-pointer"
                       onClick={(e) => {
@@ -182,11 +176,6 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
                         );
                         setActiveEditorTypes(newActiveEditors);
                         setEditorType(newActiveEditors[0]);
-                        if (designEditorType === 'design') {
-                          saveContent({ content: { body: { designer: { text: '' } } } });
-                        } else {
-                          saveContent({ content: { body: { raw: { text: '' } } } });
-                        }
                       }}
                     />
                   )}
@@ -227,7 +216,7 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
             )}
           </div>
 
-          {editorType === 'design_editor' && (
+          {activeEditorTypes.includes('design_editor') && (
             <div className="suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-mt-[-10px]">
               <Tabs
                 value={designEditorType}
@@ -263,32 +252,26 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="!suprsend-h-7 !suprsend-px-2 suprsend-border suprsend-rounded-md"
-                    aria-label="edit"
-                  >
-                    <Clipboard className="suprsend-h-4 suprsend-w-4 suprsend-text-muted-foreground" />
-                    <ChevronDown className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  onClick={(e: React.MouseEvent<HTMLDivElement>) =>
-                    e.stopPropagation()
-                  }
-                >
-                  <DropdownMenuItem
-                    onClick={() => {
-                      console.log('edit');
-                    }}
-                  >
-                    <CodeXml className="suprsend-h-3.5 suprsend-w-3.5 suprsend-mr-2" />
-                    Copy HTML
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="!suprsend-h-7 !suprsend-w-7 suprsend-border suprsend-rounded-md"
+                      aria-label="Copy HTML"
+                      onClick={() => {
+                        console.log('copy html');
+                      }}
+                    >
+                      <Clipboard className="suprsend-h-4 suprsend-w-4 suprsend-text-muted-foreground" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Copy HTML</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           )}
         </div>
@@ -346,6 +329,43 @@ function EmailTemplatePlayground({
   saveContent,
 }: IEmailTemplatePlayground) {
   const body = variantData?.content?.body;
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const designJsonRef = useRef(body?.designer?.design_json);
+  const { on, post } = usePostMessageBridge(iframeRef);
+
+  // Keep designJsonRef in sync with latest server data
+  useEffect(() => {
+    designJsonRef.current = body?.designer?.design_json;
+  }, [body?.designer?.design_json]);
+
+  // Listen for postMessage events from Unlayer iframe
+  useEffect(() => {
+    const unsubReady = on('EDITOR_READY', () => {
+      const designJson = designJsonRef.current;
+      if (designJson && Object.keys(designJson).length > 0) {
+        post('LOAD_DESIGN', { design_json: designJson });
+      }
+    });
+
+    const unsubUpdate = on('DESIGN_UPDATED', (payload) => {
+      const { html, design_json } = payload as {
+        html: string;
+        design_json: Record<string, unknown>;
+      };
+      saveContent({
+        content: {
+          body: {
+            designer: { html, design_json },
+          },
+        },
+      });
+    });
+
+    return () => {
+      unsubReady();
+      unsubUpdate();
+    };
+  }, [on, post, saveContent]);
 
   const handleEditorChange = useCallback(
     (type: 'html' | 'text', value: string) => {
@@ -390,6 +410,7 @@ function EmailTemplatePlayground({
     if (designEditorType === 'design') {
       return (
         <iframe
+          ref={iframeRef}
           src="http://localhost:3000/dropin_email_editor"
           className="suprsend-w-full suprsend-h-full"
         />
