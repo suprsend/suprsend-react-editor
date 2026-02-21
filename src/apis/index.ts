@@ -30,9 +30,10 @@ const getVariantDetails = async ({
   conditions,
   locale,
   tenantId,
+  workspaceUid,
 }: GetVariantDetailsParams) => {
   const qp = createQueryParams({ conditions, locale, tenantId });
-  const url = `${API_BASE_URL}/v2/staging/template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}/${qp}`;
+  const url = `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}/${qp}`;
   const resp = await axiosInst.get(url);
   return resp.data;
 };
@@ -44,6 +45,7 @@ export const useVariantDetails = ({
   locale,
   tenantId,
   conditions,
+  workspaceUid,
 }: GetVariantDetailsParams) => {
   return useQuery({
     queryKey: [
@@ -57,6 +59,7 @@ export const useVariantDetails = ({
         locale,
         tenantId,
         conditions,
+        workspaceUid,
       }),
   });
 };

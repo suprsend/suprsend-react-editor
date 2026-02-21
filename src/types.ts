@@ -9,7 +9,7 @@ export type ChannelId =
   | 'webpush'
   | 'whatsapp';
 
-export interface TemplateEditorContextValue {
+export interface SuprSendTemplateEditorProviderProps {
   workspaceUid: string;
   templateSlug: string;
   variantId: string;
@@ -19,7 +19,11 @@ export interface TemplateEditorContextValue {
   channels: ChannelId[];
 }
 
-export interface SuprSendTemplateEditorProviderProps extends TemplateEditorContextValue {
+export interface TemplateEditorContextValue extends SuprSendTemplateEditorProviderProps {
+  isPrivate: boolean;
+}
+
+export interface FullSuprSendTemplateEditorProviderProps extends TemplateEditorContextValue {
   children?: React.ReactNode;
 }
 
@@ -44,4 +48,32 @@ export interface GetVariantDetailsParams {
   tenantId: string | null;
   locale: string;
   conditions: unknown;
+  workspaceUid: string;
+}
+
+export interface EmailMetaDataFormValues {
+  subject: string;
+  from_name: string;
+  from_address: string;
+  preheader: string;
+  cc: string;
+  bcc: string;
+  reply_to: string;
+  extra_to: string;
+  email_markup: string;
+}
+
+export interface IEmailContent {
+  from_name?: string;
+  from_address?: string;
+  subject?: string;
+  cc?: string;
+  bcc?: string;
+  reply_to?: string;
+  extra_to?: string;
+  body?: { preheader?: string; email_markup?: string };
+}
+
+export interface IEmailContentResponse {
+  content?: IEmailContent;
 }

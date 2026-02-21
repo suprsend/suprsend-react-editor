@@ -6,10 +6,10 @@ import {
   CodeXml,
   Clipboard,
   ChevronDown,
-  Pencil,
   Smartphone,
   TvMinimal,
 } from 'lucide-react';
+import CodeMirrorEditor from '@/components/custom-ui/CodeMirrorEditor';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
@@ -18,23 +18,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import {
   TooltipProvider,
   Tooltip,
   TooltipTrigger,
   TooltipContent,
 } from '@/components/ui/tooltip';
-import Editor from '@monaco-editor/react';
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { EditorTopBanner } from './email/TopBanners';
-import HtmlSwitchModal from './email/HTMLEditorSwitchModal';
-import EmailMetaModal from './email/EditMetaDataModal';
+import { EditorTopBanner } from './TopBanners';
+import HtmlSwitchModal from './HTMLEditorSwitchModal';
+import EmailSettingsPreviewBanner from './EditMetaData';
+import type { IEmailContentResponse } from '@/types';
 
 const EDITOR_TYPE_OPTIONS = [
   { name: 'Design Editor', id: 'design_editor' },
@@ -48,7 +47,11 @@ interface IEditorTypeList {
   id: string;
 }
 
-export default function EmailChannel() {
+interface EmailChannelProps {
+  variantData: IEmailContentResponse;
+}
+
+export default function EmailChannel({ variantData }: EmailChannelProps) {
   const [designEditorType, setDesignEditorType] =
     useState<DesignEditorType>('design');
   const [editorTypeList, setEditorTypeList] =
@@ -224,7 +227,12 @@ export default function EmailChannel() {
           )}
         </div>
 
-        <EmailSettingsPreviewBanner />
+        <EmailSettingsPreviewBanner
+          variantData={variantData}
+          onSave={(data) => {
+            console.log('Payload:', data);
+          }}
+        />
       </div>
 
       <EditorTopBanner
@@ -253,37 +261,6 @@ export default function EmailChannel() {
           setEditorTypeList(editedEmailEditors);
         }}
       />
-    </div>
-  );
-}
-
-function EmailSettingsPreviewBanner() {
-  const [emailSettingsOpen, setEmailSettingsOpen] = useState(false);
-  const [otherSettingsOpen, setOtherSettingsOpen] = useState(false);
-
-  return (
-    <div className="suprsend-flex suprsend-px-3 suprsend-py-2.5 suprsend-items-center suprsend-text-sm suprsend-border">
-      <div className="suprsend-grid suprsend-grid-cols-3 suprsend-gap-6 suprsend-flex-grow">
-        <p className="suprsend-text-muted-foreground suprsend-text-xs">
-          From Name: <span className="suprsend-text-foreground">John Doe</span>
-        </p>
-        <p className="suprsend-text-muted-foreground suprsend-text-xs">
-          From Email: <span className="suprsend-text-foreground">John Doe</span>
-        </p>
-        <p className="suprsend-text-muted-foreground suprsend-text-xs">
-          Subject: <span className="suprsend-text-foreground">John Doe</span>
-        </p>
-      </div>
-      <Dialog open={emailSettingsOpen} onOpenChange={setEmailSettingsOpen}>
-        <DialogTrigger asChild>
-          <Pencil className="suprsend-h-3.5 suprsend-w-3.5 suprsend-cursor-pointer suprsend-text-muted-foreground" />
-        </DialogTrigger>
-        <EmailMetaModal
-          otherSettingsOpen={otherSettingsOpen}
-          setOtherSettingsOpen={setOtherSettingsOpen}
-          setEmailSettingsOpen={setEmailSettingsOpen}
-        />
-      </Dialog>
     </div>
   );
 }
@@ -324,28 +301,9 @@ function TextEditors({ type }: { type: 'html' | 'plaintext' }) {
         defaultSize={50}
         className="suprsend-overflow-hidden mt-1 suprsend-h-full"
       >
-        <Editor
-          defaultLanguage={type}
-          options={{
-            minimap: { enabled: false },
-            scrollBeyondLastLine: false,
-            overviewRulerBorder: false,
-            hideCursorInOverviewRuler: true,
-            renderLineHighlight: 'none',
-            folding: false,
-            lineNumbers: 'on',
-            glyphMargin: false,
-            foldingHighlight: false,
-            selectOnLineNumbers: true,
-            automaticLayout: true,
-            wordWrap: 'on',
-            scrollbar: {
-              vertical: 'visible',
-              horizontal: 'visible',
-              verticalScrollbarSize: 10,
-              horizontalScrollbarSize: 10,
-            },
-          }}
+        <CodeMirrorEditor
+          language={type === 'html' ? 'html' : undefined}
+          className="suprsend-h-full suprsend-border-0 suprsend-rounded-none"
         />
       </ResizablePanel>
       <ResizableHandle withHandle />

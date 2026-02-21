@@ -41,7 +41,7 @@ export default defineConfig(({ mode }) => {
         formats,
       },
       rollupOptions: {
-        external: [...Object.keys(pkg.dependencies || {}), 'react'],
+        external: [...Object.keys(pkg.dependencies || {}), 'react', /^@codemirror\//],
         output: {
           globals: {
             react: 'React',
