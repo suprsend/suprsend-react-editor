@@ -5,6 +5,7 @@ import {
   Brush,
   CodeXml,
   Clipboard,
+  Loader2,
   Smartphone,
   TvMinimal,
 } from 'lucide-react';
@@ -79,6 +80,8 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
     },
     [mutate]
   );
+
+  const designerHtmlRef = useRef<string>(variantData?.content?.body?.designer?.html ?? '');
 
   const bodyType = variantData?.content?.body?.type;
   const initialDesignEditorType: DesignEditorType =
@@ -260,8 +263,9 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
                       size="icon"
                       className="!suprsend-h-7 !suprsend-w-7 suprsend-border suprsend-rounded-md"
                       aria-label="Copy HTML"
+                      disabled={editorType !== 'design_editor' || designEditorType !== 'design'}
                       onClick={() => {
-                        console.log('copy html');
+                        navigator.clipboard.writeText(designerHtmlRef.current);
                       }}
                     >
                       <Clipboard className="suprsend-h-4 suprsend-w-4 suprsend-text-muted-foreground" />
@@ -293,6 +297,7 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
           editorType={editorType}
           variantData={variantData}
           saveContent={saveContent}
+          designerHtmlRef={designerHtmlRef}
         />
       </div>
 
@@ -320,6 +325,7 @@ interface IEmailTemplatePlayground {
   editorType: string;
   variantData: IEmailContentResponse;
   saveContent: (payload: EmailContentPayload) => void;
+  designerHtmlRef: React.RefObject<string>;
 }
 
 function EmailTemplatePlayground({
@@ -327,10 +333,12 @@ function EmailTemplatePlayground({
   editorType,
   variantData,
   saveContent,
+  designerHtmlRef,
 }: IEmailTemplatePlayground) {
   const body = variantData?.content?.body;
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const designJsonRef = useRef(body?.designer?.design_json);
+  const [iframeLoading, setIframeLoading] = useState(true);
   const { on, post } = usePostMessageBridge(iframeRef);
 
   // Keep designJsonRef in sync with latest server data
@@ -341,6 +349,7 @@ function EmailTemplatePlayground({
   // Listen for postMessage events from Unlayer iframe
   useEffect(() => {
     const unsubReady = on('EDITOR_READY', () => {
+      setIframeLoading(false);
       const designJson = designJsonRef.current;
       if (designJson && Object.keys(designJson).length > 0) {
         post('LOAD_DESIGN', { design_json: designJson });
@@ -352,6 +361,7 @@ function EmailTemplatePlayground({
         html: string;
         design_json: Record<string, unknown>;
       };
+      designerHtmlRef.current = html;
       saveContent({
         content: {
           body: {
@@ -365,7 +375,7 @@ function EmailTemplatePlayground({
       unsubReady();
       unsubUpdate();
     };
-  }, [on, post, saveContent]);
+  }, [on, post, saveContent, designerHtmlRef]);
 
   const handleEditorChange = useCallback(
     (type: 'html' | 'text', value: string) => {
@@ -409,11 +419,18 @@ function EmailTemplatePlayground({
   if (editorType === 'design_editor') {
     if (designEditorType === 'design') {
       return (
-        <iframe
-          ref={iframeRef}
-          src="http://localhost:3000/dropin_email_editor"
-          className="suprsend-w-full suprsend-h-full"
-        />
+        <div className="suprsend-relative suprsend-w-full suprsend-h-full">
+          {iframeLoading && (
+            <div className="suprsend-absolute suprsend-inset-0 suprsend-flex suprsend-items-center suprsend-justify-center suprsend-bg-background suprsend-z-10">
+              <Loader2 className="suprsend-h-6 suprsend-w-6 suprsend-text-muted-foreground" style={{ animation: 'spin 1s linear infinite' }} />
+            </div>
+          )}
+          <iframe
+            ref={iframeRef}
+            src="http://localhost:3000/dropin_email_editor"
+            className="suprsend-w-full suprsend-h-full"
+          />
+        </div>
       );
     } else {
       return (
