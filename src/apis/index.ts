@@ -84,6 +84,20 @@ const updateVariantContent = async ({
   return resp.data;
 };
 
+const uploadFile = async (workspaceUid: string, file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const url = `${API_BASE_URL}/v1/${workspaceUid}/public/upload_file/`;
+  const resp = await axiosInst.put(url, formData);
+  return resp.data;
+};
+
+export const useUploadFile = (workspaceUid: string) => {
+  return useMutation({
+    mutationFn: (file: File) => uploadFile(workspaceUid, file),
+  });
+};
+
 export const useUpdateVariantContent = ({
   templateSlug,
   chanelSlug,

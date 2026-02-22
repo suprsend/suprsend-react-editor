@@ -27,13 +27,10 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EditorTopBanner } from './TopBanners';
 import HtmlSwitchModal from './HTMLEditorSwitchModal';
 import EmailSettingsPreviewBanner from './EditMetaData';
-import { useUpdateVariantContent } from '@/apis';
+import { useUpdateVariantContent, useUploadFile } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { usePostMessageBridge } from '@/lib/usePostMessageBridge';
-import type {
-  IEmailContentResponse,
-  EmailContentPayload,
-} from '@/types';
+import type { IEmailContentResponse, EmailContentPayload } from '@/types';
 
 const EDITOR_TYPE_OPTIONS = [
   { name: 'Design Editor', id: 'design_editor' },
@@ -81,7 +78,9 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
     [mutate]
   );
 
-  const designerHtmlRef = useRef<string>(variantData?.content?.body?.designer?.html ?? '');
+  const designerHtmlRef = useRef<string>(
+    variantData?.content?.body?.designer?.html ?? ''
+  );
 
   const bodyType = variantData?.content?.body?.type;
   const initialDesignEditorType: DesignEditorType =
@@ -104,9 +103,8 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
   const [activeEditorTypes, setActiveEditorTypes] = useState<string[]>(() => {
     const types = [EDITOR_TYPE_OPTIONS[0].id];
     const body = variantData?.content?.body;
-    const hasPlainText = body?.type === 'raw'
-      ? !!body?.raw?.text
-      : !!body?.designer?.text;
+    const hasPlainText =
+      body?.type === 'raw' ? !!body?.raw?.text : !!body?.designer?.text;
     if (hasPlainText) {
       types.push('plain_text');
     }
@@ -263,7 +261,10 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
                       size="icon"
                       className="!suprsend-h-7 !suprsend-w-7 suprsend-border suprsend-rounded-md"
                       aria-label="Copy HTML"
-                      disabled={editorType !== 'design_editor' || designEditorType !== 'design'}
+                      disabled={
+                        editorType !== 'design_editor' ||
+                        designEditorType !== 'design'
+                      }
                       onClick={() => {
                         navigator.clipboard.writeText(designerHtmlRef.current);
                       }}
@@ -335,6 +336,10 @@ function EmailTemplatePlayground({
   saveContent,
   designerHtmlRef,
 }: IEmailTemplatePlayground) {
+  const { workspaceUid } = useTemplateEditorContext();
+  // TODO: replace with userId from API when ready
+  const userId = 'staging-1';
+  const { mutateAsync: uploadFile } = useUploadFile(workspaceUid);
   const body = variantData?.content?.body;
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const designJsonRef = useRef(body?.designer?.design_json);
@@ -345,6 +350,14 @@ function EmailTemplatePlayground({
   useEffect(() => {
     designJsonRef.current = body?.designer?.design_json;
   }, [body?.designer?.design_json]);
+
+  // Reset iframe loading state when switching from HTML back to design mode
+  // (iframe remounts in that case). Not needed for tab switches since iframe stays mounted.
+  useEffect(() => {
+    if (designEditorType === 'design') {
+      setIframeLoading(true);
+    }
+  }, [designEditorType]);
 
   // Listen for postMessage events from Unlayer iframe
   useEffect(() => {
@@ -371,11 +384,24 @@ function EmailTemplatePlayground({
       });
     });
 
+    const unsubUpload = on('IMAGE_UPLOAD', async (payload) => {
+      const { file, requestId } = payload as { file: File; requestId: string };
+      try {
+        const result = await uploadFile(file);
+        if (result.error) throw new Error(result.error);
+        post('IMAGE_UPLOAD_DONE', { requestId, url: result.url });
+      } catch (error) {
+        console.error('Image upload failed:', error);
+        post('IMAGE_UPLOAD_DONE', { requestId, url: null });
+      }
+    });
+
     return () => {
       unsubReady();
       unsubUpdate();
+      unsubUpload();
     };
-  }, [on, post, saveContent, designerHtmlRef]);
+  }, [on, post, saveContent, designerHtmlRef, uploadFile]);
 
   const handleEditorChange = useCallback(
     (type: 'html' | 'text', value: string) => {
@@ -412,44 +438,55 @@ function EmailTemplatePlayground({
     [saveContent, body?.raw, designEditorType]
   );
 
-  const plainTextValue = designEditorType === 'design'
-    ? (body?.designer?.text ?? '')
-    : (body?.raw?.text ?? '');
+  const plainTextValue =
+    designEditorType === 'design'
+      ? (body?.designer?.text ?? '')
+      : (body?.raw?.text ?? '');
 
-  if (editorType === 'design_editor') {
-    if (designEditorType === 'design') {
-      return (
-        <div className="suprsend-relative suprsend-w-full suprsend-h-full">
+  const showDesignerIframe =
+    editorType === 'design_editor' && designEditorType === 'design';
+
+  return (
+    <div className="suprsend-relative suprsend-w-full suprsend-h-full">
+      {/* Iframe stays mounted in design mode; use visibility instead of display to avoid re-layout flicker */}
+      {designEditorType === 'design' && (
+        <div
+          className="suprsend-absolute suprsend-inset-0"
+          style={showDesignerIframe ? undefined : { visibility: 'hidden' }}
+        >
           {iframeLoading && (
             <div className="suprsend-absolute suprsend-inset-0 suprsend-flex suprsend-items-center suprsend-justify-center suprsend-bg-background suprsend-z-10">
-              <Loader2 className="suprsend-h-6 suprsend-w-6 suprsend-text-muted-foreground" style={{ animation: 'spin 1s linear infinite' }} />
+              <Loader2
+                className="suprsend-h-6 suprsend-w-6 suprsend-text-muted-foreground"
+                style={{ animation: 'spin 1s linear infinite' }}
+              />
             </div>
           )}
           <iframe
             ref={iframeRef}
-            src="http://localhost:3000/dropin_email_editor"
+            src={`http://localhost:3000/dropin_email_editor?userId=${encodeURIComponent(userId)}`}
             className="suprsend-w-full suprsend-h-full"
           />
         </div>
-      );
-    } else {
-      return (
+      )}
+
+      {editorType === 'design_editor' && designEditorType !== 'design' && (
         <TextEditors
           type="html"
           value={body?.raw?.html ?? ''}
           onChange={(v) => handleEditorChange('html', v)}
         />
-      );
-    }
-  } else {
-    return (
-      <TextEditors
-        type="plaintext"
-        value={plainTextValue}
-        onChange={(v) => handleEditorChange('text', v)}
-      />
-    );
-  }
+      )}
+
+      {editorType !== 'design_editor' && (
+        <TextEditors
+          type="plaintext"
+          value={plainTextValue}
+          onChange={(v) => handleEditorChange('text', v)}
+        />
+      )}
+    </div>
+  );
 }
 
 interface TextEditorsProps {
