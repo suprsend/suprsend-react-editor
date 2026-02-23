@@ -31,6 +31,35 @@ import { useUpdateVariantContent, useUploadFile } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { usePostMessageBridge } from '@/lib/usePostMessageBridge';
 import type { IEmailContentResponse, EmailContentPayload } from '@/types';
+import DisplayConditionsModal from './DisplayConditionsModal';
+import OldDisplayConditionsModal from './OldDisplayConditionsModal';
+import type {
+  DisplayConditionInfo,
+  DisplayConditionData,
+} from './DisplayConditionsModal';
+
+// TODO: replace with brand data fetched from API
+const MOCK_BRAND_DATA = {
+  $brand: {
+    logo: 'https://picsum.photos/200/300',
+    primary_color: '#064DB3',
+    brand_name: 'SuprSend',
+    social_links: {
+      website: 'https://suprsend.com',
+      facebook: 'https://facebook.com/suprsend',
+      linkedin: 'https://linkedin.com/company/suprsend',
+      x: 'https://x.com/suprsend',
+      instagram: '',
+      medium: '',
+      discord: '',
+      telegram: '',
+      youtube: '',
+      tiktok: '',
+    },
+    embedded_preference_url: 'https://suprsend.com/preferences',
+    hosted_preference_domain: 'https://suprsend.com/unsubscribe',
+  },
+};
 
 const EDITOR_TYPE_OPTIONS = [
   { name: 'Design Editor', id: 'design_editor' },
@@ -299,6 +328,7 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
           variantData={variantData}
           saveContent={saveContent}
           designerHtmlRef={designerHtmlRef}
+          brandData={MOCK_BRAND_DATA}
         />
       </div>
 
@@ -327,6 +357,7 @@ interface IEmailTemplatePlayground {
   variantData: IEmailContentResponse;
   saveContent: (payload: EmailContentPayload) => void;
   designerHtmlRef: React.RefObject<string>;
+  brandData?: Record<string, unknown> | null;
 }
 
 function EmailTemplatePlayground({
@@ -335,6 +366,7 @@ function EmailTemplatePlayground({
   variantData,
   saveContent,
   designerHtmlRef,
+  brandData = null,
 }: IEmailTemplatePlayground) {
   const { workspaceUid } = useTemplateEditorContext();
   // TODO: replace with userId from API when ready
@@ -345,6 +377,30 @@ function EmailTemplatePlayground({
   const designJsonRef = useRef(body?.designer?.design_json);
   const [iframeLoading, setIframeLoading] = useState(true);
   const { on, post } = usePostMessageBridge(iframeRef);
+
+  const displayConditionInfoRef = useRef<DisplayConditionInfo | null>(null);
+  const [displayConditionOpen, setDisplayConditionOpen] = useState(false);
+  const [oldDisplayConditionOpen, setOldDisplayConditionOpen] = useState(false);
+  const initialDisplayConditions =
+    (variantData?.content?.body?.designer
+      ?.display_conditions as DisplayConditionData[]) ?? [];
+  const displayConditionsListRef = useRef<DisplayConditionData[]>(
+    initialDisplayConditions
+  );
+  const [displayConditionsList, setDisplayConditionsList] = useState<
+    DisplayConditionData[]
+  >(initialDisplayConditions);
+
+  const handleSetDisplayConditionsList = useCallback(
+    (list: DisplayConditionData[]) => {
+      displayConditionsListRef.current = list;
+      setDisplayConditionsList(list);
+      saveContent({
+        content: { body: { designer: { display_conditions: list } } },
+      });
+    },
+    [saveContent]
+  );
 
   // Keep designJsonRef in sync with latest server data
   useEffect(() => {
@@ -361,6 +417,10 @@ function EmailTemplatePlayground({
 
   // Listen for postMessage events from Unlayer iframe
   useEffect(() => {
+    const unsubConfig = on('REQUEST_CONFIG', () => {
+      post('BRAND_CONFIG', { brandData: brandData ?? null });
+    });
+
     const unsubReady = on('EDITOR_READY', () => {
       setIframeLoading(false);
       const designJson = designJsonRef.current;
@@ -378,10 +438,31 @@ function EmailTemplatePlayground({
       saveContent({
         content: {
           body: {
-            designer: { html, design_json },
+            designer: {
+              html,
+              design_json,
+              display_conditions: displayConditionsListRef.current,
+            },
           },
         },
       });
+    });
+
+    const unsubDisplayCondition = on('DISPLAY_CONDITION_OPEN', (payload) => {
+      const data = (payload as { data: DisplayConditionData }).data;
+      displayConditionInfoRef.current = {
+        data,
+        done: (conditionData) => {
+          post('DISPLAY_CONDITION_DONE', { conditionData });
+        },
+      };
+      // Route: v1 condition (has `before` but not version '2') → old; everything else → v2
+      const isV1 = !!(data?.before && data.version !== '2');
+      if (isV1) {
+        setOldDisplayConditionOpen(true);
+      } else {
+        setDisplayConditionOpen(true);
+      }
     });
 
     const unsubUpload = on('IMAGE_UPLOAD', async (payload) => {
@@ -397,11 +478,13 @@ function EmailTemplatePlayground({
     });
 
     return () => {
+      unsubConfig();
       unsubReady();
       unsubUpdate();
+      unsubDisplayCondition();
       unsubUpload();
     };
-  }, [on, post, saveContent, designerHtmlRef, uploadFile]);
+  }, [on, post, saveContent, designerHtmlRef, uploadFile, brandData]);
 
   const handleEditorChange = useCallback(
     (type: 'html' | 'text', value: string) => {
@@ -448,6 +531,20 @@ function EmailTemplatePlayground({
 
   return (
     <div className="suprsend-relative suprsend-w-full suprsend-h-full">
+      <DisplayConditionsModal
+        open={displayConditionOpen}
+        setOpen={setDisplayConditionOpen}
+        displayConditionInfoRef={displayConditionInfoRef}
+        displayConditionsList={displayConditionsList}
+        setDisplayConditionsList={handleSetDisplayConditionsList}
+      />
+      <OldDisplayConditionsModal
+        open={oldDisplayConditionOpen}
+        setOpen={setOldDisplayConditionOpen}
+        displayConditionInfoRef={displayConditionInfoRef}
+        displayConditionsList={displayConditionsList}
+        setDisplayConditionsList={handleSetDisplayConditionsList}
+      />
       {/* Iframe stays mounted in design mode; use visibility instead of display to avoid re-layout flicker */}
       {designEditorType === 'design' && (
         <div

@@ -44,3 +44,11 @@ export function deepMerge(
     }
   }
 }
+
+const IMG_HOST = 'https://ik.imagekit.io/l0quatz6utm/';
+
+export function makeAbsoluteUrl(url: string, transform = '') {
+  return url?.startsWith('http://') || url?.startsWith('https://')
+    ? url
+    : `${IMG_HOST}${transform}${url}`;
+}
