@@ -415,7 +415,7 @@ function EmailTemplatePlayground({
     }
   }, [designEditorType]);
 
-  // Listen for postMessage events from Unlayer iframe
+  // Listen for postMessage events from iframe
   useEffect(() => {
     const unsubConfig = on('REQUEST_CONFIG', () => {
       post('BRAND_CONFIG', { brandData: brandData ?? null });
