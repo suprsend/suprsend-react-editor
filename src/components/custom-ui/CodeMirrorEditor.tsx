@@ -141,6 +141,10 @@ function CodeMirrorEditorInner(
   useEffect(() => {
     const view = viewRef.current;
     if (!view) return;
+    // While the editor is focused (user is actively editing), skip external
+    // value syncs to prevent stale API responses (from autosave round-trips)
+    // from overwriting what the user just typed.
+    if (view.hasFocus) return;
     const currentDoc = view.state.doc.toString();
     if (value !== currentDoc) {
       view.dispatch({

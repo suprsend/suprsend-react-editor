@@ -96,6 +96,7 @@ export default function SuggestionInput({
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const highlightRef = useRef<HTMLDivElement | null>(null);
   const suggestionRef = useRef(false);
+  const isFocusedRef = useRef(false);
 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -188,8 +189,13 @@ export default function SuggestionInput({
   };
 
   useEffect(() => {
-    setInputValue(value);
-    setWarning('');
+    // While the user is actively typing (focused), local inputValue is the
+    // source of truth. Skip external syncs to prevent stale API responses
+    // (from autosave round-trips) from overwriting what the user just typed.
+    if (!isFocusedRef.current) {
+      setInputValue(value);
+      setWarning('');
+    }
   }, [value]);
 
   useEffect(() => {
@@ -294,8 +300,8 @@ export default function SuggestionInput({
                 'suprsend-absolute suprsend-pointer-events-none suprsend-overflow-hidden suprsend-rounded-md',
                 'suprsend-px-3 suprsend-text-base md:suprsend-text-sm',
                 isTextarea
-                  ? 'suprsend-py-2 suprsend-whitespace-pre-wrap suprsend-break-words'
-                  : 'suprsend-flex suprsend-items-center suprsend-whitespace-nowrap'
+                  ? 'suprsend-py-2'
+                  : 'suprsend-flex suprsend-items-center'
               )}
               style={{
                 top: 1,
@@ -305,8 +311,16 @@ export default function SuggestionInput({
                 zIndex: 2,
                 color: 'hsl(var(--foreground))',
               }}
-              dangerouslySetInnerHTML={{ __html: highlightedHtml }}
-            />
+            >
+              <span
+                className={
+                  isTextarea
+                    ? 'suprsend-whitespace-pre-wrap suprsend-break-words'
+                    : 'suprsend-whitespace-pre'
+                }
+                dangerouslySetInnerHTML={{ __html: highlightedHtml }}
+              />
+            </div>
 
             {/* Layer 3: Transparent input for user interaction */}
             <InputComponent
@@ -320,8 +334,14 @@ export default function SuggestionInput({
               onKeyUp={enableSuggestions ? handleInputEvent : undefined}
               onScroll={handleScroll}
               onChange={(e) => onChange(e.target.value)}
-              onFocus={() => setWarning('')}
-              onBlur={handleBlur}
+              onFocus={() => {
+                isFocusedRef.current = true;
+                setWarning('');
+              }}
+              onBlur={() => {
+                isFocusedRef.current = false;
+                handleBlur();
+              }}
               className={cn(
                 'suprsend-border-transparent suprsend-bg-transparent disabled:suprsend-bg-transparent suprsend-shadow-none',
                 isTextarea && 'suprsend-resize-none',
@@ -346,8 +366,14 @@ export default function SuggestionInput({
             onClick={enableSuggestions ? handleInputEvent : undefined}
             onKeyUp={enableSuggestions ? handleInputEvent : undefined}
             onChange={(e) => onChange(e.target.value)}
-            onFocus={() => setWarning('')}
-            onBlur={handleBlur}
+            onFocus={() => {
+              isFocusedRef.current = true;
+              setWarning('');
+            }}
+            onBlur={() => {
+              isFocusedRef.current = false;
+              handleBlur();
+            }}
             className={className}
             {...(isTextarea ? { rows } : {})}
             {...rest}

@@ -21,7 +21,7 @@ export default function SuprSendTemplateEditorProvider({
   accessToken,
   refreshAccessToken,
 }: FullSuprSendTemplateEditorProviderProps) {
-  const isPrivate = false; // TODO: Determine if the template is private based on your logic
+  const isPrivate = true; // TODO: Determine if the template is private based on your logic
 
   const value = useMemo<TemplateEditorContextValue>(
     () => ({
@@ -50,7 +50,7 @@ export default function SuprSendTemplateEditorProvider({
     ]
   );
 
-  useAuthInterceptor(accessToken, refreshAccessToken);
+  useAuthInterceptor({ accessToken, refreshAccessToken, isPrivate });
 
   return (
     <QueryClientProvider client={queryClient}>
