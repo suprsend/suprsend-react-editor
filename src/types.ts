@@ -21,6 +21,8 @@ export interface SuprSendTemplateEditorProviderProps {
 
 export interface TemplateEditorContextValue extends SuprSendTemplateEditorProviderProps {
   isPrivate: boolean;
+  accessToken?: string;
+  refreshAccessToken?: (oldToken: string) => Promise<string>;
 }
 
 export interface FullSuprSendTemplateEditorProviderProps extends TemplateEditorContextValue {
@@ -41,10 +43,13 @@ export interface CommitButtonProps {
   onCommit: () => void;
 }
 
-export interface GetVariantDetailsParams {
+export interface useVariantDetailsParams {
   templateSlug: string;
   chanelSlug: string;
   variantId: string;
+}
+
+export interface GetVariantDetailsParams extends useVariantDetailsParams {
   tenantId: string | null;
   locale: string;
   conditions: unknown;
@@ -98,4 +103,9 @@ export type EmailContentPayload = {
 
 export interface UpdateVariantContentParams extends GetVariantDetailsParams {
   payload: EmailContentPayload;
+}
+
+export interface UploadFileParams {
+  workspaceUid: string;
+  file: File;
 }

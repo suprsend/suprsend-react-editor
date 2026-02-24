@@ -4,8 +4,11 @@ import type {
   GetVariantDetailsParams,
   EmailContentPayload,
   UpdateVariantContentParams,
+  useVariantDetailsParams,
+  UploadFileParams,
 } from '@/types';
 import { createQueryParams, deepMerge } from '@/lib/utils';
+import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 
 const API_BASE_URL = 'https://stagingapi2.suprsend.com';
 
@@ -46,11 +49,9 @@ export const useVariantDetails = ({
   templateSlug,
   chanelSlug,
   variantId,
-  locale,
-  tenantId,
-  conditions,
-  workspaceUid,
-}: GetVariantDetailsParams) => {
+}: useVariantDetailsParams) => {
+  const { locale, tenantId, workspaceUid, conditions } =
+    useTemplateEditorContext();
   return useQuery({
     queryKey: [
       `template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}`,
@@ -84,29 +85,13 @@ const updateVariantContent = async ({
   return resp.data;
 };
 
-const uploadFile = async (workspaceUid: string, file: File) => {
-  const formData = new FormData();
-  formData.append('file', file);
-  const url = `${API_BASE_URL}/v1/${workspaceUid}/public/upload_file/`;
-  const resp = await axiosInst.put(url, formData);
-  return resp.data;
-};
-
-export const useUploadFile = (workspaceUid: string) => {
-  return useMutation({
-    mutationFn: (file: File) => uploadFile(workspaceUid, file),
-  });
-};
-
 export const useUpdateVariantContent = ({
   templateSlug,
   chanelSlug,
   variantId,
-  workspaceUid,
-  conditions,
-  locale,
-  tenantId,
 }: GetVariantDetailsParams) => {
+  const { locale, tenantId, workspaceUid, conditions } =
+    useTemplateEditorContext();
   const queryKey = [
     `template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}`,
   ];
@@ -134,5 +119,19 @@ export const useUpdateVariantContent = ({
         }
       );
     },
+  });
+};
+
+const uploadFile = async ({ workspaceUid, file }: UploadFileParams) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const url = `${API_BASE_URL}/v1/${workspaceUid}/public/upload_file/`;
+  const resp = await axiosInst.put(url, formData);
+  return resp.data;
+};
+
+export const useUploadFile = (workspaceUid: string) => {
+  return useMutation({
+    mutationFn: (file: File) => uploadFile({ workspaceUid, file }),
   });
 };

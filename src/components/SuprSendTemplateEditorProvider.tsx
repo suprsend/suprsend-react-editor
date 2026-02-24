@@ -6,6 +6,7 @@ import type {
   TemplateEditorContextValue,
 } from '@/types';
 import { TemplateEditorContext } from '@/lib/TemplateEditorContext';
+import { useAuthInterceptor } from '@/lib/useAuthInterceptor';
 import { queryClient } from '@/apis';
 
 export default function SuprSendTemplateEditorProvider({
@@ -17,6 +18,8 @@ export default function SuprSendTemplateEditorProvider({
   locale,
   conditions,
   children,
+  accessToken,
+  refreshAccessToken,
 }: FullSuprSendTemplateEditorProviderProps) {
   const isPrivate = false; // TODO: Determine if the template is private based on your logic
 
@@ -30,6 +33,8 @@ export default function SuprSendTemplateEditorProvider({
       locale,
       conditions,
       isPrivate,
+      accessToken,
+      refreshAccessToken,
     }),
     [
       workspaceUid,
@@ -40,8 +45,12 @@ export default function SuprSendTemplateEditorProvider({
       locale,
       conditions,
       isPrivate,
+      accessToken,
+      refreshAccessToken,
     ]
   );
+
+  useAuthInterceptor(accessToken, refreshAccessToken);
 
   return (
     <QueryClientProvider client={queryClient}>
