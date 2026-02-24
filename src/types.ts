@@ -13,20 +13,20 @@ export interface SuprSendTemplateEditorProviderProps {
   workspaceUid: string;
   templateSlug: string;
   variantId: string;
+  channels: ChannelId[];
   tenantId: string | null;
   locale: string;
   conditions?: unknown;
-  channels: ChannelId[];
-}
-
-export interface TemplateEditorContextValue extends SuprSendTemplateEditorProviderProps {
-  isPrivate: boolean;
   accessToken?: string;
   refreshAccessToken?: (oldToken: string) => Promise<string>;
 }
 
-export interface FullSuprSendTemplateEditorProviderProps extends TemplateEditorContextValue {
+export interface FullSuprSendTemplateEditorProviderProps extends SuprSendTemplateEditorProviderProps {
   children?: React.ReactNode;
+}
+
+export interface TemplateEditorContextValue extends SuprSendTemplateEditorProviderProps {
+  isPrivate: boolean;
 }
 
 export interface SuprSendTemplateEditorProps {

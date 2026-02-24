@@ -10,23 +10,11 @@ import { FileX } from 'lucide-react';
 export default function SuprSendTemplateEditor({
   hideChannelsTab = false,
 }: SuprSendTemplateEditorProps) {
-  const {
-    channels,
-    templateSlug,
-    variantId,
-    locale,
-    tenantId,
-    conditions,
-    workspaceUid,
-  } = useTemplateEditorContext();
+  const { channels, templateSlug, variantId } = useTemplateEditorContext();
   const { data: variantData, error: variantError } = useVariantDetails({
     chanelSlug: channels[0],
     templateSlug,
     variantId,
-    locale,
-    tenantId,
-    conditions,
-    workspaceUid,
   });
   console.log('Variant Details:', variantData);
   const [selectedChannel, setSelectedChannel] = useState<string | number>(
