@@ -2,10 +2,11 @@ import '../index.css';
 import { useMemo } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type {
-  SuprSendTemplateEditorProviderProps,
+  FullSuprSendTemplateEditorProviderProps,
   TemplateEditorContextValue,
 } from '@/types';
 import { TemplateEditorContext } from '@/lib/TemplateEditorContext';
+import { useAuthInterceptor } from '@/lib/useAuthInterceptor';
 import { queryClient } from '@/apis';
 
 export default function SuprSendTemplateEditorProvider({
@@ -17,16 +18,11 @@ export default function SuprSendTemplateEditorProvider({
   locale,
   conditions,
   children,
-}: SuprSendTemplateEditorProviderProps) {
-  console.log('SDK PROPS:', {
-    workspaceUid,
-    templateSlug,
-    variantId,
-    channels,
-    tenantId,
-    locale,
-    conditions,
-  });
+  accessToken,
+  refreshAccessToken,
+}: FullSuprSendTemplateEditorProviderProps) {
+  const isPrivate = false; // TODO: Determine if the template is private based on your logic
+
   const value = useMemo<TemplateEditorContextValue>(
     () => ({
       workspaceUid,
@@ -36,6 +32,9 @@ export default function SuprSendTemplateEditorProvider({
       tenantId,
       locale,
       conditions,
+      isPrivate,
+      accessToken,
+      refreshAccessToken,
     }),
     [
       workspaceUid,
@@ -45,8 +44,13 @@ export default function SuprSendTemplateEditorProvider({
       tenantId,
       locale,
       conditions,
+      isPrivate,
+      accessToken,
+      refreshAccessToken,
     ]
   );
+
+  useAuthInterceptor(accessToken, refreshAccessToken);
 
   return (
     <QueryClientProvider client={queryClient}>

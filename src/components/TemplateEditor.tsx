@@ -10,17 +10,13 @@ import { FileX } from 'lucide-react';
 export default function SuprSendTemplateEditor({
   hideChannelsTab = false,
 }: SuprSendTemplateEditorProps) {
-  const { channels, templateSlug, variantId, locale, tenantId, conditions } =
-    useTemplateEditorContext();
-  const { data, error } = useVariantDetails({
+  const { channels, templateSlug, variantId } = useTemplateEditorContext();
+  const { data: variantData, error: variantError } = useVariantDetails({
     chanelSlug: channels[0],
     templateSlug,
     variantId,
-    locale,
-    tenantId,
-    conditions,
   });
-  console.log('Variant Details:', data);
+  console.log('Variant Details:', variantData);
   const [selectedChannel, setSelectedChannel] = useState<string | number>(
     channels[0]
   );
@@ -31,7 +27,7 @@ export default function SuprSendTemplateEditor({
   }, [channels]);
 
   const isNotFound =
-    axios.isAxiosError(error) && error.response?.status === 404;
+    axios.isAxiosError(variantError) && variantError.response?.status === 404;
 
   if (isNotFound) {
     return (
@@ -50,7 +46,7 @@ export default function SuprSendTemplateEditor({
     );
   }
 
-  if (!selectedChannel) {
+  if (!selectedChannel || !variantData) {
     return <p>Loading...</p>;
   }
   return (
@@ -63,7 +59,9 @@ export default function SuprSendTemplateEditor({
         />
       )}
       <div className="suprsend-flex-1 suprsend-min-h-0 suprsend-overflow-hidden">
-        {selectedChannel === 'email' && <EmailChannel />}
+        {selectedChannel === 'email' && (
+          <EmailChannel variantData={variantData} />
+        )}
         {selectedChannel === 'sms' && <p>SMS Channel Editor Coming Soon...</p>}
         {selectedChannel === 'inbox' && (
           <p>In-app Inbox Channel Editor Coming Soon...</p>

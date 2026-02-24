@@ -18,3 +18,37 @@ export function createQueryParams(params: Record<string, unknown>): string {
   const qs = searchParams.toString();
   return qs ? `?${qs}` : '';
 }
+
+// Deep merge source into target (mutates target)
+export function deepMerge(
+  target: Record<string, unknown>,
+  source: Record<string, unknown>
+) {
+  for (const key of Object.keys(source)) {
+    const srcVal = source[key];
+    const tgtVal = target[key];
+    if (
+      srcVal &&
+      typeof srcVal === 'object' &&
+      !Array.isArray(srcVal) &&
+      tgtVal &&
+      typeof tgtVal === 'object' &&
+      !Array.isArray(tgtVal)
+    ) {
+      deepMerge(
+        tgtVal as Record<string, unknown>,
+        srcVal as Record<string, unknown>
+      );
+    } else {
+      target[key] = srcVal;
+    }
+  }
+}
+
+const IMG_HOST = 'https://ik.imagekit.io/l0quatz6utm/';
+
+export function makeAbsoluteUrl(url: string, transform = '') {
+  return url?.startsWith('http://') || url?.startsWith('https://')
+    ? url
+    : `${IMG_HOST}${transform}${url}`;
+}
