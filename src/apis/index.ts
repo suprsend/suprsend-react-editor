@@ -2,7 +2,7 @@ import { QueryClient, useQuery, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import type {
   GetVariantDetailsParams,
-  EmailContentPayload,
+  ChannelContentPayload,
   UpdateVariantContentParams,
   useVariantDetailsParams,
   UploadFileParams,
@@ -97,7 +97,7 @@ export const useUpdateVariantContent = ({
   ];
 
   return useMutation({
-    mutationFn: (payload: EmailContentPayload) =>
+    mutationFn: (payload: ChannelContentPayload) =>
       updateVariantContent({
         templateSlug,
         chanelSlug,

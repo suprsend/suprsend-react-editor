@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { TabBar } from '@/components/custom-ui/channelsTab';
 import EmailChannel from '@/components/channels/email';
+import IOSPushChannel from '@/components/channels/IOSPush';
 import type { SuprSendTemplateEditorProps } from '@/types';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { useVariantDetails } from '@/apis';
@@ -79,7 +80,7 @@ export default function SuprSendTemplateEditor({
           <p>Android Push Channel Editor Coming Soon...</p>
         )}
         {selectedChannel === 'iospush' && (
-          <p>iOS Push Channel Editor Coming Soon...</p>
+          <IOSPushChannel variantData={variantData} />
         )}
         {selectedChannel === 'webpush' && (
           <p>Web Push Channel Editor Coming Soon...</p>

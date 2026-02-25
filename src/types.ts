@@ -101,8 +101,31 @@ export type EmailContentPayload = {
   content: IEmailContent;
 };
 
+// --- iOS Push ---
+
+export interface IIOSPushContent {
+  header: string;
+  body: string;
+  image_url: string;
+  action_url: string;
+}
+
+export interface IIOSPushContentResponse {
+  content: IIOSPushContent;
+}
+
+export type IOSPushFormValues = IIOSPushContent;
+
+export type IOSPushContentPayload = {
+  content: Partial<IIOSPushContent>;
+};
+
+// --- Generic payload union for API ---
+
+export type ChannelContentPayload = EmailContentPayload | IOSPushContentPayload;
+
 export interface UpdateVariantContentParams extends GetVariantDetailsParams {
-  payload: EmailContentPayload;
+  payload: ChannelContentPayload;
 }
 
 export interface UploadFileParams {
