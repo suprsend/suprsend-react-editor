@@ -125,4 +125,5 @@ export interface TextEditorsProps {
   type: 'html' | 'plaintext';
   value: string;
   onChange: (value: string) => void;
+  variables?: Record<string, unknown>;
 }

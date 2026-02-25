@@ -101,7 +101,9 @@ function EmailMetaDataModal({
   variables,
 }: EmailMetaDataModalProps) {
   const emailContent = variantData?.content;
-  const [infoBannerVisible, setInfoBannerVisible] = useState(true);
+  const [infoBannerVisible, setInfoBannerVisible] = useState(
+    () => localStorage.getItem('ss_email_banner_metadata_dismissed') !== 'true'
+  );
 
   const { watch, control } = useForm<EmailMetaDataFormValues>({
     values: {
@@ -202,7 +204,10 @@ function EmailMetaDataModal({
             </div>
             <X
               className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600 suprsend-cursor-pointer suprsend-shrink-0"
-              onClick={() => setInfoBannerVisible(false)}
+              onClick={() => {
+                localStorage.setItem('ss_email_banner_metadata_dismissed', 'true');
+                setInfoBannerVisible(false);
+              }}
             />
           </div>
         )}

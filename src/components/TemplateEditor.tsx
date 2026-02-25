@@ -72,7 +72,7 @@ export default function SuprSendTemplateEditor({
         {selectedChannel === 'email' && (
           <EmailChannel
             variantData={variantData}
-            tenantData={mockData?.transformed_data?.['$brand']}
+            variables={mockData?.transformed_data ?? {}}
           />
         )}
         {selectedChannel === 'sms' && <p>SMS Channel Editor Coming Soon...</p>}
