@@ -2,10 +2,17 @@ import { useEffect, useRef } from 'react';
 import axios from 'axios';
 import { axiosInst } from '@/apis';
 
-export function useAuthInterceptor(
-  accessToken?: string,
-  refreshAccessToken?: (oldToken: string) => Promise<string>
-) {
+interface UseAuthInterceptorParams {
+  accessToken?: string;
+  refreshAccessToken?: (oldToken: string) => Promise<string>;
+  isPrivate: boolean;
+}
+
+export function useAuthInterceptor({
+  accessToken,
+  refreshAccessToken,
+  isPrivate,
+}: UseAuthInterceptorParams) {
   const accessTokenRef = useRef(accessToken);
   accessTokenRef.current = accessToken;
 
@@ -14,7 +21,7 @@ export function useAuthInterceptor(
 
   useEffect(() => {
     const reqId = axiosInst.interceptors.request.use((config) => {
-      if (accessTokenRef.current) {
+      if (accessTokenRef.current && !isPrivate) {
         config.headers.Authorization = `Bearer ${accessTokenRef.current}`;
       }
       return config;
@@ -52,7 +59,11 @@ export function useAuthInterceptor(
           return new Promise<string>((resolve, reject) => {
             failedQueue.push({ resolve, reject });
           }).then((newToken) => {
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            if (isPrivate) {
+              // do nothing
+            } else {
+              originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            }
             return axiosInst(originalRequest);
           });
         }
@@ -66,7 +77,11 @@ export function useAuthInterceptor(
           );
           accessTokenRef.current = newToken;
           processQueue(null, newToken);
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          if (isPrivate) {
+            // do nothing
+          } else {
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          }
           return axiosInst(originalRequest);
         } catch (refreshError) {
           processQueue(refreshError);

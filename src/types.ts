@@ -109,3 +109,20 @@ export interface UploadFileParams {
   workspaceUid: string;
   file: File;
 }
+
+export interface UseMockDataParams {
+  templateSlug: string;
+  recipientDistinctId?: string;
+  actorDistinctId?: string;
+}
+
+export interface GetMockDataParams extends UseMockDataParams {
+  workspaceUid: string;
+  tenantId: string | null;
+}
+
+export interface TextEditorsProps {
+  type: 'html' | 'plaintext';
+  value: string;
+  onChange: (value: string) => void;
+}

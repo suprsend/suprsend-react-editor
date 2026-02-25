@@ -174,7 +174,7 @@ export default function DisplayConditionsModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
-        className="suprsend-max-w-3xl suprsend-overflow-y-auto suprsend-max-h-[90vh]"
+        className="!suprsend-max-w-3xl suprsend-overflow-y-auto suprsend-max-h-[90vh]"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeader>

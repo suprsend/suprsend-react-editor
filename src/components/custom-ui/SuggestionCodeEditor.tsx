@@ -1,5 +1,7 @@
 import { useRef, useState, useMemo, useCallback } from 'react';
 import { RangeSetBuilder } from '@codemirror/state';
+import { syntaxHighlighting, HighlightStyle } from '@codemirror/language';
+import { tags } from '@lezer/highlight';
 import {
   ViewPlugin,
   Decoration,
@@ -81,9 +83,22 @@ function createHighlightPlugin(flattenedVars: Record<string, unknown>) {
 }
 
 const highlightTheme = EditorView.baseTheme({
-  '.cm-hbs-valid': { color: 'hsl(var(--primary))' },
-  '.cm-hbs-invalid': { color: 'hsl(var(--destructive))' },
+  '.cm-hbs-valid, .cm-hbs-valid span': {
+    color: 'hsl(var(--primary)) !important',
+  },
+  '.cm-hbs-invalid, .cm-hbs-invalid span': {
+    color: 'hsl(var(--destructive)) !important',
+  },
 });
+
+const jsonValueStyle = syntaxHighlighting(
+  HighlightStyle.define([
+    { tag: tags.string, color: '#16a34a' },
+    { tag: tags.number, color: '#16a34a' },
+    { tag: tags.bool, color: '#16a34a' },
+    { tag: tags.null, color: '#16a34a' },
+  ])
+);
 
 // --- Main Component ---
 
@@ -135,6 +150,7 @@ export default function SuggestionCodeEditor({
   const extraExtensions = useMemo(
     () => [
       highlightTheme,
+      jsonValueStyle,
       enableHighlighting ? createHighlightPlugin(flattenedVars) : [],
     ],
     [flattenedVars, enableHighlighting]

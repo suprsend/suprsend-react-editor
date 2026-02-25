@@ -30,36 +30,17 @@ import EmailSettingsPreviewBanner from './EditMetaData';
 import { useUpdateVariantContent, useUploadFile } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { usePostMessageBridge } from '@/lib/usePostMessageBridge';
-import type { IEmailContentResponse, EmailContentPayload } from '@/types';
+import type {
+  IEmailContentResponse,
+  EmailContentPayload,
+  TextEditorsProps,
+} from '@/types';
 import DisplayConditionsModal from './DisplayConditionsModal';
 import OldDisplayConditionsModal from './OldDisplayConditionsModal';
 import type {
   DisplayConditionInfo,
   DisplayConditionData,
 } from './DisplayConditionsModal';
-
-// TODO: replace with brand data fetched from API
-const MOCK_BRAND_DATA = {
-  $brand: {
-    logo: 'https://picsum.photos/200/300',
-    primary_color: '#064DB3',
-    brand_name: 'SuprSend',
-    social_links: {
-      website: 'https://suprsend.com',
-      facebook: 'https://facebook.com/suprsend',
-      linkedin: 'https://linkedin.com/company/suprsend',
-      x: 'https://x.com/suprsend',
-      instagram: '',
-      medium: '',
-      discord: '',
-      telegram: '',
-      youtube: '',
-      tiktok: '',
-    },
-    embedded_preference_url: 'https://suprsend.com/preferences',
-    hosted_preference_domain: 'https://suprsend.com/unsubscribe',
-  },
-};
 
 const EDITOR_TYPE_OPTIONS = [
   { name: 'Design Editor', id: 'design_editor' },
@@ -75,9 +56,13 @@ interface IEditorTypeList {
 
 interface EmailChannelProps {
   variantData: IEmailContentResponse;
+  tenantData?: Record<string, unknown> | null;
 }
 
-export default function EmailChannel({ variantData }: EmailChannelProps) {
+export default function EmailChannel({
+  variantData,
+  tenantData,
+}: EmailChannelProps) {
   const {
     templateSlug,
     variantId,
@@ -328,7 +313,7 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
           variantData={variantData}
           saveContent={saveContent}
           designerHtmlRef={designerHtmlRef}
-          brandData={MOCK_BRAND_DATA}
+          brandData={{ $brand: tenantData }}
         />
       </div>
 
@@ -363,19 +348,20 @@ interface IEmailTemplatePlayground {
 function EmailTemplatePlayground({
   designEditorType,
   editorType,
-  variantData,
   saveContent,
   designerHtmlRef,
+  variantData,
   brandData = null,
 }: IEmailTemplatePlayground) {
+  const userId = 'staging-1'; // TODO: replace with userId from API when ready
+
   const { workspaceUid } = useTemplateEditorContext();
-  // TODO: replace with userId from API when ready
-  const userId = 'staging-1';
   const { mutateAsync: uploadFile } = useUploadFile(workspaceUid);
+  const [iframeLoading, setIframeLoading] = useState(true);
+
   const body = variantData?.content?.body;
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const designJsonRef = useRef(body?.designer?.design_json);
-  const [iframeLoading, setIframeLoading] = useState(true);
   const { on, post } = usePostMessageBridge(iframeRef);
 
   const displayConditionInfoRef = useRef<DisplayConditionInfo | null>(null);
@@ -418,7 +404,7 @@ function EmailTemplatePlayground({
   // Listen for postMessage events from iframe
   useEffect(() => {
     const unsubConfig = on('REQUEST_CONFIG', () => {
-      post('BRAND_CONFIG', { brandData: brandData ?? null });
+      post('BRAND_CONFIG', { brandData });
     });
 
     const unsubReady = on('EDITOR_READY', () => {
@@ -545,7 +531,6 @@ function EmailTemplatePlayground({
         displayConditionsList={displayConditionsList}
         setDisplayConditionsList={handleSetDisplayConditionsList}
       />
-      {/* Iframe stays mounted in design mode; use visibility instead of display to avoid re-layout flicker */}
       {designEditorType === 'design' && (
         <div
           className="suprsend-absolute suprsend-inset-0"
@@ -584,12 +569,6 @@ function EmailTemplatePlayground({
       )}
     </div>
   );
-}
-
-interface TextEditorsProps {
-  type: 'html' | 'plaintext';
-  value: string;
-  onChange: (value: string) => void;
 }
 
 function TextEditors({ type, value, onChange }: TextEditorsProps) {
