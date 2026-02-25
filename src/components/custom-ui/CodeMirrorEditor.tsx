@@ -39,7 +39,7 @@ const externalUpdate = Annotation.define<boolean>();
 // --- Theme ---
 
 const editorTheme = EditorView.theme({
-  '&': { fontSize: '14px', fontFamily: 'inherit' },
+  '&': { height: '100%', fontSize: '14px', fontFamily: 'inherit' },
   '&.cm-focused': { outline: 'none' },
   '.cm-content': {
     padding: '8px 12px',
