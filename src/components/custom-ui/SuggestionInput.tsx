@@ -14,7 +14,7 @@ import Suggestions from './Suggestions';
 
 // --- Types ---
 
-interface SuggestionInputProps {
+export interface SuggestionInputProps {
   variables: Record<string, unknown>;
   label?: string;
   mandatory?: boolean;
@@ -159,21 +159,7 @@ export default function SuggestionInput({
 
     if (!enableSuggestions) return;
 
-    let coords = getCaretCoordinates(target, caretIndex);
-
-    if (
-      target.offsetWidth < target.scrollWidth &&
-      coords.left > target.offsetWidth
-    ) {
-      coords = { ...coords, left: target.offsetWidth };
-    } else if (
-      target.offsetHeight < target.scrollHeight &&
-      coords.top > target.offsetHeight
-    ) {
-      coords = { ...coords, top: target.offsetHeight };
-    }
-    setCaretCoordinates(coords);
-
+    // Determine suggestion visibility synchronously.
     const strippedValue = val.slice(0, caretIndex);
     const startBracketIndex = strippedValue.lastIndexOf('{{');
     const endBracketIndex = strippedValue.lastIndexOf('}}');
@@ -186,6 +172,31 @@ export default function SuggestionInput({
     } else {
       setShowSuggestions(false);
     }
+
+    // Defer coordinate measurement to the next frame.
+    // For click events the browser may not have finished adjusting the
+    // input's scrollLeft by the time this handler fires, so reading it
+    // synchronously produces a stale value that places the popup at the
+    // wrong horizontal position (often clamped to the left edge).
+    requestAnimationFrame(() => {
+      const el = inputRef.current;
+      if (!el) return;
+      const pos = el.selectionEnd ?? 0;
+      const coords = getCaretCoordinates(el, pos);
+      const visibleLeft = coords.left - el.scrollLeft;
+      const visibleTop = coords.top - el.scrollTop;
+      setCaretCoordinates({
+        ...coords,
+        left: Math.max(0, Math.min(visibleLeft, el.offsetWidth)),
+        // Single-line inputs always have top ≈ 0 from getCaretCoordinates
+        // (only one line), which would place the popup inside the input.
+        // Pin it to offsetHeight so the popup appears below the input.
+        // Textareas track the visible caret line.
+        top: isTextarea
+          ? Math.max(0, Math.min(visibleTop, el.offsetHeight))
+          : el.offsetHeight,
+      });
+    });
   };
 
   useEffect(() => {
