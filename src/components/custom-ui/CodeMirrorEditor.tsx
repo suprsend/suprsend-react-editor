@@ -6,11 +6,7 @@ import {
   type Ref,
 } from 'react';
 import { EditorView, basicSetup } from 'codemirror';
-import {
-  Compartment,
-  Annotation,
-  type Extension,
-} from '@codemirror/state';
+import { Compartment, Annotation, type Extension } from '@codemirror/state';
 import { json } from '@codemirror/lang-json';
 import { html } from '@codemirror/lang-html';
 import { placeholder as cmPlaceholder } from '@codemirror/view';
@@ -116,8 +112,8 @@ function CodeMirrorEditorInner(
         extraCompartment.current.of(extraExtensions),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
-            const isExternal = update.transactions.some(
-              (tr) => tr.annotation(externalUpdate)
+            const isExternal = update.transactions.some((tr) =>
+              tr.annotation(externalUpdate)
             );
             if (!isExternal) {
               onChangeRef.current?.(update.state.doc.toString());

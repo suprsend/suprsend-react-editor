@@ -367,7 +367,6 @@ function EmailTemplatePlayground({
   const displayConditionInfoRef = useRef<DisplayConditionInfo | null>(null);
   const [displayConditionOpen, setDisplayConditionOpen] = useState(false);
   const [oldDisplayConditionOpen, setOldDisplayConditionOpen] = useState(false);
-
   const initialDisplayConditions =
     (variantData?.content?.body?.designer
       ?.display_conditions as DisplayConditionData[]) ?? [];
