@@ -2,9 +2,9 @@ import { QueryClient, useQuery, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import type {
   GetVariantDetailsParams,
-  EmailContentPayload,
+  ChannelContentPayload,
   UpdateVariantContentParams,
-  useVariantDetailsParams,
+  UseVariantDetailsParams,
   UploadFileParams,
   UseMockDataParams,
   GetMockDataParams,
@@ -51,7 +51,7 @@ export const useVariantDetails = ({
   templateSlug,
   chanelSlug,
   variantId,
-}: useVariantDetailsParams) => {
+}: UseVariantDetailsParams) => {
   const { locale, tenantId, workspaceUid, conditions } =
     useTemplateEditorContext();
   return useQuery({
@@ -91,7 +91,7 @@ export const useUpdateVariantContent = ({
   templateSlug,
   chanelSlug,
   variantId,
-}: GetVariantDetailsParams) => {
+}: UseVariantDetailsParams) => {
   const { locale, tenantId, workspaceUid, conditions } =
     useTemplateEditorContext();
   const queryKey = [
@@ -99,7 +99,7 @@ export const useUpdateVariantContent = ({
   ];
 
   return useMutation({
-    mutationFn: (payload: EmailContentPayload) =>
+    mutationFn: (payload: ChannelContentPayload) =>
       updateVariantContent({
         templateSlug,
         chanelSlug,

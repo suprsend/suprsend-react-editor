@@ -43,13 +43,13 @@ export interface CommitButtonProps {
   onCommit: () => void;
 }
 
-export interface useVariantDetailsParams {
+export interface UseVariantDetailsParams {
   templateSlug: string;
   chanelSlug: string;
   variantId: string;
 }
 
-export interface GetVariantDetailsParams extends useVariantDetailsParams {
+export interface GetVariantDetailsParams extends UseVariantDetailsParams {
   tenantId: string | null;
   locale: string;
   conditions: unknown;
@@ -101,8 +101,41 @@ export type EmailContentPayload = {
   content: IEmailContent;
 };
 
+// --- iOS Push ---
+
+export interface IIOSPushContent {
+  header: string;
+  body: string;
+  image_url: string;
+  action_url: string;
+}
+
+export interface IIOSPushContentResponse {
+  content: IIOSPushContent;
+}
+
+export type IOSPushFormValues = IIOSPushContent;
+
+export type IOSPushContentPayload = {
+  content: Partial<IIOSPushContent>;
+};
+
+export interface IOSPushChannelProps {
+  variantData: IIOSPushContentResponse;
+  variables: Record<string, unknown>;
+}
+
+export interface IOSPushPreviewProps {
+  formValues: IOSPushFormValues;
+  variables: Record<string, unknown>;
+}
+
+// --- Generic payload union for API ---
+
+export type ChannelContentPayload = EmailContentPayload | IOSPushContentPayload;
+
 export interface UpdateVariantContentParams extends GetVariantDetailsParams {
-  payload: EmailContentPayload;
+  payload: ChannelContentPayload;
 }
 
 export interface UploadFileParams {
