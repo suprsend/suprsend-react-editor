@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { TabBar } from '@/components/custom-ui/channelsTab';
-import EmailChannel from '@/components/channels/email';
-import IOSPushChannel from '@/components/channels/IOSPush';
+import EmailChannel from '@/templates/channels/email';
+import IOSPushChannel from '@/templates/channels/IOSPush';
 import type { SuprSendTemplateEditorProps } from '@/types';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { useMockData, useVariantDetails } from '@/apis';
