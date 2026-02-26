@@ -14,7 +14,7 @@ import Suggestions from './Suggestions';
 
 // --- Types ---
 
-interface SuggestionInputProps {
+export interface SuggestionInputProps {
   variables: Record<string, unknown>;
   label?: string;
   mandatory?: boolean;
@@ -96,6 +96,7 @@ export default function SuggestionInput({
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const highlightRef = useRef<HTMLDivElement | null>(null);
   const suggestionRef = useRef(false);
+  const isFocusedRef = useRef(false);
 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -158,21 +159,7 @@ export default function SuggestionInput({
 
     if (!enableSuggestions) return;
 
-    let coords = getCaretCoordinates(target, caretIndex);
-
-    if (
-      target.offsetWidth < target.scrollWidth &&
-      coords.left > target.offsetWidth
-    ) {
-      coords = { ...coords, left: target.offsetWidth };
-    } else if (
-      target.offsetHeight < target.scrollHeight &&
-      coords.top > target.offsetHeight
-    ) {
-      coords = { ...coords, top: target.offsetHeight };
-    }
-    setCaretCoordinates(coords);
-
+    // Determine suggestion visibility synchronously.
     const strippedValue = val.slice(0, caretIndex);
     const startBracketIndex = strippedValue.lastIndexOf('{{');
     const endBracketIndex = strippedValue.lastIndexOf('}}');
@@ -185,11 +172,41 @@ export default function SuggestionInput({
     } else {
       setShowSuggestions(false);
     }
+
+    // Defer coordinate measurement to the next frame.
+    // For click events the browser may not have finished adjusting the
+    // input's scrollLeft by the time this handler fires, so reading it
+    // synchronously produces a stale value that places the popup at the
+    // wrong horizontal position (often clamped to the left edge).
+    requestAnimationFrame(() => {
+      const el = inputRef.current;
+      if (!el) return;
+      const pos = el.selectionEnd ?? 0;
+      const coords = getCaretCoordinates(el, pos);
+      const visibleLeft = coords.left - el.scrollLeft;
+      const visibleTop = coords.top - el.scrollTop;
+      setCaretCoordinates({
+        ...coords,
+        left: Math.max(0, Math.min(visibleLeft, el.offsetWidth)),
+        // Single-line inputs always have top ≈ 0 from getCaretCoordinates
+        // (only one line), which would place the popup inside the input.
+        // Pin it to offsetHeight so the popup appears below the input.
+        // Textareas track the visible caret line.
+        top: isTextarea
+          ? Math.max(0, Math.min(visibleTop, el.offsetHeight))
+          : el.offsetHeight,
+      });
+    });
   };
 
   useEffect(() => {
-    setInputValue(value);
-    setWarning('');
+    // While the user is actively typing (focused), local inputValue is the
+    // source of truth. Skip external syncs to prevent stale API responses
+    // (from autosave round-trips) from overwriting what the user just typed.
+    if (!isFocusedRef.current) {
+      setInputValue(value);
+      setWarning('');
+    }
   }, [value]);
 
   useEffect(() => {
@@ -294,8 +311,8 @@ export default function SuggestionInput({
                 'suprsend-absolute suprsend-pointer-events-none suprsend-overflow-hidden suprsend-rounded-md',
                 'suprsend-px-3 suprsend-text-base md:suprsend-text-sm',
                 isTextarea
-                  ? 'suprsend-py-2 suprsend-whitespace-pre-wrap suprsend-break-words'
-                  : 'suprsend-flex suprsend-items-center suprsend-whitespace-nowrap'
+                  ? 'suprsend-py-2'
+                  : 'suprsend-flex suprsend-items-center'
               )}
               style={{
                 top: 1,
@@ -305,8 +322,16 @@ export default function SuggestionInput({
                 zIndex: 2,
                 color: 'hsl(var(--foreground))',
               }}
-              dangerouslySetInnerHTML={{ __html: highlightedHtml }}
-            />
+            >
+              <span
+                className={
+                  isTextarea
+                    ? 'suprsend-whitespace-pre-wrap suprsend-break-words'
+                    : 'suprsend-whitespace-pre'
+                }
+                dangerouslySetInnerHTML={{ __html: highlightedHtml }}
+              />
+            </div>
 
             {/* Layer 3: Transparent input for user interaction */}
             <InputComponent
@@ -320,8 +345,14 @@ export default function SuggestionInput({
               onKeyUp={enableSuggestions ? handleInputEvent : undefined}
               onScroll={handleScroll}
               onChange={(e) => onChange(e.target.value)}
-              onFocus={() => setWarning('')}
-              onBlur={handleBlur}
+              onFocus={() => {
+                isFocusedRef.current = true;
+                setWarning('');
+              }}
+              onBlur={() => {
+                isFocusedRef.current = false;
+                handleBlur();
+              }}
               className={cn(
                 'suprsend-border-transparent suprsend-bg-transparent disabled:suprsend-bg-transparent suprsend-shadow-none',
                 isTextarea && 'suprsend-resize-none',
@@ -346,8 +377,14 @@ export default function SuggestionInput({
             onClick={enableSuggestions ? handleInputEvent : undefined}
             onKeyUp={enableSuggestions ? handleInputEvent : undefined}
             onChange={(e) => onChange(e.target.value)}
-            onFocus={() => setWarning('')}
-            onBlur={handleBlur}
+            onFocus={() => {
+              isFocusedRef.current = true;
+              setWarning('');
+            }}
+            onBlur={() => {
+              isFocusedRef.current = false;
+              handleBlur();
+            }}
             className={className}
             {...(isTextarea ? { rows } : {})}
             {...rest}

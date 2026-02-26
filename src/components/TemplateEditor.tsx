@@ -4,23 +4,27 @@ import EmailChannel from '@/components/channels/email';
 import IOSPushChannel from '@/components/channels/IOSPush';
 import type { SuprSendTemplateEditorProps } from '@/types';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import { useVariantDetails } from '@/apis';
+import { useMockData, useVariantDetails } from '@/apis';
 import axios from 'axios';
-import { FileX } from 'lucide-react';
+import { FileX, Loader2 } from 'lucide-react';
 
 export default function SuprSendTemplateEditor({
   hideChannelsTab = false,
 }: SuprSendTemplateEditorProps) {
   const { channels, templateSlug, variantId } = useTemplateEditorContext();
+  const [selectedChannel, setSelectedChannel] = useState<string | number>(
+    channels[0]
+  );
+
   const { data: variantData, error: variantError } = useVariantDetails({
     chanelSlug: channels[0],
     templateSlug,
     variantId,
   });
-  console.log('Variant Details:', variantData);
-  const [selectedChannel, setSelectedChannel] = useState<string | number>(
-    channels[0]
-  );
+
+  // TODO: if mock data api errors then what to do
+  const { data: mockData } = useMockData({ templateSlug });
+
   useEffect(() => {
     if (channels.length > 0) {
       setSelectedChannel(channels[0]);
@@ -46,9 +50,15 @@ export default function SuprSendTemplateEditor({
       </div>
     );
   }
-
-  if (!selectedChannel || !variantData) {
-    return <p>Loading...</p>;
+  if (!selectedChannel || !variantData || !mockData) {
+    return (
+      <div className="suprsend-flex suprsend-h-full suprsend-items-center suprsend-justify-center suprsend-bg-background suprsend-z-10">
+        <Loader2
+          className="suprsend-h-6 suprsend-w-6 suprsend-text-muted-foreground"
+          style={{ animation: 'spin 1s linear infinite' }}
+        />
+      </div>
+    );
   }
   return (
     <div className="suprsend-h-full suprsend-flex suprsend-flex-col">
@@ -61,7 +71,10 @@ export default function SuprSendTemplateEditor({
       )}
       <div className="suprsend-flex-1 suprsend-min-h-0 suprsend-overflow-hidden">
         {selectedChannel === 'email' && (
-          <EmailChannel variantData={variantData} />
+          <EmailChannel
+            variantData={variantData}
+            variables={mockData?.transformed_data ?? {}}
+          />
         )}
         {selectedChannel === 'sms' && <p>SMS Channel Editor Coming Soon...</p>}
         {selectedChannel === 'inbox' && (

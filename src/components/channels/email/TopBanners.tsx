@@ -1,4 +1,8 @@
+import { useState } from 'react';
 import { Info, X } from 'lucide-react';
+
+const LS_DESIGN_BANNER = 'ss_email_banner_design_dismissed';
+const LS_HTML_BANNER = 'ss_email_banner_html_dismissed';
 
 interface TopBannerProps {
   editorType: string;
@@ -6,6 +10,11 @@ interface TopBannerProps {
 }
 
 function DesignEditorBanner() {
+  const [visible, setVisible] = useState(
+    () => localStorage.getItem(LS_DESIGN_BANNER) !== 'true'
+  );
+
+  if (!visible) return null;
   return (
     <div className="suprsend-px-3 suprsend-bg-blue-50 suprsend-text-gray-700 suprsend-text-xs suprsend-py-1.5 suprsend-flex suprsend-items-center suprsend-justify-between suprsend-my-1 suprsend-rounded">
       <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
@@ -15,12 +24,23 @@ function DesignEditorBanner() {
           send a plain text version using your email content.
         </span>
       </div>
-      <X className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600" />
+      <X
+        className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600 suprsend-cursor-pointer suprsend-shrink-0"
+        onClick={() => {
+          localStorage.setItem(LS_DESIGN_BANNER, 'true');
+          setVisible(false);
+        }}
+      />
     </div>
   );
 }
 
 function HTMLEditorBanner() {
+  const [visible, setVisible] = useState(
+    () => localStorage.getItem(LS_HTML_BANNER) !== 'true'
+  );
+
+  if (!visible) return null;
   return (
     <div className="suprsend-px-3 suprsend-bg-blue-50 suprsend-text-gray-700 suprsend-text-xs suprsend-py-1.5 suprsend-flex suprsend-items-center suprsend-justify-between suprsend-my-1 suprsend-rounded">
       <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
@@ -38,7 +58,13 @@ function HTMLEditorBanner() {
           </a>
         </span>
       </div>
-      <X className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600" />
+      <X
+        className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600 suprsend-cursor-pointer suprsend-shrink-0"
+        onClick={() => {
+          localStorage.setItem(LS_HTML_BANNER, 'true');
+          setVisible(false);
+        }}
+      />
     </div>
   );
 }

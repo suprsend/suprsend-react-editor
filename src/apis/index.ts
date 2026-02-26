@@ -6,6 +6,8 @@ import type {
   UpdateVariantContentParams,
   useVariantDetailsParams,
   UploadFileParams,
+  UseMockDataParams,
+  GetMockDataParams,
 } from '@/types';
 import { createQueryParams, deepMerge } from '@/lib/utils';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
@@ -133,5 +135,41 @@ const uploadFile = async ({ workspaceUid, file }: UploadFileParams) => {
 export const useUploadFile = (workspaceUid: string) => {
   return useMutation({
     mutationFn: (file: File) => uploadFile({ workspaceUid, file }),
+  });
+};
+
+const getMockData = async ({
+  templateSlug,
+  workspaceUid,
+  tenantId,
+  recipientDistinctId,
+  actorDistinctId,
+}: GetMockDataParams) => {
+  const qp = createQueryParams({
+    tenant_id: tenantId,
+    recipient_distinct_id: recipientDistinctId,
+    actor_distinct_id: actorDistinctId,
+  });
+  const url = `${API_BASE_URL}/v2/${workspaceUid}/template/embedded/${templateSlug}/mock_data/${qp}`;
+  const resp = await axiosInst.get(url);
+  return resp.data;
+};
+
+export const useMockData = ({
+  templateSlug,
+  recipientDistinctId,
+  actorDistinctId,
+}: UseMockDataParams) => {
+  const { tenantId, workspaceUid } = useTemplateEditorContext();
+  return useQuery({
+    queryKey: [`template/${templateSlug}/mock_data`],
+    queryFn: () =>
+      getMockData({
+        templateSlug,
+        workspaceUid,
+        tenantId,
+        recipientDistinctId,
+        actorDistinctId,
+      }),
   });
 };

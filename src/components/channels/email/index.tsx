@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import {
   X,
   Plus,
@@ -30,36 +30,18 @@ import EmailSettingsPreviewBanner from './EditMetaData';
 import { useUpdateVariantContent, useUploadFile } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { usePostMessageBridge } from '@/lib/usePostMessageBridge';
-import type { IEmailContentResponse, EmailContentPayload } from '@/types';
+import type {
+  IEmailContentResponse,
+  EmailContentPayload,
+  TextEditorsProps,
+} from '@/types';
 import DisplayConditionsModal from './DisplayConditionsModal';
+import { renderHandlebars } from '@/components/custom-ui/HandlebarsRenderer';
 import OldDisplayConditionsModal from './OldDisplayConditionsModal';
 import type {
   DisplayConditionInfo,
   DisplayConditionData,
 } from './DisplayConditionsModal';
-
-// TODO: replace with brand data fetched from API
-const MOCK_BRAND_DATA = {
-  $brand: {
-    logo: 'https://picsum.photos/200/300',
-    primary_color: '#064DB3',
-    brand_name: 'SuprSend',
-    social_links: {
-      website: 'https://suprsend.com',
-      facebook: 'https://facebook.com/suprsend',
-      linkedin: 'https://linkedin.com/company/suprsend',
-      x: 'https://x.com/suprsend',
-      instagram: '',
-      medium: '',
-      discord: '',
-      telegram: '',
-      youtube: '',
-      tiktok: '',
-    },
-    embedded_preference_url: 'https://suprsend.com/preferences',
-    hosted_preference_domain: 'https://suprsend.com/unsubscribe',
-  },
-};
 
 const EDITOR_TYPE_OPTIONS = [
   { name: 'Design Editor', id: 'design_editor' },
@@ -75,9 +57,13 @@ interface IEditorTypeList {
 
 interface EmailChannelProps {
   variantData: IEmailContentResponse;
+  variables?: Record<string, unknown>;
 }
 
-export default function EmailChannel({ variantData }: EmailChannelProps) {
+export default function EmailChannel({
+  variantData,
+  variables = {},
+}: EmailChannelProps) {
   const {
     templateSlug,
     variantId,
@@ -155,6 +141,18 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
   }, [bodyType]);
 
   const [htmlSwitchModalOpen, setHtmlSwitchModalOpen] = useState(false);
+
+  const handleSwitchToHtml = useCallback(() => {
+    setDesignEditorType('html');
+    mutate({ content: { body: { type: 'raw' } } });
+    setEditorTypeList((prev) =>
+      prev.map((editor) =>
+        editor.id === 'design_editor'
+          ? { ...editor, name: 'HTML Editor' }
+          : editor
+      )
+    );
+  }, [mutate, setDesignEditorType, setEditorTypeList]);
 
   const missingEditor = EDITOR_TYPE_OPTIONS.find(
     (editor) => !activeEditorTypes.includes(editor.id)
@@ -274,7 +272,15 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
                     onClick={(e) => {
                       e.preventDefault();
                       if (designEditorType !== 'html') {
-                        setHtmlSwitchModalOpen(true);
+                        if (
+                          localStorage.getItem(
+                            'ss_email_html_switch_confirmed'
+                          ) === 'true'
+                        ) {
+                          handleSwitchToHtml();
+                        } else {
+                          setHtmlSwitchModalOpen(true);
+                        }
                       }
                     }}
                   >
@@ -328,7 +334,7 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
           variantData={variantData}
           saveContent={saveContent}
           designerHtmlRef={designerHtmlRef}
-          brandData={MOCK_BRAND_DATA}
+          variables={variables}
         />
       </div>
 
@@ -336,15 +342,8 @@ export default function EmailChannel({ variantData }: EmailChannelProps) {
         open={htmlSwitchModalOpen}
         onOpenChange={setHtmlSwitchModalOpen}
         onProceed={() => {
-          setDesignEditorType('html');
-          mutate({ content: { body: { type: 'raw' } } });
-          const editedEmailEditors = editorTypeList.map((editor) => {
-            if (editor.id === 'design_editor') {
-              return { ...editor, name: 'HTML Editor' };
-            }
-            return editor;
-          });
-          setEditorTypeList(editedEmailEditors);
+          localStorage.setItem('ss_email_html_switch_confirmed', 'true');
+          handleSwitchToHtml();
         }}
       />
     </div>
@@ -357,25 +356,26 @@ interface IEmailTemplatePlayground {
   variantData: IEmailContentResponse;
   saveContent: (payload: EmailContentPayload) => void;
   designerHtmlRef: React.RefObject<string>;
-  brandData?: Record<string, unknown> | null;
+  variables?: Record<string, unknown>;
 }
 
 function EmailTemplatePlayground({
   designEditorType,
   editorType,
-  variantData,
   saveContent,
   designerHtmlRef,
-  brandData = null,
+  variantData,
+  variables = {},
 }: IEmailTemplatePlayground) {
+  const userId = 'staging-1'; // TODO: replace with userId from API when ready
+
   const { workspaceUid } = useTemplateEditorContext();
-  // TODO: replace with userId from API when ready
-  const userId = 'staging-1';
   const { mutateAsync: uploadFile } = useUploadFile(workspaceUid);
+  const [iframeLoading, setIframeLoading] = useState(true);
+
   const body = variantData?.content?.body;
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const designJsonRef = useRef(body?.designer?.design_json);
-  const [iframeLoading, setIframeLoading] = useState(true);
   const { on, post } = usePostMessageBridge(iframeRef);
 
   const displayConditionInfoRef = useRef<DisplayConditionInfo | null>(null);
@@ -418,7 +418,9 @@ function EmailTemplatePlayground({
   // Listen for postMessage events from iframe
   useEffect(() => {
     const unsubConfig = on('REQUEST_CONFIG', () => {
-      post('BRAND_CONFIG', { brandData: brandData ?? null });
+      post('BRAND_CONFIG', {
+        brandData: variables?.['$brand'],
+      });
     });
 
     const unsubReady = on('EDITOR_READY', () => {
@@ -484,7 +486,7 @@ function EmailTemplatePlayground({
       unsubDisplayCondition();
       unsubUpload();
     };
-  }, [on, post, saveContent, designerHtmlRef, uploadFile, brandData]);
+  }, [on, post, saveContent, designerHtmlRef, uploadFile, variables]);
 
   const handleEditorChange = useCallback(
     (type: 'html' | 'text', value: string) => {
@@ -545,7 +547,6 @@ function EmailTemplatePlayground({
         displayConditionsList={displayConditionsList}
         setDisplayConditionsList={handleSetDisplayConditionsList}
       />
-      {/* Iframe stays mounted in design mode; use visibility instead of display to avoid re-layout flicker */}
       {designEditorType === 'design' && (
         <div
           className="suprsend-absolute suprsend-inset-0"
@@ -572,6 +573,7 @@ function EmailTemplatePlayground({
           type="html"
           value={body?.raw?.html ?? ''}
           onChange={(v) => handleEditorChange('html', v)}
+          variables={variables}
         />
       )}
 
@@ -580,22 +582,42 @@ function EmailTemplatePlayground({
           type="plaintext"
           value={plainTextValue}
           onChange={(v) => handleEditorChange('text', v)}
+          variables={variables}
         />
       )}
     </div>
   );
 }
 
-interface TextEditorsProps {
-  type: 'html' | 'plaintext';
-  value: string;
-  onChange: (value: string) => void;
-}
-
-function TextEditors({ type, value, onChange }: TextEditorsProps) {
+function TextEditors({
+  type,
+  value,
+  onChange,
+  variables = {},
+}: TextEditorsProps) {
   const [activePreviewTab, setActivePreviewTab] = useState<
     'desktop' | 'mobile'
   >('desktop');
+
+  const renderedContent = useMemo(
+    () => renderHandlebars(value, variables),
+    [value, variables]
+  );
+
+  const previewIframeRef = useRef<HTMLIFrameElement>(null);
+
+  const resizePreviewIframe = useCallback(() => {
+    const iframe = previewIframeRef.current;
+    const doc = iframe?.contentDocument;
+    if (!doc) return;
+    if (doc.body) doc.body.style.overflow = 'hidden';
+    if (doc.documentElement) doc.documentElement.style.overflow = 'hidden';
+    const height = Math.max(
+      doc.body?.scrollHeight ?? 0,
+      doc.documentElement?.scrollHeight ?? 0
+    );
+    if (iframe) iframe.style.height = `${height}px`;
+  }, []);
 
   return (
     <ResizablePanelGroup direction="horizontal" className="suprsend-border">
@@ -611,18 +633,20 @@ function TextEditors({ type, value, onChange }: TextEditorsProps) {
         />
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={50}>
-        <div>
-          <div className="suprsend-border-b suprsend-flex suprsend-items-center suprsend-justify-between">
-            <div className="suprsend-p-2">
-              <p className="suprsend-text-sm suprsend-font-medium">Preview</p>
-            </div>
+      <ResizablePanel
+        defaultSize={50}
+        className="suprsend-flex suprsend-flex-col"
+      >
+        <div className="suprsend-border-b suprsend-flex suprsend-items-center suprsend-justify-between suprsend-shrink-0">
+          <div className="suprsend-p-2">
+            <p className="suprsend-text-sm suprsend-font-medium">Preview</p>
+          </div>
+          {type === 'html' && (
             <div className="suprsend-mr-2">
               <Tabs
                 defaultValue="desktop"
-                className=""
-                onValueChange={(value) =>
-                  setActivePreviewTab(value as 'desktop' | 'mobile')
+                onValueChange={(v) =>
+                  setActivePreviewTab(v as 'desktop' | 'mobile')
                 }
               >
                 <TabsList className="!suprsend-h-7">
@@ -635,9 +659,40 @@ function TextEditors({ type, value, onChange }: TextEditorsProps) {
                 </TabsList>
               </Tabs>
             </div>
-          </div>
-          {activePreviewTab === 'desktop' && <p>Desktop preview</p>}
-          {activePreviewTab === 'mobile' && <p>Mobile preview</p>}
+          )}
+        </div>
+
+        <div className="suprsend-flex-1 suprsend-min-h-0 suprsend-overflow-auto suprsend-bg-muted/30">
+          {type === 'html' ? (
+            <div
+              className={cn(
+                'suprsend-p-4',
+                activePreviewTab === 'mobile' &&
+                  'suprsend-flex suprsend-justify-center'
+              )}
+            >
+              <iframe
+                ref={previewIframeRef}
+                srcDoc={renderedContent}
+                title="Email preview"
+                onLoad={resizePreviewIframe}
+                className={cn(
+                  'suprsend-bg-white suprsend-border suprsend-border-muted-foreground/10',
+                  activePreviewTab === 'desktop'
+                    ? 'suprsend-w-full'
+                    : 'suprsend-w-[390px] suprsend-rounded-lg'
+                )}
+              />
+            </div>
+          ) : (
+            <pre className="suprsend-p-4 suprsend-text-xs suprsend-whitespace-pre-wrap suprsend-break-words suprsend-font-mono suprsend-text-gray-700">
+              {renderedContent || (
+                <span className="suprsend-text-muted-foreground">
+                  Nothing to preview
+                </span>
+              )}
+            </pre>
+          )}
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>
