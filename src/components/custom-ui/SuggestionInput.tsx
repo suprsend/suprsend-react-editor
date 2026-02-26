@@ -355,7 +355,6 @@ export default function SuggestionInput({
               }}
               className={cn(
                 'suprsend-border-transparent suprsend-bg-transparent disabled:suprsend-bg-transparent suprsend-shadow-none',
-                isTextarea && 'suprsend-resize-none',
                 className
               )}
               style={{

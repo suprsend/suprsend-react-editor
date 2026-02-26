@@ -11,37 +11,21 @@ import HandlebarsRenderer, {
   renderHandlebars,
 } from '@/components/custom-ui/HandlebarsRenderer';
 import type {
-  IIOSPushContentResponse,
+  IOSPushChannelProps,
+  IOSPushPreviewProps,
   IOSPushFormValues,
-  IOSPushContentPayload,
 } from '@/types';
-
-interface IOSPushChannelProps {
-  variantData: IIOSPushContentResponse;
-  variables: Record<string, unknown>;
-}
 
 export default function IOSPushChannel({
   variantData,
   variables,
 }: IOSPushChannelProps) {
-  const {
-    templateSlug,
-    variantId,
-    workspaceUid,
-    conditions,
-    locale,
-    tenantId,
-  } = useTemplateEditorContext();
+  const { templateSlug, variantId } = useTemplateEditorContext();
 
   const { mutate } = useUpdateVariantContent({
     templateSlug,
     chanelSlug: 'iospush',
     variantId,
-    workspaceUid,
-    conditions,
-    locale,
-    tenantId,
   });
 
   const content = variantData?.content;
@@ -59,15 +43,7 @@ export default function IOSPushChannel({
 
   const handleAutosave = useCallback(
     (data: IOSPushFormValues) => {
-      const payload: IOSPushContentPayload = {
-        content: {
-          header: data.header,
-          body: data.body,
-          image_url: data.image_url,
-          action_url: data.action_url,
-        },
-      };
-      mutate(payload);
+      mutate({ content: { ...data } });
     },
     [mutate]
   );
@@ -177,11 +153,6 @@ export default function IOSPushChannel({
       </div>
     </div>
   );
-}
-
-interface IOSPushPreviewProps {
-  formValues: IOSPushFormValues;
-  variables: Record<string, unknown>;
 }
 
 function IOSPushPreview({ formValues, variables }: IOSPushPreviewProps) {

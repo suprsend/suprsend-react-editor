@@ -4,7 +4,7 @@ import type {
   GetVariantDetailsParams,
   ChannelContentPayload,
   UpdateVariantContentParams,
-  useVariantDetailsParams,
+  UseVariantDetailsParams,
   UploadFileParams,
   UseMockDataParams,
   GetMockDataParams,
@@ -51,7 +51,7 @@ export const useVariantDetails = ({
   templateSlug,
   chanelSlug,
   variantId,
-}: useVariantDetailsParams) => {
+}: UseVariantDetailsParams) => {
   const { locale, tenantId, workspaceUid, conditions } =
     useTemplateEditorContext();
   return useQuery({
@@ -91,7 +91,7 @@ export const useUpdateVariantContent = ({
   templateSlug,
   chanelSlug,
   variantId,
-}: GetVariantDetailsParams) => {
+}: UseVariantDetailsParams) => {
   const { locale, tenantId, workspaceUid, conditions } =
     useTemplateEditorContext();
   const queryKey = [

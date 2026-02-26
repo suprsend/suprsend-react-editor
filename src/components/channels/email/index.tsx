@@ -64,22 +64,11 @@ export default function EmailChannel({
   variantData,
   variables = {},
 }: EmailChannelProps) {
-  const {
-    templateSlug,
-    variantId,
-    workspaceUid,
-    conditions,
-    locale,
-    tenantId,
-  } = useTemplateEditorContext();
+  const { templateSlug, variantId } = useTemplateEditorContext();
   const { mutate } = useUpdateVariantContent({
     templateSlug,
     chanelSlug: 'email',
     variantId,
-    workspaceUid,
-    conditions,
-    locale,
-    tenantId,
   });
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
