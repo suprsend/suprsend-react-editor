@@ -1,23 +1,30 @@
 import { useCallback } from 'react';
 import { useForm, Controller, useWatch } from 'react-hook-form';
-import { DeviceFrameset } from 'react-device-frameset';
 import SuggestionInput from '@/components/custom-ui/SuggestionInput';
+import SuggestionInputWithEmoji from '@/components/custom-ui/SuggestionInputWithEmoji';
+import IPhoneFrame from '@/components/custom-ui/IPhoneFrame';
 import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { makeAbsoluteUrl } from '@/lib/utils';
+import HandlebarsRenderer, {
+  renderHandlebars,
+} from '@/components/custom-ui/HandlebarsRenderer';
 import type {
   IIOSPushContentResponse,
   IOSPushFormValues,
   IOSPushContentPayload,
 } from '@/types';
-import 'react-device-frameset/styles/marvel-devices.min.css';
 
 interface IOSPushChannelProps {
   variantData: IIOSPushContentResponse;
+  variables: Record<string, unknown>;
 }
 
-export default function IOSPushChannel({ variantData }: IOSPushChannelProps) {
+export default function IOSPushChannel({
+  variantData,
+  variables,
+}: IOSPushChannelProps) {
   const {
     templateSlug,
     variantId,
@@ -78,7 +85,7 @@ export default function IOSPushChannel({ variantData }: IOSPushChannelProps) {
               control={control}
               rules={{ required: 'Title is required' }}
               render={({ field, fieldState }) => (
-                <SuggestionInput
+                <SuggestionInputWithEmoji
                   label="Title"
                   value={field.value}
                   onChange={field.onChange}
@@ -86,7 +93,7 @@ export default function IOSPushChannel({ variantData }: IOSPushChannelProps) {
                   error={fieldState.error?.message}
                   enableHighlighting
                   enableSuggestions
-                  variables={{}}
+                  variables={variables}
                 />
               )}
             />
@@ -98,7 +105,7 @@ export default function IOSPushChannel({ variantData }: IOSPushChannelProps) {
               control={control}
               rules={{ required: 'Body is required' }}
               render={({ field, fieldState }) => (
-                <SuggestionInput
+                <SuggestionInputWithEmoji
                   label="Body"
                   as="textarea"
                   rows={4}
@@ -108,7 +115,7 @@ export default function IOSPushChannel({ variantData }: IOSPushChannelProps) {
                   error={fieldState.error?.message}
                   enableHighlighting
                   enableSuggestions
-                  variables={{}}
+                  variables={variables}
                 />
               )}
             />
@@ -127,7 +134,7 @@ export default function IOSPushChannel({ variantData }: IOSPushChannelProps) {
                   placeholder="Image URL"
                   enableHighlighting
                   enableSuggestions
-                  variables={{}}
+                  variables={variables}
                 />
               )}
             />
@@ -146,7 +153,7 @@ export default function IOSPushChannel({ variantData }: IOSPushChannelProps) {
                   placeholder="Launch URL"
                   enableHighlighting
                   enableSuggestions
-                  variables={{}}
+                  variables={variables}
                 />
               )}
             />
@@ -163,7 +170,10 @@ export default function IOSPushChannel({ variantData }: IOSPushChannelProps) {
           backgroundSize: '16px 16px',
         }}
       >
-        <IOSPushPreview formValues={formValues as IOSPushFormValues} />
+        <IOSPushPreview
+          formValues={formValues as IOSPushFormValues}
+          variables={variables}
+        />
       </div>
     </div>
   );
@@ -171,101 +181,46 @@ export default function IOSPushChannel({ variantData }: IOSPushChannelProps) {
 
 interface IOSPushPreviewProps {
   formValues: IOSPushFormValues;
+  variables: Record<string, unknown>;
 }
 
-function IOSPushPreview({ formValues }: IOSPushPreviewProps) {
-  const imageUrl = formValues.image_url
-    ? makeAbsoluteUrl(formValues.image_url)
+function IOSPushPreview({ formValues, variables }: IOSPushPreviewProps) {
+  const resolvedImageUrl = formValues.image_url
+    ? makeAbsoluteUrl(renderHandlebars(formValues.image_url, variables))
     : '';
 
   return (
-    <div style={{ transform: 'scale(0.75)', transformOrigin: 'center' }}>
-      <DeviceFrameset device="iPhone X">
-        <div
-          style={{
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            padding: '0 16px',
-            background:
-              'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-          }}
-        >
-          {/* Notification card */}
-          <div
-            style={{
-              background: 'rgba(255, 255, 255, 0.95)',
-              borderRadius: 14,
-              padding: '12px',
-              backdropFilter: 'blur(20px)',
-            }}
-          >
-            {/* Header row */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 6,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 12,
-                  color: '#888',
-                  fontWeight: 500,
-                  textTransform: 'uppercase',
-                  letterSpacing: 0.3,
-                }}
-              >
-                App Name
-              </span>
-              <span style={{ fontSize: 12, color: '#888' }}>now</span>
-            </div>
-
-            {/* Title */}
-            <p
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                color: '#000',
-                margin: 0,
-                wordBreak: 'break-word',
-              }}
-            >
-              {formValues.header || 'Notification Title'}
-            </p>
-
-            {/* Body */}
-            <p
-              style={{
-                fontSize: 13,
-                color: '#333',
-                margin: '4px 0 0',
-                wordBreak: 'break-word',
-              }}
-            >
-              {formValues.body || 'Notification body text'}
-            </p>
-
-            {/* Image */}
-            {imageUrl && (
-              <img
-                src={imageUrl}
-                alt="notification"
-                style={{
-                  width: '100%',
-                  maxHeight: 200,
-                  objectFit: 'cover',
-                  borderRadius: 8,
-                  marginTop: 8,
-                }}
-              />
-            )}
-          </div>
+    <IPhoneFrame>
+      {/* Notification card */}
+      <div className="suprsend-bg-white suprsend-opacity-70 suprsend-rounded-[14px] suprsend-px-3 suprsend-py-2.5 suprsend-backdrop-blur-[20px]">
+        {/* Header row */}
+        <div className="suprsend-flex suprsend-items-start suprsend-justify-between suprsend-mb-1">
+          <HandlebarsRenderer
+            template={formValues.header || 'Notification Title'}
+            data={variables}
+            className="suprsend-m-0 suprsend-text-[11px] suprsend-font-semibold suprsend-text-foreground suprsend-break-words"
+          />
+          <span className="suprsend-text-[11px] suprsend-text-muted-foreground">
+            now
+          </span>
         </div>
-      </DeviceFrameset>
-    </div>
+
+        {/* Body */}
+        <HandlebarsRenderer
+          template={formValues.body || 'Notification body text'}
+          data={variables}
+          className="suprsend-m-0 suprsend-text-[11px] suprsend-text-muted-foreground suprsend-break-words"
+        />
+
+        {/* Image */}
+        {resolvedImageUrl && (
+          <img
+            src={resolvedImageUrl}
+            alt="notification"
+            className="suprsend-w-full suprsend-max-h-[150px] suprsend-object-cover suprsend-rounded-lg suprsend-mt-1.5"
+          />
+        )}
+      </div>
+    </IPhoneFrame>
   );
 }

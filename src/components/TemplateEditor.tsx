@@ -93,7 +93,10 @@ export default function SuprSendTemplateEditor({
           <p>Android Push Channel Editor Coming Soon...</p>
         )}
         {selectedChannel === 'iospush' && (
-          <IOSPushChannel variantData={variantData} />
+          <IOSPushChannel
+            variantData={variantData}
+            variables={mockData?.transformed_data ?? {}}
+          />
         )}
         {selectedChannel === 'webpush' && (
           <p>Web Push Channel Editor Coming Soon...</p>
