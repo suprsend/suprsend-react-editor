@@ -187,7 +187,7 @@ export default function WebpushChannel({
                   />
                 </div>
                 <X
-                  className="suprsend-w-4 suprsend-h-4 suprsend-cursor-pointer"
+                  className="suprsend-w-4 suprsend-h-4 suprsend-cursor-pointer suprsend-text-muted-foreground"
                   onClick={() => remove(index)}
                 />
               </div>
