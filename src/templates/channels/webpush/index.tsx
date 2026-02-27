@@ -196,6 +196,7 @@ export default function WebpushChannel({
             {fields.length < 2 && (
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => append({ text: '', url: '' })}
               >
                 <Plus className="suprsend-w-4 suprsend-h-4" />
