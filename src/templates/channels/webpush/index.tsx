@@ -149,9 +149,9 @@ export default function WebpushChannel({
               Chrome Action Buttons
             </p>
 
-            {fields.map((field, index) => (
+            {fields.map((_, index) => (
               <div
-                key={field.id}
+                key={index}
                 className="suprsend-flex suprsend-items-center suprsend-gap-1"
               >
                 <div className="suprsend-flex-1 suprsend-min-w-0">
