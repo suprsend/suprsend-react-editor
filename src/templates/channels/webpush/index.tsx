@@ -1,48 +1,52 @@
 import { useCallback } from 'react';
-import { useForm, Controller, useWatch } from 'react-hook-form';
+import { useForm, Controller, useWatch, useFieldArray } from 'react-hook-form';
 import SuggestionInput from '@/components/custom-ui/SuggestionInput';
 import SuggestionInputWithEmoji from '@/components/custom-ui/SuggestionInputWithEmoji';
-import IPhoneFrame from '@/components/custom-ui/IPhoneFrame';
+import SuggestionInputWithUpload from '@/components/custom-ui/SuggestionInputWithUpload';
 import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import { makeAbsoluteUrl } from '@/lib/utils';
-import HandlebarsRenderer, {
-  renderHandlebars,
-} from '@/components/custom-ui/HandlebarsRenderer';
-import type {
-  IOSPushChannelProps,
-  IOSPushPreviewProps,
-  IOSPushFormValues,
-} from '@/types';
+import { X, Plus } from 'lucide-react';
+import type { WebpushChannelProps, WebpushFormValues } from '@/types';
+import { Button } from '@/components/ui/button';
+import WebpushPreview from './Preview';
 
-export default function IOSPushChannel({
+export default function WebpushChannel({
   variantData,
   variables,
-}: IOSPushChannelProps) {
+}: WebpushChannelProps) {
   const { templateSlug, variantId } = useTemplateEditorContext();
 
   const { mutate } = useUpdateVariantContent({
     templateSlug,
-    chanelSlug: 'iospush',
+    chanelSlug: 'webpush',
     variantId,
   });
 
   const content = variantData?.content;
 
-  const { watch, control } = useForm<IOSPushFormValues>({
+  const { watch, control } = useForm<WebpushFormValues>({
     values: {
       header: content?.header ?? '',
       body: content?.body ?? '',
+      buttons: content?.buttons ?? [],
       image_url: content?.image_url ?? '',
       action_url: content?.action_url ?? '',
     },
+    resetOptions: {
+      keepDirtyValues: true,
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'buttons',
   });
 
   const formValues = useWatch({ control });
 
   const handleAutosave = useCallback(
-    (data: IOSPushFormValues) => {
+    (data: WebpushFormValues) => {
       mutate({ content: { ...data } });
     },
     [mutate]
@@ -53,7 +57,7 @@ export default function IOSPushChannel({
   return (
     <div className="suprsend-h-full suprsend-flex">
       {/* Form */}
-      <div className="suprsend-flex-1 suprsend-p-6">
+      <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto">
         <div className="suprsend-max-w-2xl suprsend-space-y-6">
           <div className="suprsend-space-y-1">
             <Controller
@@ -102,18 +106,22 @@ export default function IOSPushChannel({
               name="image_url"
               control={control}
               render={({ field }) => (
-                <SuggestionInput
-                  label="Image URL"
+                <SuggestionInputWithUpload
+                  label="Banner Image URL"
                   mandatory={false}
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Image URL"
+                  accept="image/*"
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
                 />
               )}
             />
+            <p className="suprsend-text-xs suprsend-text-muted-foreground">
+              Recommended size: 720x480
+            </p>
           </div>
 
           <div className="suprsend-space-y-1">
@@ -134,6 +142,67 @@ export default function IOSPushChannel({
               )}
             />
           </div>
+
+          {/* Chrome Action Buttons */}
+          <div className="suprsend-space-y-3">
+            <p className="suprsend-text-sm suprsend-font-semibold suprsend-text-foreground">
+              Chrome Action Buttons
+            </p>
+
+            {fields.map((field, index) => (
+              <div
+                key={field.id}
+                className="suprsend-flex suprsend-items-center suprsend-gap-1"
+              >
+                <div className="suprsend-flex-1 suprsend-min-w-0">
+                  <Controller
+                    name={`buttons.${index}.text`}
+                    control={control}
+                    render={({ field: f }) => (
+                      <SuggestionInput
+                        value={f.value}
+                        onChange={f.onChange}
+                        placeholder={`Button ${index + 1} Title`}
+                        enableHighlighting
+                        enableSuggestions
+                        variables={variables}
+                      />
+                    )}
+                  />
+                </div>
+                <div className="suprsend-flex-1 suprsend-min-w-0">
+                  <Controller
+                    name={`buttons.${index}.url`}
+                    control={control}
+                    render={({ field: f }) => (
+                      <SuggestionInput
+                        value={f.value}
+                        onChange={f.onChange}
+                        placeholder={`Button ${index + 1} Link`}
+                        enableHighlighting
+                        enableSuggestions
+                        variables={variables}
+                      />
+                    )}
+                  />
+                </div>
+                <X
+                  className="suprsend-w-4 suprsend-h-4 suprsend-cursor-pointer"
+                  onClick={() => remove(index)}
+                />
+              </div>
+            ))}
+
+            {fields.length < 2 && (
+              <Button
+                variant="outline"
+                onClick={() => append({ text: '', url: '' })}
+              >
+                <Plus className="suprsend-w-4 suprsend-h-4" />
+                Add Button
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -146,52 +215,11 @@ export default function IOSPushChannel({
           backgroundSize: '16px 16px',
         }}
       >
-        <IOSPushPreview
-          formValues={formValues as IOSPushFormValues}
+        <WebpushPreview
+          formValues={formValues as WebpushFormValues}
           variables={variables}
         />
       </div>
     </div>
-  );
-}
-
-function IOSPushPreview({ formValues, variables }: IOSPushPreviewProps) {
-  const resolvedImageUrl = formValues.image_url
-    ? makeAbsoluteUrl(renderHandlebars(formValues.image_url, variables))
-    : '';
-
-  return (
-    <IPhoneFrame>
-      {/* Notification card */}
-      <div className="suprsend-bg-white suprsend-opacity-70 suprsend-rounded-[14px] suprsend-px-3 suprsend-py-2.5 suprsend-backdrop-blur-[20px]">
-        {/* Header row */}
-        <div className="suprsend-flex suprsend-items-start suprsend-justify-between suprsend-mb-1">
-          <HandlebarsRenderer
-            template={formValues.header || 'Notification Title'}
-            data={variables}
-            className="suprsend-m-0 suprsend-text-[11px] suprsend-font-semibold suprsend-text-foreground suprsend-break-words"
-          />
-          <span className="suprsend-text-[11px] suprsend-text-muted-foreground">
-            now
-          </span>
-        </div>
-
-        {/* Body */}
-        <HandlebarsRenderer
-          template={formValues.body || 'Notification body text'}
-          data={variables}
-          className="suprsend-m-0 suprsend-text-[11px] suprsend-text-muted-foreground suprsend-break-words"
-        />
-
-        {/* Image */}
-        {resolvedImageUrl && (
-          <img
-            src={resolvedImageUrl}
-            alt="notification"
-            className="suprsend-w-full suprsend-max-h-[150px] suprsend-object-cover suprsend-rounded-lg suprsend-mt-1.5"
-          />
-        )}
-      </div>
-    </IPhoneFrame>
   );
 }
