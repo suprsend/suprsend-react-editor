@@ -38,10 +38,13 @@ import type {
 import DisplayConditionsModal from './DisplayConditionsModal';
 import { renderHandlebars } from '@/components/custom-ui/HandlebarsRenderer';
 import OldDisplayConditionsModal from './OldDisplayConditionsModal';
+import MergeTagsModal from './MergeTagsModal';
 import type {
   DisplayConditionInfo,
   DisplayConditionData,
 } from './DisplayConditionsModal';
+import type { MergeTagInfo } from './MergeTagsModal';
+import type { MergeTagData } from '@/types';
 
 const EDITOR_TYPE_OPTIONS = [
   { name: 'Design Editor', id: 'design_editor' },
@@ -391,6 +394,26 @@ function EmailTemplatePlayground({
     [saveContent]
   );
 
+  const mergeTagInfoRef = useRef<MergeTagInfo | null>(null);
+  const [mergeTagModalOpen, setMergeTagModalOpen] = useState(false);
+  const initialMergeTags =
+    (variantData?.content?.body?.designer?.merge_tags as MergeTagData[]) ?? [];
+  const mergeTagsListRef = useRef<MergeTagData[]>(initialMergeTags);
+  const [mergeTagsList, setMergeTagsList] =
+    useState<MergeTagData[]>(initialMergeTags);
+
+  const handleSetMergeTagsList = useCallback(
+    (list: MergeTagData[]) => {
+      mergeTagsListRef.current = list;
+      setMergeTagsList(list);
+      saveContent({
+        content: { body: { designer: { merge_tags: list } } },
+      });
+      post('SET_MERGE_TAGS', { mergeTagsList: list });
+    },
+    [saveContent, post]
+  );
+
   // Keep designJsonRef in sync with latest server data
   useEffect(() => {
     designJsonRef.current = body?.designer?.design_json;
@@ -418,6 +441,10 @@ function EmailTemplatePlayground({
       if (designJson && Object.keys(designJson).length > 0) {
         post('LOAD_DESIGN', { design_json: designJson });
       }
+      post('INIT_MERGE_TAGS', {
+        variables,
+        mergeTagsList: mergeTagsListRef.current,
+      });
     });
 
     const unsubUpdate = on('DESIGN_UPDATED', (payload) => {
@@ -433,6 +460,7 @@ function EmailTemplatePlayground({
               html,
               design_json,
               display_conditions: displayConditionsListRef.current,
+              merge_tags: mergeTagsListRef.current,
             },
           },
         },
@@ -456,6 +484,24 @@ function EmailTemplatePlayground({
       }
     });
 
+    const unsubMergeTag = on('MERGE_TAG_OPEN', (payload) => {
+      const data = (
+        payload as {
+          data: {
+            mergeTagGroup?: string | null;
+            mergeTags?: Record<string, unknown>;
+          };
+        }
+      ).data;
+      mergeTagInfoRef.current = {
+        data,
+        done: (result) => {
+          post('MERGE_TAG_DONE', { result });
+        },
+      };
+      setMergeTagModalOpen(true);
+    });
+
     const unsubUpload = on('IMAGE_UPLOAD', async (payload) => {
       const { file, requestId } = payload as { file: File; requestId: string };
       try {
@@ -473,6 +519,7 @@ function EmailTemplatePlayground({
       unsubReady();
       unsubUpdate();
       unsubDisplayCondition();
+      unsubMergeTag();
       unsubUpload();
     };
   }, [on, post, saveContent, designerHtmlRef, uploadFile, variables]);
@@ -535,6 +582,14 @@ function EmailTemplatePlayground({
         displayConditionInfoRef={displayConditionInfoRef}
         displayConditionsList={displayConditionsList}
         setDisplayConditionsList={handleSetDisplayConditionsList}
+      />
+      <MergeTagsModal
+        open={mergeTagModalOpen}
+        setOpen={setMergeTagModalOpen}
+        mergeTagInfoRef={mergeTagInfoRef}
+        mergeTagsList={mergeTagsList}
+        setMergeTagsList={handleSetMergeTagsList}
+        variables={variables}
       />
       {designEditorType === 'design' && (
         <div

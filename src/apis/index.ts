@@ -40,9 +40,13 @@ const getVariantDetails = async ({
   locale,
   tenantId,
   workspaceUid,
+  isPrivate,
 }: GetVariantDetailsParams) => {
   const qp = createQueryParams({ conditions, locale, tenantId });
-  const url = `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}/${qp}`;
+  const url = isPrivate
+    ? `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}/${qp}`
+    : `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/embedded/channel/${chanelSlug}/variant/${variantId}/${qp}`;
+
   const resp = await axiosInst.get(url);
   return resp.data;
 };
@@ -52,8 +56,9 @@ export const useVariantDetails = ({
   chanelSlug,
   variantId,
 }: UseVariantDetailsParams) => {
-  const { locale, tenantId, workspaceUid, conditions } =
+  const { locale, tenantId, workspaceUid, conditions, isPrivate } =
     useTemplateEditorContext();
+
   return useQuery({
     queryKey: [
       `template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}`,
@@ -67,6 +72,7 @@ export const useVariantDetails = ({
         tenantId,
         conditions,
         workspaceUid,
+        isPrivate,
       }),
   });
 };
@@ -80,9 +86,13 @@ const updateVariantContent = async ({
   locale,
   tenantId,
   payload,
+  isPrivate,
 }: UpdateVariantContentParams) => {
   const qp = createQueryParams({ conditions, locale, tenantId });
-  const url = `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}/content/${qp}`;
+  const url = isPrivate
+    ? `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}/content/${qp}`
+    : `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/embedded/channel/${chanelSlug}/variant/${variantId}/content/${qp}`;
+
   const resp = await axiosInst.patch(url, payload);
   return resp.data;
 };
@@ -92,7 +102,7 @@ export const useUpdateVariantContent = ({
   chanelSlug,
   variantId,
 }: UseVariantDetailsParams) => {
-  const { locale, tenantId, workspaceUid, conditions } =
+  const { locale, tenantId, workspaceUid, conditions, isPrivate } =
     useTemplateEditorContext();
   const queryKey = [
     `template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}`,
@@ -109,6 +119,7 @@ export const useUpdateVariantContent = ({
         locale,
         tenantId,
         payload,
+        isPrivate,
       }),
     onSuccess: (_data, payload) => {
       queryClient.setQueryData(
@@ -144,13 +155,18 @@ const getMockData = async ({
   tenantId,
   recipientDistinctId,
   actorDistinctId,
+  isPrivate,
 }: GetMockDataParams) => {
   const qp = createQueryParams({
     tenant_id: tenantId,
     recipient_distinct_id: recipientDistinctId,
     actor_distinct_id: actorDistinctId,
   });
-  const url = `${API_BASE_URL}/v2/${workspaceUid}/template/embedded/${templateSlug}/mock_data/${qp}`;
+
+  const url = isPrivate
+    ? `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/mock_data/${qp}`
+    : `${API_BASE_URL}/v2/${workspaceUid}/template/embedded/${templateSlug}/mock_data/${qp}`;
+
   const resp = await axiosInst.get(url);
   return resp.data;
 };
@@ -160,7 +176,7 @@ export const useMockData = ({
   recipientDistinctId,
   actorDistinctId,
 }: UseMockDataParams) => {
-  const { tenantId, workspaceUid } = useTemplateEditorContext();
+  const { tenantId, workspaceUid, isPrivate } = useTemplateEditorContext();
   return useQuery({
     queryKey: [`template/${templateSlug}/mock_data`],
     queryFn: () =>
@@ -170,6 +186,7 @@ export const useMockData = ({
         tenantId,
         recipientDistinctId,
         actorDistinctId,
+        isPrivate,
       }),
   });
 };
