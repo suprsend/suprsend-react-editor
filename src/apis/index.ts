@@ -8,6 +8,7 @@ import type {
   UploadFileParams,
   UseMockDataParams,
   GetMockDataParams,
+  MockDataQueryParams,
 } from '@/types';
 import { createQueryParams, deepMerge } from '@/lib/utils';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
@@ -157,11 +158,17 @@ const getMockData = async ({
   actorDistinctId,
   isPrivate,
 }: GetMockDataParams) => {
-  const qp = createQueryParams({
-    tenant_id: tenantId,
-    recipient_distinct_id: recipientDistinctId,
-    actor_distinct_id: actorDistinctId,
-  });
+  let queryObject: MockDataQueryParams = {};
+
+  if (!isPrivate) {
+    queryObject = {
+      tenant_id: tenantId,
+      recipient_distinct_id: recipientDistinctId,
+      actor_distinct_id: actorDistinctId,
+    };
+  }
+
+  const qp = createQueryParams({ ...queryObject });
 
   const url = isPrivate
     ? `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/mock_data/${qp}`
@@ -171,12 +178,14 @@ const getMockData = async ({
   return resp.data;
 };
 
-export const useMockData = ({
-  templateSlug,
-  recipientDistinctId,
-  actorDistinctId,
-}: UseMockDataParams) => {
-  const { tenantId, workspaceUid, isPrivate } = useTemplateEditorContext();
+export const useMockData = ({ templateSlug }: UseMockDataParams) => {
+  const {
+    tenantId,
+    workspaceUid,
+    isPrivate,
+    recipientDistinctId,
+    actorDistinctId,
+  } = useTemplateEditorContext();
   return useQuery({
     queryKey: [`template/${templateSlug}/mock_data`],
     queryFn: () =>
@@ -184,9 +193,9 @@ export const useMockData = ({
         templateSlug,
         workspaceUid,
         tenantId,
+        isPrivate,
         recipientDistinctId,
         actorDistinctId,
-        isPrivate,
       }),
   });
 };

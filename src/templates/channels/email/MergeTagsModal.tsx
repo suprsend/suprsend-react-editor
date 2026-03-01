@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import SuggestionInput from '@/components/custom-ui/SuggestionInput';
+import { HELPER_NAMES } from '@/lib/suggestion-utils';
 import type { MergeTagData } from '@/types';
 
 export interface MergeTagInfo {
@@ -109,17 +110,13 @@ export default function MergeTagsModal({
     const isValid = validateMergeTag();
     if (!isValid) return;
 
-    const isHelper =
-      currentMergeTag.includes(' ') && !currentMergeTag.includes('[');
-    let modifiedMergeTag = currentMergeTag;
-
-    if (isHelper) {
-      modifiedMergeTag = modifiedMergeTag.replace('{{', '(');
-      modifiedMergeTag = modifiedMergeTag.replace('}}', ')');
-    } else {
-      modifiedMergeTag = modifiedMergeTag.replace('{{', '');
-      modifiedMergeTag = modifiedMergeTag.replace('}}', '');
-    }
+    const stripped = currentMergeTag
+      .replace(/^\{\{/, '')
+      .replace(/\}\}$/, '')
+      .trim();
+    const firstWord = stripped.split(/\s+/)[0];
+    const isHelper = HELPER_NAMES.has(firstWord);
+    const modifiedMergeTag = isHelper ? `(${stripped})` : stripped;
 
     const before = `{{#each ${modifiedMergeTag}}}`;
     const after = '{{/each}}';
@@ -150,14 +147,6 @@ export default function MergeTagsModal({
         before,
         after,
         expression: currentMergeTag,
-      });
-    }
-
-    // If editing and expression changed, clear the old assignment first
-    if (existingMergeTag && existingMergeTag.expression !== currentMergeTag) {
-      refData?.done({
-        mergeTagGroup: null,
-        mergeTagRule: null,
       });
     }
 
@@ -212,6 +201,7 @@ export default function MergeTagsModal({
             }}
             error={error || warning}
           />
+
           <div className="suprsend-flex suprsend-items-center suprsend-mt-4 suprsend-bg-muted suprsend-rounded-md suprsend-py-1.5 suprsend-px-2 suprsend-mb-4">
             <Info className="suprsend-h-4 suprsend-w-4 suprsend-text-muted-foreground suprsend-shrink-0" />
             <p className="suprsend-text-sm suprsend-ml-2 suprsend-text-muted-foreground">

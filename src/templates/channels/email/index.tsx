@@ -37,6 +37,7 @@ import type {
 } from '@/types';
 import DisplayConditionsModal from './DisplayConditionsModal';
 import { renderHandlebars } from '@/components/custom-ui/HandlebarsRenderer';
+import { variablesToUnlayerMergeTags } from '@/lib/suggestion-utils';
 import OldDisplayConditionsModal from './OldDisplayConditionsModal';
 import MergeTagsModal from './MergeTagsModal';
 import type {
@@ -409,9 +410,12 @@ function EmailTemplatePlayground({
       saveContent({
         content: { body: { designer: { merge_tags: list } } },
       });
-      post('SET_MERGE_TAGS', { mergeTagsList: list });
+      post('SET_MERGE_TAGS', {
+        mergeTagsList: list,
+        unlayerMergeTags: variablesToUnlayerMergeTags(variables),
+      });
     },
-    [saveContent, post]
+    [saveContent, post, variables]
   );
 
   // Keep designJsonRef in sync with latest server data
@@ -444,6 +448,7 @@ function EmailTemplatePlayground({
       post('INIT_MERGE_TAGS', {
         variables,
         mergeTagsList: mergeTagsListRef.current,
+        unlayerMergeTags: variablesToUnlayerMergeTags(variables),
       });
     });
 

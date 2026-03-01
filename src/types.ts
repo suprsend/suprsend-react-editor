@@ -19,6 +19,8 @@ export interface SuprSendTemplateEditorProviderProps {
   conditions?: unknown;
   accessToken?: string;
   refreshAccessToken?: (oldToken: string) => Promise<string>;
+  recipientDistinctId?: string;
+  actorDistinctId?: string;
 }
 
 export interface FullSuprSendTemplateEditorProviderProps extends SuprSendTemplateEditorProviderProps {
@@ -199,14 +201,14 @@ export interface UploadFileParams {
 
 export interface UseMockDataParams {
   templateSlug: string;
-  recipientDistinctId?: string;
-  actorDistinctId?: string;
 }
 
 export interface GetMockDataParams extends UseMockDataParams {
   workspaceUid: string;
   tenantId: string | null;
   isPrivate: boolean;
+  recipientDistinctId?: string;
+  actorDistinctId?: string;
 }
 
 export interface TextEditorsProps {
@@ -214,4 +216,10 @@ export interface TextEditorsProps {
   value: string;
   onChange: (value: string) => void;
   variables?: Record<string, unknown>;
+}
+
+export interface MockDataQueryParams {
+  tenant_id?: string | null;
+  recipient_distinct_id?: string;
+  actor_distinct_id?: string;
 }
