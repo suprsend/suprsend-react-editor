@@ -130,9 +130,50 @@ export interface IOSPushPreviewProps {
   variables: Record<string, unknown>;
 }
 
+// --- Web Push ---
+
+export interface IWebpushButton {
+  url: string;
+  text: string;
+}
+
+export interface IWebpushContent {
+  header: string;
+  body: string;
+  buttons: IWebpushButton[];
+  image_url: string;
+  action_url: string;
+}
+
+export interface IWebpushContentResponse {
+  content: IWebpushContent;
+}
+
+export type WebpushFormValues = IWebpushContent;
+
+export type WebpushContentPayload = {
+  content: Partial<IWebpushContent>;
+};
+
+export interface WebpushChannelProps {
+  variantData: IWebpushContentResponse;
+  variables: Record<string, unknown>;
+}
+
+export interface WebpushPreviewProps {
+  formValues: WebpushFormValues;
+  variables: Record<string, unknown>;
+}
+
+export type PreviewTab = 'windows' | 'macos';
+
+export interface PreviewFrameProps extends WebpushPreviewProps {
+  resolvedImageUrl: string;
+}
+
 // --- Generic payload union for API ---
 
-export type ChannelContentPayload = EmailContentPayload | IOSPushContentPayload;
+export type ChannelContentPayload = EmailContentPayload | IOSPushContentPayload | WebpushContentPayload;
 
 export interface UpdateVariantContentParams extends GetVariantDetailsParams {
   payload: ChannelContentPayload;

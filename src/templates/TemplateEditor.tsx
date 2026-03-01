@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { TabBar } from '@/components/custom-ui/channelsTab';
 import EmailChannel from '@/templates/channels/email';
 import IOSPushChannel from '@/templates/channels/IOSPush';
+import WebpushChannel from '@/templates/channels/webpush';
 import type { SuprSendTemplateEditorProps } from '@/types';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { useMockData, useVariantDetails } from '@/apis';
@@ -99,7 +100,10 @@ export default function SuprSendTemplateEditor({
           />
         )}
         {selectedChannel === 'webpush' && (
-          <p>Web Push Channel Editor Coming Soon...</p>
+          <WebpushChannel
+            variantData={variantData}
+            variables={mockData?.transformed_data ?? {}}
+          />
         )}
       </div>
     </div>
