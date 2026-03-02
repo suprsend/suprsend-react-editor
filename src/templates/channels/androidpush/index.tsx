@@ -274,7 +274,7 @@ export default function AndroidPushChannel({
                 size="sm"
                 onClick={() => appendButton({ id: '', url: '', text: '' })}
               >
-                <Plus className="suprsend-w-4 suprsend-h-4" />
+                <Plus className="suprsend-w-4 suprsend-h-4 suprsend-text-muted-foreground" />
                 Add Button
               </Button>
             )}
@@ -286,15 +286,15 @@ export default function AndroidPushChannel({
           {/* Advanced Configuration */}
           <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
             <CollapsibleTrigger className="suprsend-flex suprsend-items-center suprsend-gap-1 suprsend-cursor-pointer">
-              <ChevronRight
-                className={cn(
-                  'suprsend-w-4 suprsend-h-4 suprsend-text-foreground suprsend-transition-transform suprsend-duration-200',
-                  advancedOpen && 'suprsend-rotate-90'
-                )}
-              />
               <p className="suprsend-text-sm suprsend-font-semibold suprsend-text-foreground">
                 Advanced Configuration
               </p>
+              <ChevronRight
+                className={cn(
+                  'suprsend-w-4 suprsend-h-4 suprsend-text-muted-foreground suprsend-transition-transform suprsend-duration-200',
+                  advancedOpen && 'suprsend-rotate-90'
+                )}
+              />
             </CollapsibleTrigger>
 
             <CollapsibleContent>
@@ -452,7 +452,7 @@ export default function AndroidPushChannel({
                     size="sm"
                     onClick={() => appendPayload({ key: '', value: '' })}
                   >
-                    <Plus className="suprsend-w-4 suprsend-h-4" />
+                    <Plus className="suprsend-w-4 suprsend-h-4 suprsend-text-muted-foreground" />
                     Add key-value pair
                   </Button>
                 </div>
