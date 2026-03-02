@@ -20,6 +20,8 @@ export default function SuprSendTemplateEditorProvider({
   children,
   accessToken,
   refreshAccessToken,
+  recipientDistinctId,
+  actorDistinctId,
 }: FullSuprSendTemplateEditorProviderProps) {
   const isPrivate = true; // TODO: Determine if the template is private based on your logic
 
@@ -35,6 +37,8 @@ export default function SuprSendTemplateEditorProvider({
       isPrivate,
       accessToken,
       refreshAccessToken,
+      recipientDistinctId,
+      actorDistinctId,
     }),
     [
       workspaceUid,
@@ -47,6 +51,8 @@ export default function SuprSendTemplateEditorProvider({
       isPrivate,
       accessToken,
       refreshAccessToken,
+      recipientDistinctId,
+      actorDistinctId,
     ]
   );
 

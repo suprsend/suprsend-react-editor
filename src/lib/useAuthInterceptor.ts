@@ -22,7 +22,7 @@ export function useAuthInterceptor({
   useEffect(() => {
     const reqId = axiosInst.interceptors.request.use((config) => {
       if (accessTokenRef.current && !isPrivate) {
-        config.headers.Authorization = `Bearer ${accessTokenRef.current}`;
+        config.headers.Authorization = `EmbeddedToken ${accessTokenRef.current}`;
       }
       return config;
     });
@@ -62,7 +62,7 @@ export function useAuthInterceptor({
             if (isPrivate) {
               // do nothing
             } else {
-              originalRequest.headers.Authorization = `Bearer ${newToken}`;
+              originalRequest.headers.Authorization = `EmbeddedToken ${newToken}`;
             }
             return axiosInst(originalRequest);
           });
@@ -80,7 +80,7 @@ export function useAuthInterceptor({
           if (isPrivate) {
             // do nothing
           } else {
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            originalRequest.headers.Authorization = `EmbeddedToken ${newToken}`;
           }
           return axiosInst(originalRequest);
         } catch (refreshError) {

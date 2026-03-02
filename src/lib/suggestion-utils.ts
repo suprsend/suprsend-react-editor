@@ -209,3 +209,31 @@ export function shouldShowSuggestions(
   if (leftCharacter === '}') return false;
   return startBracketIndex > endBracketIndex;
 }
+
+export function variablesToUnlayerMergeTags(
+  variables: Record<string, unknown>
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  for (const section of DATA_TYPE_SECTIONS) {
+    const options = getOptionsList({ variables, selectedSection: section.id });
+    if (Object.keys(options).length === 0) continue;
+
+    const sectionMergeTags: Record<string, unknown> = {};
+    for (const key of Object.keys(options)) {
+      const label = getLabel(key);
+      if (!label || !key) continue;
+      sectionMergeTags[key] = {
+        name: label,
+        value: `{{${key}}}`,
+      };
+    }
+
+    result[section.id] = {
+      name: section.label,
+      mergeTags: sectionMergeTags,
+    };
+  }
+
+  return result;
+}

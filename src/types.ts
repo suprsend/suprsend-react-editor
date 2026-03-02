@@ -19,6 +19,8 @@ export interface SuprSendTemplateEditorProviderProps {
   conditions?: unknown;
   accessToken?: string;
   refreshAccessToken?: (oldToken: string) => Promise<string>;
+  recipientDistinctId?: string;
+  actorDistinctId?: string;
 }
 
 export interface FullSuprSendTemplateEditorProviderProps extends SuprSendTemplateEditorProviderProps {
@@ -54,6 +56,7 @@ export interface GetVariantDetailsParams extends UseVariantDetailsParams {
   locale: string;
   conditions: unknown;
   workspaceUid: string;
+  isPrivate: boolean;
 }
 
 export interface EmailMetaDataFormValues {
@@ -68,6 +71,13 @@ export interface EmailMetaDataFormValues {
   email_markup: string;
 }
 
+export interface MergeTagData {
+  id: string;
+  before: string;
+  after: string;
+  expression: string;
+}
+
 export interface IEmailBody {
   raw?: { html?: string; text?: string };
   type?: string;
@@ -76,6 +86,7 @@ export interface IEmailBody {
     text?: string;
     design_json?: Record<string, unknown>;
     display_conditions?: unknown[];
+    merge_tags?: MergeTagData[];
   };
   preheader?: string;
   email_markup?: string;
@@ -173,10 +184,14 @@ export interface PreviewFrameProps extends WebpushPreviewProps {
 
 // --- Generic payload union for API ---
 
-export type ChannelContentPayload = EmailContentPayload | IOSPushContentPayload | WebpushContentPayload;
+export type ChannelContentPayload =
+  | EmailContentPayload
+  | IOSPushContentPayload
+  | WebpushContentPayload;
 
 export interface UpdateVariantContentParams extends GetVariantDetailsParams {
   payload: ChannelContentPayload;
+  isPrivate: boolean;
 }
 
 export interface UploadFileParams {
@@ -186,13 +201,14 @@ export interface UploadFileParams {
 
 export interface UseMockDataParams {
   templateSlug: string;
-  recipientDistinctId?: string;
-  actorDistinctId?: string;
 }
 
 export interface GetMockDataParams extends UseMockDataParams {
   workspaceUid: string;
   tenantId: string | null;
+  isPrivate: boolean;
+  recipientDistinctId?: string;
+  actorDistinctId?: string;
 }
 
 export interface TextEditorsProps {
@@ -200,4 +216,10 @@ export interface TextEditorsProps {
   value: string;
   onChange: (value: string) => void;
   variables?: Record<string, unknown>;
+}
+
+export interface MockDataQueryParams {
+  tenant_id?: string | null;
+  recipient_distinct_id?: string;
+  actor_distinct_id?: string;
 }

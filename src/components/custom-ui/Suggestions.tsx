@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import {
   DATA_TYPE_SECTIONS,
   CustomHelpers,
@@ -25,7 +24,6 @@ export default function Suggestions({
   caretCoordinates,
   onSelectOption,
 }: SuggestionsProps) {
-  const { isPrivate } = useTemplateEditorContext();
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Stop native pointerdown from reaching document-level listeners (e.g. Radix Dialog dismiss)
@@ -37,13 +35,7 @@ export default function Suggestions({
     return () => el.removeEventListener('pointerdown', stop);
   }, []);
 
-  const visibleSections = useMemo(
-    () =>
-      isPrivate
-        ? DATA_TYPE_SECTIONS
-        : DATA_TYPE_SECTIONS.filter((s) => s.id === 'data'),
-    [isPrivate]
-  );
+  const visibleSections = DATA_TYPE_SECTIONS;
 
   const [selectedSection, setSelectedSection] = useState(
     visibleSections[0].id
@@ -79,9 +71,7 @@ export default function Suggestions({
   }, [inputValue, currentCaretPos, visibleSections]);
 
   useEffect(() => {
-    setOptionsList(undefined);
-    const selectedOptionsData = getOptionsList({ variables, selectedSection });
-    setTimeout(() => setOptionsList(selectedOptionsData), 0);
+    setOptionsList(getOptionsList({ variables, selectedSection }));
   }, [selectedSection, variables]);
 
   const filteredOptionsList = useMemo(() => {
