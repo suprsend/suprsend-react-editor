@@ -2,6 +2,13 @@ import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { Flashlight, Camera, Signal, Wifi, BatteryFull } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import HandlebarsRenderer, {
+  renderHandlebars,
+} from '@/components/custom-ui/HandlebarsRenderer';
+import { makeAbsoluteUrl } from '@/lib/utils';
+import type { IOSPushPreviewProps } from '@/types';
+
+// --- iPhone Frame (reusable) ---
 
 interface IPhoneFrameProps {
   children?: ReactNode;
@@ -24,7 +31,7 @@ function useCurrentDateTime() {
   }, []);
 }
 
-export default function IPhoneFrame({ children, className }: IPhoneFrameProps) {
+export function IPhoneFrame({ children, className }: IPhoneFrameProps) {
   const { dateStr, timeStr } = useCurrentDateTime();
 
   return (
@@ -79,7 +86,7 @@ export default function IPhoneFrame({ children, className }: IPhoneFrameProps) {
           </div>
 
           {/* Notification area */}
-          <div className="suprsend-flex-1 suprsend-px-3 suprsend-mt-4">
+          <div className="suprsend-flex-1 suprsend-px-3 suprsend-mt-4 suprsend-overflow-hidden">
             {children}
           </div>
 
@@ -103,5 +110,53 @@ export default function IPhoneFrame({ children, className }: IPhoneFrameProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+// --- Notification Preview ---
+
+export default function IOSPushPreview({
+  formValues,
+  variables,
+}: IOSPushPreviewProps) {
+  const resolvedImageUrl = formValues.image_url
+    ? makeAbsoluteUrl(renderHandlebars(formValues.image_url, variables))
+    : '';
+
+  return (
+    <IPhoneFrame>
+      {/* Notification card */}
+      <div className="suprsend-bg-white suprsend-opacity-70 suprsend-rounded-[14px] suprsend-px-3 suprsend-py-2.5 suprsend-backdrop-blur-[20px] suprsend-overflow-hidden">
+        {/* Header row */}
+        <div className="suprsend-flex suprsend-items-start suprsend-justify-between suprsend-gap-2 suprsend-mb-1">
+          <div className="suprsend-flex-1 suprsend-min-w-0">
+            <HandlebarsRenderer
+              template={formValues.header || 'Notification Title'}
+              data={variables}
+              className="suprsend-m-0 suprsend-text-[13px] suprsend-font-semibold suprsend-text-foreground suprsend-break-all"
+            />
+          </div>
+          <span className="suprsend-text-[10px] suprsend-text-muted-foreground suprsend-shrink-0">
+            now
+          </span>
+        </div>
+
+        {/* Body */}
+        <HandlebarsRenderer
+          template={formValues.body || 'Notification body text'}
+          data={variables}
+          className="suprsend-m-0 suprsend-text-[12px] suprsend-text-muted-foreground suprsend-break-all"
+        />
+
+        {/* Image */}
+        {resolvedImageUrl && (
+          <img
+            src={resolvedImageUrl}
+            alt="notification"
+            className="suprsend-w-full suprsend-max-h-[150px] suprsend-object-cover suprsend-rounded-lg suprsend-mt-1.5"
+          />
+        )}
+      </div>
+    </IPhoneFrame>
   );
 }
