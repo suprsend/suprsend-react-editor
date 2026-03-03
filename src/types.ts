@@ -188,7 +188,6 @@ export interface IMSTeamsContent {
   body_type: 'card' | 'text';
   body_card?: string;
   body_text?: string;
-  templating_language?: string;
 }
 
 export interface IMSTeamsContentResponse {
@@ -223,6 +222,33 @@ export interface JsonnetPreviewState {
   error: string | null;
 }
 
+// --- Slack ---
+
+export interface ISlackContent {
+  body_type: 'block' | 'text';
+  body_block?: string;
+  body_text?: string;
+}
+
+export interface ISlackContentResponse {
+  content: ISlackContent;
+}
+
+export type SlackFormValues = {
+  body_type: 'block' | 'text';
+  body_block: string;
+  body_text: string;
+};
+
+export type SlackContentPayload = {
+  content: Partial<ISlackContent>;
+};
+
+export interface SlackChannelProps {
+  variantData: ISlackContentResponse;
+  variables: Record<string, unknown>;
+}
+
 // --- JSONNET Render ---
 
 export interface JsonnetRenderBody {
@@ -243,7 +269,8 @@ export type ChannelContentPayload =
   | EmailContentPayload
   | IOSPushContentPayload
   | WebpushContentPayload
-  | MSTeamsContentPayload;
+  | MSTeamsContentPayload
+  | SlackContentPayload;
 
 export interface UpdateVariantContentParams extends GetVariantDetailsParams {
   payload: ChannelContentPayload;
