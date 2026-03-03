@@ -224,9 +224,9 @@ export default function AndroidPushChannel({
               Action Buttons
             </p>
 
-            {buttonFields.map((_, index) => (
+            {buttonFields.map((field, index) => (
               <div
-                key={index}
+                key={field.id}
                 className="suprsend-flex suprsend-items-center suprsend-gap-1"
               >
                 <div className="suprsend-flex-1 suprsend-min-w-0">
@@ -403,9 +403,9 @@ export default function AndroidPushChannel({
                     Custom key-value pairs
                   </p>
 
-                  {extraPayloadFields.map((_, index) => (
+                  {extraPayloadFields.map((field, index) => (
                     <div
-                      key={index}
+                      key={field.id}
                       className="suprsend-flex suprsend-items-center suprsend-gap-1"
                     >
                       <div className="suprsend-flex-1 suprsend-min-w-0">
