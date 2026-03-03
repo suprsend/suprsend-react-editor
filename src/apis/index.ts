@@ -10,7 +10,7 @@ import type {
   GetMockDataParams,
   MockDataQueryParams,
 } from '@/types';
-import { createQueryParams, deepMerge } from '@/lib/utils';
+import { createQueryParams } from '@/lib/utils';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 
 const API_BASE_URL = 'https://stagingapi2.suprsend.com';
@@ -105,9 +105,6 @@ export const useUpdateVariantContent = ({
 }: UseVariantDetailsParams) => {
   const { locale, tenantId, workspaceUid, conditions, isPrivate } =
     useTemplateEditorContext();
-  const queryKey = [
-    `template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}`,
-  ];
 
   return useMutation({
     mutationFn: (payload: ChannelContentPayload) =>
@@ -122,17 +119,6 @@ export const useUpdateVariantContent = ({
         payload,
         isPrivate,
       }),
-    onSuccess: (_data, payload) => {
-      queryClient.setQueryData(
-        queryKey,
-        (old: Record<string, unknown> | undefined) => {
-          if (!old) return old;
-          const updated = structuredClone(old);
-          deepMerge(updated, payload as unknown as Record<string, unknown>);
-          return updated;
-        }
-      );
-    },
   });
 };
 

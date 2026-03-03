@@ -89,6 +89,7 @@ export default function EmailChannel({
   const designerHtmlRef = useRef<string>(
     variantData?.content?.body?.designer?.html ?? ''
   );
+  const exportHtmlRef = useRef<(() => Promise<string>) | null>(null);
 
   const bodyType = variantData?.content?.body?.type;
   const initialDesignEditorType: DesignEditorType =
@@ -293,8 +294,15 @@ export default function EmailChannel({
                         editorType !== 'design_editor' ||
                         designEditorType !== 'design'
                       }
-                      onClick={() => {
-                        navigator.clipboard.writeText(designerHtmlRef.current);
+                      onClick={async () => {
+                        if (exportHtmlRef.current) {
+                          const html = await exportHtmlRef.current();
+                          navigator.clipboard.writeText(html);
+                        } else {
+                          navigator.clipboard.writeText(
+                            designerHtmlRef.current
+                          );
+                        }
                       }}
                     >
                       <Clipboard className="suprsend-h-4 suprsend-w-4 suprsend-text-muted-foreground" />
@@ -327,6 +335,7 @@ export default function EmailChannel({
           variantData={variantData}
           saveContent={saveContent}
           designerHtmlRef={designerHtmlRef}
+          exportHtmlRef={exportHtmlRef}
           variables={variables}
         />
       </div>
@@ -348,7 +357,8 @@ interface IEmailTemplatePlayground {
   editorType: string;
   variantData: IEmailContentResponse;
   saveContent: (payload: EmailContentPayload) => void;
-  designerHtmlRef: React.RefObject<string>;
+  designerHtmlRef: { current: string };
+  exportHtmlRef: React.RefObject<(() => Promise<string>) | null>;
   variables?: Record<string, unknown>;
 }
 
@@ -357,6 +367,7 @@ function EmailTemplatePlayground({
   editorType,
   saveContent,
   designerHtmlRef,
+  exportHtmlRef,
   variantData,
   variables = {},
 }: IEmailTemplatePlayground) {
@@ -417,6 +428,22 @@ function EmailTemplatePlayground({
     },
     [saveContent, post, variables]
   );
+
+  // Expose a function to request fresh HTML export from Unlayer
+  useEffect(() => {
+    exportHtmlRef.current = () => {
+      return new Promise<string>((resolve) => {
+        const unsub = on('EXPORT_HTML_DONE', (payload) => {
+          unsub();
+          resolve((payload as { html: string }).html);
+        });
+        post('EXPORT_HTML');
+      });
+    };
+    return () => {
+      exportHtmlRef.current = null;
+    };
+  }, [on, post, exportHtmlRef]);
 
   // Keep designJsonRef in sync with latest server data
   useEffect(() => {
