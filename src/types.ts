@@ -182,12 +182,68 @@ export interface PreviewFrameProps extends WebpushPreviewProps {
   resolvedImageUrl: string;
 }
 
+// --- MS Teams ---
+
+export interface IMSTeamsContent {
+  body_type: 'card' | 'text';
+  body_card?: string;
+  body_text?: string;
+  templating_language?: string;
+}
+
+export interface IMSTeamsContentResponse {
+  content: IMSTeamsContent;
+}
+
+export type MSTeamsFormValues = {
+  body_type: 'card' | 'text';
+  body_card: string;
+  body_text: string;
+};
+
+export type MSTeamsContentPayload = {
+  content: Partial<IMSTeamsContent>;
+};
+
+export interface MSTeamsChannelProps {
+  variantData: IMSTeamsContentResponse;
+  variables: Record<string, unknown>;
+}
+
+export interface MSTeamsPreviewProps {
+  bodyType: 'card' | 'text';
+  bodyCard: string;
+  bodyText: string;
+  variables: Record<string, unknown>;
+}
+
+export interface JsonnetPreviewState {
+  success: boolean;
+  html: string | null;
+  error: string | null;
+}
+
+// --- JSONNET Render ---
+
+export interface JsonnetRenderBody {
+  snippet: string;
+  data: Record<string, unknown>;
+  translations?: unknown;
+}
+
+export interface JsonnetRenderResponse {
+  success: boolean;
+  result?: unknown[];
+  error?: string;
+}
+
 // --- Generic payload union for API ---
 
 export type ChannelContentPayload =
   | EmailContentPayload
   | IOSPushContentPayload
-  | WebpushContentPayload;
+  | WebpushContentPayload
+  | MSTeamsContentPayload;
 
 export interface UpdateVariantContentParams extends GetVariantDetailsParams {
   payload: ChannelContentPayload;

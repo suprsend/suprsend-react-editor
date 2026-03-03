@@ -3,6 +3,7 @@ import { TabBar } from '@/components/custom-ui/channelsTab';
 import EmailChannel from '@/templates/channels/email';
 import IOSPushChannel from '@/templates/channels/IOSPush';
 import WebpushChannel from '@/templates/channels/webpush';
+import MSTeamsChannel from '@/templates/channels/msteams';
 import type { SuprSendTemplateEditorProps } from '@/types';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { useMockData, useVariantDetails } from '@/apis';
@@ -88,7 +89,10 @@ export default function SuprSendTemplateEditor({
           <p>Slack Channel Editor Coming Soon...</p>
         )}
         {selectedChannel === 'ms_teams' && (
-          <p>MS Teams Channel Editor Coming Soon...</p>
+          <MSTeamsChannel
+            variantData={variantData}
+            variables={mockData?.transformed_data ?? {}}
+          />
         )}
         {selectedChannel === 'androidpush' && (
           <p>Android Push Channel Editor Coming Soon...</p>
