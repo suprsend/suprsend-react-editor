@@ -125,19 +125,17 @@ export const useUpdateVariantContent = ({
         payload,
         isPrivate,
       }),
-    //TODO : onsuccess logic
-
-    // onSuccess: (_data, payload) => {
-    //   queryClient.setQueryData(
-    //     queryKey,
-    //     (old: Record<string, unknown> | undefined) => {
-    //       if (!old) return old;
-    //       const updated = structuredClone(old);
-    //       deepMerge(updated, payload as unknown as Record<string, unknown>);
-    //       return updated;
-    //     }
-    //   );
-    // },
+    onSuccess: (_data, payload) => {
+      queryClient.setQueryData(
+        queryKey,
+        (old: Record<string, unknown> | undefined) => {
+          if (!old) return old;
+          const updated = structuredClone(old);
+          deepMerge(updated, payload as unknown as Record<string, unknown>);
+          return updated;
+        }
+      );
+    },
   });
 };
 
