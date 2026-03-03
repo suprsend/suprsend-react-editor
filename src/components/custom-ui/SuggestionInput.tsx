@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import getCaretCoordinates from 'textarea-caret';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -97,6 +98,7 @@ export default function SuggestionInput({
   const highlightRef = useRef<HTMLDivElement | null>(null);
   const suggestionRef = useRef(false);
   const isFocusedRef = useRef(false);
+  const suggestionsMouseDownRef = useRef(false);
 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -146,6 +148,30 @@ export default function SuggestionInput({
     }
   }, []);
 
+  // Compute caret coordinates from the current input element and update state.
+  const computeCaretCoordinates = useCallback(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    const pos = el.selectionEnd ?? 0;
+    const coords = getCaretCoordinates(el, pos);
+    const rect = el.getBoundingClientRect();
+    const visibleLeft = coords.left - el.scrollLeft;
+    const visibleTop = coords.top - el.scrollTop;
+    setCaretCoordinates({
+      ...coords,
+      left: rect.left + Math.max(0, Math.min(visibleLeft, el.offsetWidth)),
+      // Single-line inputs always have top ≈ 0 from getCaretCoordinates
+      // (only one line), which would place the popup inside the input.
+      // Pin it to offsetHeight so the popup appears below the input.
+      // Textareas track the visible caret line.
+      top:
+        rect.top +
+        (isTextarea
+          ? Math.max(0, Math.min(visibleTop, el.offsetHeight))
+          : el.offsetHeight),
+    });
+  }, [isTextarea]);
+
   // Handle input/click/keyup events for both highlighting and suggestions
   const handleInputEvent = (
     event: React.SyntheticEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -168,35 +194,19 @@ export default function SuggestionInput({
     if (leftCharacter === '}') {
       setShowSuggestions(false);
     } else if (startBracketIndex > endBracketIndex) {
+      // Compute coordinates synchronously so React batches them with
+      // showSuggestions — prevents a frame where the popup renders at (0,0).
+      computeCaretCoordinates();
       setShowSuggestions(true);
     } else {
       setShowSuggestions(false);
     }
 
-    // Defer coordinate measurement to the next frame.
+    // Refine coordinate measurement in the next frame.
     // For click events the browser may not have finished adjusting the
-    // input's scrollLeft by the time this handler fires, so reading it
-    // synchronously produces a stale value that places the popup at the
-    // wrong horizontal position (often clamped to the left edge).
-    requestAnimationFrame(() => {
-      const el = inputRef.current;
-      if (!el) return;
-      const pos = el.selectionEnd ?? 0;
-      const coords = getCaretCoordinates(el, pos);
-      const visibleLeft = coords.left - el.scrollLeft;
-      const visibleTop = coords.top - el.scrollTop;
-      setCaretCoordinates({
-        ...coords,
-        left: Math.max(0, Math.min(visibleLeft, el.offsetWidth)),
-        // Single-line inputs always have top ≈ 0 from getCaretCoordinates
-        // (only one line), which would place the popup inside the input.
-        // Pin it to offsetHeight so the popup appears below the input.
-        // Textareas track the visible caret line.
-        top: isTextarea
-          ? Math.max(0, Math.min(visibleTop, el.offsetHeight))
-          : el.offsetHeight,
-      });
-    });
+    // input's scrollLeft by the time this handler fires, so the
+    // synchronous read above can be slightly off horizontally.
+    requestAnimationFrame(computeCaretCoordinates);
   };
 
   useEffect(() => {
@@ -211,6 +221,23 @@ export default function SuggestionInput({
 
   useEffect(() => {
     suggestionRef.current = showSuggestions;
+  }, [showSuggestions]);
+
+  // Close suggestions when clicking outside the input and suggestions portal
+  useEffect(() => {
+    if (!showSuggestions) return;
+    const handleDocMouseDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        inputRef.current?.contains(target) ||
+        target.closest('[data-suggestions-portal]')
+      ) {
+        return;
+      }
+      setShowSuggestions(false);
+    };
+    document.addEventListener('mousedown', handleDocMouseDown);
+    return () => document.removeEventListener('mousedown', handleDocMouseDown);
   }, [showSuggestions]);
 
   const handleBlur = () => {
@@ -285,9 +312,16 @@ export default function SuggestionInput({
             e.currentTarget.contains(e.relatedTarget)
           ) {
             // focus moved within container — keep suggestions open
-          } else {
-            setShowSuggestions(false);
+            return;
           }
+          // Defer so the mousedown flag from portaled Suggestions can be set first
+          requestAnimationFrame(() => {
+            if (suggestionsMouseDownRef.current) {
+              suggestionsMouseDownRef.current = false;
+              return;
+            }
+            setShowSuggestions(false);
+          });
         }}
       >
         {enableHighlighting ? (
@@ -396,15 +430,21 @@ export default function SuggestionInput({
           </p>
         )}
 
-        {enableSuggestions && showSuggestions && (
-          <Suggestions
-            inputValue={inputValue}
-            variables={modifiedVariables}
-            currentCaretPos={currentCaretPos}
-            caretCoordinates={caretCoordinates}
-            onSelectOption={handleSelectOption}
-          />
-        )}
+        {enableSuggestions &&
+          showSuggestions &&
+          createPortal(
+            <Suggestions
+              inputValue={inputValue}
+              variables={modifiedVariables}
+              currentCaretPos={currentCaretPos}
+              caretCoordinates={caretCoordinates}
+              onSelectOption={handleSelectOption}
+              onSuggestionsMouseDown={() => {
+                suggestionsMouseDownRef.current = true;
+              }}
+            />,
+            document.body
+          )}
       </div>
     </>
   );

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
   Info,
@@ -46,6 +46,11 @@ export default function EmailSettingsPreviewBanner({
   const emailContent = variantData?.content;
   const [emailSettingsOpen, setEmailSettingsOpen] = useState(false);
   const [otherSettingsOpen, setOtherSettingsOpen] = useState(false);
+  const [previewMeta, setPreviewMeta] = useState({
+    from_name: emailContent?.from_name ?? '',
+    from_address: emailContent?.from_address ?? '',
+    subject: emailContent?.subject ?? '',
+  });
 
   return (
     <div className="suprsend-flex suprsend-px-3 suprsend-py-2.5 suprsend-items-center suprsend-text-sm suprsend-border">
@@ -53,19 +58,19 @@ export default function EmailSettingsPreviewBanner({
         <p className="suprsend-text-muted-foreground suprsend-text-xs">
           From Name:{' '}
           <span className="suprsend-text-foreground">
-            {emailContent?.from_name || '-'}
+            {previewMeta.from_name || '-'}
           </span>
         </p>
         <p className="suprsend-text-muted-foreground suprsend-text-xs">
           From Email:{' '}
           <span className="suprsend-text-foreground">
-            {emailContent?.from_address || '-'}
+            {previewMeta.from_address || '-'}
           </span>
         </p>
         <p className="suprsend-text-muted-foreground suprsend-text-xs">
           Subject:{' '}
           <span className="suprsend-text-foreground">
-            {emailContent?.subject || '-'}
+            {previewMeta.subject || '-'}
           </span>
         </p>
       </div>
@@ -78,6 +83,7 @@ export default function EmailSettingsPreviewBanner({
           setOtherSettingsOpen={setOtherSettingsOpen}
           variantData={variantData}
           onSave={onSave}
+          onFieldsChange={setPreviewMeta}
           variables={variables}
         />
       </Dialog>
@@ -85,11 +91,18 @@ export default function EmailSettingsPreviewBanner({
   );
 }
 
+interface PreviewMeta {
+  from_name: string;
+  from_address: string;
+  subject: string;
+}
+
 interface EmailMetaDataModalProps {
   otherSettingsOpen: boolean;
   setOtherSettingsOpen: (open: boolean) => void;
   variantData: IEmailContentResponse;
   onSave: (payload: EmailContentPayload) => void;
+  onFieldsChange: (meta: PreviewMeta) => void;
   variables: Record<string, unknown>;
 }
 
@@ -98,6 +111,7 @@ function EmailMetaDataModal({
   setOtherSettingsOpen,
   variantData,
   onSave,
+  onFieldsChange,
   variables,
 }: EmailMetaDataModalProps) {
   const emailContent = variantData?.content;
@@ -130,6 +144,18 @@ function EmailMetaDataModal({
   );
 
   useAutosave({ watch, onSave: handleAutosave, debounceMs: 0 });
+
+  const subject = watch('subject');
+  const fromName = watch('from_name');
+  const fromAddress = watch('from_address');
+
+  useEffect(() => {
+    onFieldsChange({
+      subject,
+      from_name: fromName,
+      from_address: fromAddress,
+    });
+  }, [subject, fromName, fromAddress, onFieldsChange]);
 
   return (
     <DialogContent className="!suprsend-max-w-3xl suprsend-p-0 !suprsend-max-h-[90vh] !suprsend-overflow-y-auto !suprsend-border-0">

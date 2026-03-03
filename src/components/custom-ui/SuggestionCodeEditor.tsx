@@ -1,4 +1,5 @@
-import { useRef, useState, useMemo, useCallback } from 'react';
+import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { RangeSetBuilder } from '@codemirror/state';
 import { syntaxHighlighting, HighlightStyle } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
@@ -118,6 +119,7 @@ export default function SuggestionCodeEditor({
   mandatory = true,
 }: SuggestionCodeEditorProps) {
   const editorRef = useRef<CodeMirrorEditorHandle>(null);
+  const suggestionsMouseDownRef = useRef(false);
 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [currentCaretPos, setCurrentCaretPos] = useState(0);
@@ -168,14 +170,13 @@ export default function SuggestionCodeEditor({
       setCurrentCaretPos(pos);
 
       if (shouldShowSuggestions(docText, pos)) {
-        setShowSuggestions(true);
         const coords = update.view.coordsAtPos(pos);
         if (coords) {
-          const editorRect = update.view.dom.getBoundingClientRect();
           setCaretCoordinates({
-            left: coords.left - editorRect.left,
-            top: coords.bottom - editorRect.top,
+            left: coords.left,
+            top: coords.bottom,
           });
+          setShowSuggestions(true);
         }
       } else {
         setShowSuggestions(false);
@@ -183,6 +184,23 @@ export default function SuggestionCodeEditor({
     },
     [enableSuggestions]
   );
+
+  // Close suggestions when clicking outside the editor and suggestions portal
+  useEffect(() => {
+    if (!showSuggestions) return;
+    const handleDocMouseDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        editorRef.current?.getView()?.dom.contains(target) ||
+        target.closest('[data-suggestions-portal]')
+      ) {
+        return;
+      }
+      setShowSuggestions(false);
+    };
+    document.addEventListener('mousedown', handleDocMouseDown);
+    return () => document.removeEventListener('mousedown', handleDocMouseDown);
+  }, [showSuggestions]);
 
   // Handle suggestion selection
   const handleSelectOption = useCallback(
@@ -243,9 +261,15 @@ export default function SuggestionCodeEditor({
             e.currentTarget.contains(e.relatedTarget)
           ) {
             // focus moved within container — keep suggestions open
-          } else {
-            setShowSuggestions(false);
+            return;
           }
+          requestAnimationFrame(() => {
+            if (suggestionsMouseDownRef.current) {
+              suggestionsMouseDownRef.current = false;
+              return;
+            }
+            setShowSuggestions(false);
+          });
         }}
       >
         <CodeMirrorEditor
@@ -273,17 +297,23 @@ export default function SuggestionCodeEditor({
           </p>
         )}
 
-        {enableSuggestions && showSuggestions && (
-          <Suggestions
-            inputValue={
-              editorRef.current?.getView()?.state.doc.toString() ?? ''
-            }
-            variables={modifiedVariables}
-            currentCaretPos={currentCaretPos}
-            caretCoordinates={caretCoordinates}
-            onSelectOption={handleSelectOption}
-          />
-        )}
+        {enableSuggestions &&
+          showSuggestions &&
+          createPortal(
+            <Suggestions
+              inputValue={
+                editorRef.current?.getView()?.state.doc.toString() ?? ''
+              }
+              variables={modifiedVariables}
+              currentCaretPos={currentCaretPos}
+              caretCoordinates={caretCoordinates}
+              onSelectOption={handleSelectOption}
+              onSuggestionsMouseDown={() => {
+                suggestionsMouseDownRef.current = true;
+              }}
+            />,
+            document.body
+          )}
       </div>
     </>
   );
