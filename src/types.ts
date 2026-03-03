@@ -216,6 +216,7 @@ export interface TextEditorsProps {
   value: string;
   onChange: (value: string) => void;
   variables?: Record<string, unknown>;
+  onFetchFromHtml?: () => void;
 }
 
 export interface MockDataQueryParams {

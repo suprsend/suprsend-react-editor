@@ -24,7 +24,7 @@ import {
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { EditorTopBanner } from './TopBanners';
+import { EditorTopBanner, PlainTextBanner } from './TopBanners';
 import HtmlSwitchModal from './HTMLEditorSwitchModal';
 import EmailSettingsPreviewBanner from './EditMetaData';
 import { useUpdateVariantContent, useUploadFile } from '@/apis';
@@ -109,16 +109,9 @@ export default function EmailChannel({
   const [editorType, setEditorType] = useState<string>(
     EDITOR_TYPE_OPTIONS[0].id
   );
-  const [activeEditorTypes, setActiveEditorTypes] = useState<string[]>(() => {
-    const types = [EDITOR_TYPE_OPTIONS[0].id];
-    const body = variantData?.content?.body;
-    const hasPlainText =
-      body?.type === 'raw' ? !!body?.raw?.text : !!body?.designer?.text;
-    if (hasPlainText) {
-      types.push('plain_text');
-    }
-    return types;
-  });
+  const [activeEditorTypes, setActiveEditorTypes] = useState<string[]>(
+    EDITOR_TYPE_OPTIONS.map((opt) => opt.id)
+  );
 
   // Sync design/html switch from server data after fetch
   useEffect(() => {
@@ -148,21 +141,6 @@ export default function EmailChannel({
     );
   }, [mutate, setDesignEditorType, setEditorTypeList]);
 
-  const missingEditor = EDITOR_TYPE_OPTIONS.find(
-    (editor) => !activeEditorTypes.includes(editor.id)
-  );
-
-  let tooltipText = '';
-  if (missingEditor?.id === 'plain_text') {
-    tooltipText = 'Add Plain text';
-  } else if (missingEditor?.id === 'design_editor') {
-    if (designEditorType === 'design') {
-      tooltipText = 'Add Design Editor';
-    } else {
-      tooltipText = 'Add HTML Editor';
-    }
-  }
-
   return (
     <div className="suprsend-h-full suprsend-flex suprsend-flex-col suprsend-m-1.5">
       <div>
@@ -188,24 +166,22 @@ export default function EmailChannel({
                   >
                     {editor.name}
                   </span>
-                  {activeEditorTypes.length > 1 && editor.id === editorType && (
+                  {editor.id === 'design_editor' && editor.id === editorType && (
                     <X
                       className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground suprsend-cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
-                        const newActiveEditors = activeEditorTypes.filter(
-                          (id) => id !== editor.id
+                        setActiveEditorTypes((prev) =>
+                          prev.filter((id) => id !== 'design_editor')
                         );
-                        setActiveEditorTypes(newActiveEditors);
-                        setEditorType(newActiveEditors[0]);
+                        setEditorType('plain_text');
                       }}
                     />
                   )}
                 </div>
               );
             })}
-
-            {activeEditorTypes.length < EDITOR_TYPE_OPTIONS.length && (
+            {!activeEditorTypes.includes('design_editor') && (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -215,30 +191,29 @@ export default function EmailChannel({
                       aria-label="add-tab"
                       className="suprsend-ml-1 hover:suprsend-rounded-b-none hover:suprsend-border-b"
                       onClick={() => {
-                        const missingEditor = EDITOR_TYPE_OPTIONS.find(
-                          (editor) => !activeEditorTypes.includes(editor.id)
-                        );
-                        if (missingEditor) {
-                          setActiveEditorTypes((prev) => [
-                            ...prev,
-                            missingEditor.id,
-                          ]);
-                          setEditorType(missingEditor.id);
-                        }
+                        setActiveEditorTypes((prev) => [
+                          'design_editor',
+                          ...prev,
+                        ]);
+                        setEditorType('design_editor');
                       }}
                     >
                       <Plus className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>{tooltipText}</p>
+                    <p>
+                      {designEditorType === 'design'
+                        ? 'Add Design Editor'
+                        : 'Add HTML Editor'}
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             )}
           </div>
 
-          {activeEditorTypes.includes('design_editor') && (
+          {activeEditorTypes.includes('design_editor') && editorType === 'design_editor' && (
             <div className="suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-mt-[-10px]">
               <Tabs
                 value={designEditorType}
@@ -659,6 +634,18 @@ function EmailTemplatePlayground({
           value={plainTextValue}
           onChange={(v) => handleEditorChange('text', v)}
           variables={variables}
+          onFetchFromHtml={async () => {
+            let html = '';
+            if (designEditorType === 'design' && exportHtmlRef.current) {
+              html = await exportHtmlRef.current();
+            } else if (designEditorType === 'html') {
+              html = body?.raw?.html ?? '';
+            }
+            if (!html) return;
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const text = (doc.body.textContent ?? '').replace(/\s+/g, ' ').trim();
+            handleEditorChange('text', text);
+          }}
         />
       )}
     </div>
@@ -670,6 +657,7 @@ function TextEditors({
   value,
   onChange,
   variables = {},
+  onFetchFromHtml,
 }: TextEditorsProps) {
   const [activePreviewTab, setActivePreviewTab] = useState<
     'desktop' | 'mobile'
@@ -699,13 +687,21 @@ function TextEditors({
     <ResizablePanelGroup direction="horizontal" className="suprsend-border">
       <ResizablePanel
         defaultSize={50}
-        className="suprsend-overflow-hidden mt-1 suprsend-h-full"
+        className="suprsend-overflow-hidden suprsend-flex suprsend-flex-col suprsend-h-full"
       >
+        {type === 'plaintext' && (
+          <PlainTextBanner onFetchFromHtml={onFetchFromHtml} />
+        )}
         <CodeMirrorEditor
           value={value}
           onChange={onChange}
           language={type === 'html' ? 'html' : undefined}
-          className="suprsend-h-full suprsend-border-0 suprsend-rounded-none"
+          placeholder={
+            type === 'plaintext'
+              ? 'Plain text is always sent to reach users with HTML blocked in their email client. To preview or edit it, click "Fetch from HTML" above.'
+              : undefined
+          }
+          className="suprsend-flex-1 suprsend-min-h-0 suprsend-border-0 suprsend-rounded-none"
         />
       </ResizablePanel>
       <ResizableHandle withHandle />

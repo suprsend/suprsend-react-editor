@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Info, X } from 'lucide-react';
+import { Info, X, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const LS_DESIGN_BANNER = 'ss_email_banner_design_dismissed';
 const LS_HTML_BANNER = 'ss_email_banner_html_dismissed';
@@ -69,6 +70,28 @@ function HTMLEditorBanner() {
   );
 }
 
+export function PlainTextBanner({ onFetchFromHtml }: { onFetchFromHtml?: () => void }) {
+  return (
+    <div className="suprsend-px-3 suprsend-bg-blue-50 suprsend-text-gray-700 suprsend-text-xs suprsend-py-1.5 suprsend-flex suprsend-items-center suprsend-justify-between suprsend-my-1 suprsend-rounded">
+      <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+        <Info className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600 suprsend-shrink-0" />
+        <span>
+          Plain text (If left blank) is auto-generated from HTML on every commit
+        </span>
+      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        className="suprsend-shrink-0 suprsend-ml-4 suprsend-gap-1.5 suprsend-text-xs"
+        onClick={onFetchFromHtml}
+      >
+        <RefreshCw className="suprsend-w-3 suprsend-h-3" />
+        Fetch from HTML
+      </Button>
+    </div>
+  );
+}
+
 export function EditorTopBanner({
   editorType,
   designEditorType,
@@ -78,8 +101,6 @@ export function EditorTopBanner({
       return <DesignEditorBanner />;
     } else if (designEditorType === 'html') {
       return <HTMLEditorBanner />;
-    } else {
-      return null;
     }
   }
   return null;
