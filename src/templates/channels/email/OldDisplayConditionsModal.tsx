@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import type {
   DisplayConditionData,
   DisplayConditionInfo,
-} from './DisplayConditionsModal';
+} from '@/types';
 
 interface OldDisplayConditionsModalProps {
   open: boolean;

@@ -88,6 +88,7 @@ export interface IEmailBody {
     display_conditions?: unknown[];
     merge_tags?: MergeTagData[];
   };
+  plain_text?: { text?: string };
   preheader?: string;
   email_markup?: string;
 }
@@ -106,6 +107,7 @@ export interface IEmailContent {
 
 export interface IEmailContentResponse {
   content: IEmailContent;
+  email_editor_userid?: string;
 }
 
 export type EmailContentPayload = {
@@ -216,10 +218,83 @@ export interface TextEditorsProps {
   value: string;
   onChange: (value: string) => void;
   variables?: Record<string, unknown>;
+  onFetchFromHtml?: () => Promise<string | undefined>;
 }
 
 export interface MockDataQueryParams {
   tenant_id?: string | null;
   recipient_distinct_id?: string;
   actor_distinct_id?: string;
+}
+
+// --- Email Editor ---
+
+export type EditorMode = 'design' | 'html';
+export type ActiveTab = 'editor' | 'plain_text';
+
+export interface EmailChannelProps {
+  variantData: IEmailContentResponse;
+  variables?: Record<string, unknown>;
+}
+
+export interface EmailTemplatePlaygroundProps {
+  editorMode: EditorMode;
+  activeTab: ActiveTab;
+  hasEditorTab: boolean;
+  variantData: IEmailContentResponse;
+  saveContent: (payload: EmailContentPayload) => void;
+  designerHtmlRef: { current: string };
+  exportHtmlRef: React.RefObject<(() => Promise<string>) | null>;
+  rawHtmlRef: { current: string };
+  variables?: Record<string, unknown>;
+  designerText: string;
+  onDesignerTextChange: (v: string) => void;
+  rawText: string;
+  onRawTextChange: (v: string) => void;
+  plainTextOnlyText: string;
+  onPlainTextOnlyTextChange: (v: string) => void;
+}
+
+export interface IEmailSettingsPreviewBannerProps {
+  variantData: IEmailContentResponse;
+  onSave: (payload: EmailContentPayload) => void;
+  variables?: Record<string, unknown>;
+}
+
+export interface Condition {
+  variable: string;
+  op: string;
+  value: string;
+}
+
+export interface OuterCondition {
+  op: 'AND' | 'OR';
+  args: Condition[];
+}
+
+export interface DisplayConditionData {
+  id?: string;
+  version?: string;
+  label?: string;
+  description?: string;
+  expression?: string;
+  conditions?: OuterCondition[];
+  before?: string;
+  after?: string;
+}
+
+export interface DisplayConditionInfo {
+  data: DisplayConditionData;
+  done: (data: DisplayConditionData) => void;
+}
+
+export interface MergeTagInfo {
+  data: {
+    mergeTagGroup?: string | null;
+    mergeTags?: Record<string, unknown>;
+  };
+  done: (result: {
+    mergeTagGroup: string | null;
+    mergeTagRule: string | null;
+  }) => void;
 }
