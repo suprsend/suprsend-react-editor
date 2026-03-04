@@ -168,7 +168,9 @@ export default function EmailChannel({
 
   const handleCloseEditorTab = useCallback(async () => {
     flushSave();
-    const body: { type: string; plain_text?: { text: string } } = { type: 'plain_text' };
+    const body: { type: string; plain_text?: { text: string } } = {
+      type: 'plain_text',
+    };
 
     // Only convert HTML when plain_text.text is empty
     if (!plainTextOnlyText) {
@@ -442,7 +444,7 @@ function EmailTemplatePlayground({
   onPlainTextOnlyTextChange,
   variables = {},
 }: EmailTemplatePlaygroundProps) {
-  const userId = 'staging-1'; // TODO: replace with userId from API when ready
+  const userId = variantData?.email_editor_userid;
 
   const { workspaceUid } = useTemplateEditorContext();
   const { mutateAsync: uploadFile } = useUploadFile(workspaceUid);
@@ -683,9 +685,11 @@ function EmailTemplatePlayground({
     return convert(html, { wordwrap: 130 });
   }, [rawHtmlRef]);
 
-  const showDesignerIframe =
-    activeTab === 'editor' && editorMode === 'design';
-  const hiddenStyle = { visibility: 'hidden' as const, pointerEvents: 'none' as const };
+  const showDesignerIframe = activeTab === 'editor' && editorMode === 'design';
+  const hiddenStyle = {
+    visibility: 'hidden' as const,
+    pointerEvents: 'none' as const,
+  };
 
   return (
     <div className="suprsend-relative suprsend-w-full suprsend-h-full">
@@ -737,7 +741,11 @@ function EmailTemplatePlayground({
       {/* HTML CodeMirror editor */}
       <div
         className="suprsend-absolute suprsend-inset-0"
-        style={activeTab === 'editor' && editorMode === 'html' ? undefined : hiddenStyle}
+        style={
+          activeTab === 'editor' && editorMode === 'html'
+            ? undefined
+            : hiddenStyle
+        }
       >
         <TextEditors
           type="html"

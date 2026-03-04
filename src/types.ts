@@ -107,6 +107,7 @@ export interface IEmailContent {
 
 export interface IEmailContentResponse {
   content: IEmailContent;
+  email_editor_userid?: string;
 }
 
 export type EmailContentPayload = {
