@@ -35,6 +35,7 @@ interface SuggestionCodeEditorProps {
   disabled?: boolean;
   placeholder?: string;
   className?: string;
+  containerClassName?: string;
   height?: string;
   error?: string;
   label?: string;
@@ -113,6 +114,7 @@ export default function SuggestionCodeEditor({
   disabled = false,
   placeholder,
   className,
+  containerClassName,
   height = '300px',
   error,
   label,
@@ -253,7 +255,7 @@ export default function SuggestionCodeEditor({
         </Label>
       )}
       <div
-        className="suprsend-relative suprsend-mt-1"
+        className={cn('suprsend-relative suprsend-mt-1', containerClassName)}
         onBlur={(e) => {
           if (
             e.currentTarget &&

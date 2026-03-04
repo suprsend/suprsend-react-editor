@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Smartphone, TvMinimal } from 'lucide-react';
-import CodeMirrorEditor from '@/components/custom-ui/CodeMirrorEditor';
+import SuggestionCodeEditor from '@/components/custom-ui/SuggestionCodeEditor';
 import { cn } from '@/lib/utils';
 import {
   ResizableHandle,
@@ -81,16 +81,19 @@ export default function TextEditors({
         {type === 'plaintext' && onFetchFromHtml && (
           <PlainTextBanner onFetchFromHtml={handleFetchFromHtml} />
         )}
-        <CodeMirrorEditor
+        <SuggestionCodeEditor
           value={localValue}
           onChange={handleChange}
+          variables={variables}
           language={type === 'html' ? 'html' : undefined}
           placeholder={
             type === 'plaintext'
               ? 'Plain text is always sent to reach users with HTML blocked in their email client. To preview or edit it, click "Fetch from HTML" above.'
               : undefined
           }
-          className="suprsend-flex-1 suprsend-min-h-0 suprsend-border-0 suprsend-rounded-none"
+          height=""
+          containerClassName="suprsend-flex-1 suprsend-min-h-0 !suprsend-mt-0"
+          className="suprsend-h-full suprsend-border-0 suprsend-rounded-none"
         />
       </ResizablePanel>
       <ResizableHandle withHandle />

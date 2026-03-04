@@ -19,10 +19,24 @@ export function createQueryParams(params: Record<string, unknown>): string {
   return qs ? `?${qs}` : '';
 }
 
+export function htmlToText(html: string): string {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  return doc.body.textContent || '';
+}
+
 const IMG_HOST = 'https://ik.imagekit.io/l0quatz6utm/';
 
 export function makeAbsoluteUrl(url: string, transform = '') {
   return url?.startsWith('http://') || url?.startsWith('https://')
     ? url
     : `${IMG_HOST}${transform}${url}`;
+}
+
+export function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }

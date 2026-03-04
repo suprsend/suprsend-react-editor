@@ -20,7 +20,7 @@ import type {
   ActiveTab,
   EmailChannelProps,
 } from '@/types';
-import { convert } from 'html-to-text';
+import { htmlToText } from '@/lib/utils';
 import EmailTemplatePlayground from './EmailTemplatePlayground';
 
 /**
@@ -149,7 +149,7 @@ export default function EmailChannel({
       } else {
         html = rawHtmlRef.current;
       }
-      const text = html ? convert(html, { wordwrap: 130 }) : '';
+      const text = html ? htmlToText(html) : '';
       body.plain_text = { text };
       setPlainTextOnlyText(text);
     }

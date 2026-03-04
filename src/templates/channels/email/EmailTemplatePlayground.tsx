@@ -4,7 +4,7 @@ import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { usePostMessageBridge } from '@/lib/usePostMessageBridge';
 import { useUploadFile } from '@/apis';
 import { variablesToDesignerMergeTags } from '@/lib/suggestion-utils';
-import { convert } from 'html-to-text';
+import { generateUUID, htmlToText } from '@/lib/utils';
 import type {
   MergeTagData,
   EmailTemplatePlaygroundProps,
@@ -34,7 +34,9 @@ export default function EmailTemplatePlayground({
   onPlainTextOnlyTextChange,
   variables = {},
 }: EmailTemplatePlaygroundProps) {
-  const userId = variantData?.email_editor_userid;
+  const { isPrivate } = useTemplateEditorContext();
+
+  const userId = isPrivate ? variantData?.email_editor_userid : generateUUID();
 
   const { workspaceUid } = useTemplateEditorContext();
   const { mutateAsync: uploadFile } = useUploadFile(workspaceUid);
@@ -266,13 +268,13 @@ export default function EmailTemplatePlayground({
       ? await exportHtmlRef.current()
       : designerHtmlRef.current;
     if (!html) return undefined;
-    return convert(html, { wordwrap: 130 });
+    return htmlToText(html);
   }, [exportHtmlRef, designerHtmlRef]);
 
   const fetchRawHtml = useCallback(async () => {
     const html = rawHtmlRef.current;
     if (!html) return undefined;
-    return convert(html, { wordwrap: 130 });
+    return htmlToText(html);
   }, [rawHtmlRef]);
 
   const showDesignerIframe = activeTab === 'editor' && editorMode === 'design';
