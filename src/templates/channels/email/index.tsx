@@ -38,7 +38,7 @@ import type {
 } from '@/types';
 import DisplayConditionsModal from './DisplayConditionsModal';
 import { renderHandlebars } from '@/components/custom-ui/HandlebarsRenderer';
-import { variablesToUnlayerMergeTags } from '@/lib/suggestion-utils';
+import { variablesToDesignerMergeTags } from '@/lib/suggestion-utils';
 import OldDisplayConditionsModal from './OldDisplayConditionsModal';
 import MergeTagsModal from './MergeTagsModal';
 import type {
@@ -51,7 +51,7 @@ import { convert } from 'html-to-text';
 /**
  * Tab / data model:
  *
- * type='designer' → 2 tabs: Design Editor (designer.html via Unlayer) + Plain Text (designer.text)
+ * type='designer' → 2 tabs: Design Editor (designer.html) + Plain Text (designer.text)
  * type='raw'      → 2 tabs: HTML Editor   (raw.html via CodeMirror)  + Plain Text (raw.text)
  * type='plain_text' → 1 tab: Plain Text (plain_text.text)
  *
@@ -122,7 +122,7 @@ export default function EmailChannel({
   // --- Core state ---
   const apiBodyType = variantData?.content?.body?.type as string | undefined;
 
-  // Which sub-editor: Unlayer designer or raw HTML CodeMirror
+  // Which sub-editor: designer or raw HTML CodeMirror
   // Persists across plain_text mode so re-adding restores the right editor
   const [editorMode, setEditorMode] = useState<EditorMode>(
     apiBodyType === 'raw' ? 'html' : 'design'
@@ -495,13 +495,13 @@ function EmailTemplatePlayground({
       });
       post('SET_MERGE_TAGS', {
         mergeTagsList: list,
-        unlayerMergeTags: variablesToUnlayerMergeTags(variables),
+        designerMergeTags: variablesToDesignerMergeTags(variables),
       });
     },
     [saveContent, post, variables]
   );
 
-  // --- Unlayer HTML export ---
+  // --- Designer HTML export ---
   useEffect(() => {
     exportHtmlRef.current = () => {
       return new Promise<string>((resolve) => {
@@ -554,7 +554,7 @@ function EmailTemplatePlayground({
       post('INIT_MERGE_TAGS', {
         variables,
         mergeTagsList: mergeTagsListRef.current,
-        unlayerMergeTags: variablesToUnlayerMergeTags(variables),
+        designerMergeTags: variablesToDesignerMergeTags(variables),
       });
     });
 
@@ -712,7 +712,7 @@ function EmailTemplatePlayground({
         variables={variables}
       />
 
-      {/* Unlayer iframe – always mounted in design mode, hidden when not active */}
+      {/* Designer iframe – always mounted in design mode, hidden when not active */}
       {editorMode === 'design' && (
         <div
           className="suprsend-absolute suprsend-inset-0"

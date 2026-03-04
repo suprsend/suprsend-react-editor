@@ -47,20 +47,20 @@ export default function MergeTagsModal({
   const [warning, setWarning] = useState('');
 
   const refData = mergeTagInfoRef?.current;
-  const existingUnlayerMergeTag = refData?.data?.mergeTagGroup;
+  const existingMergeTagGroup = refData?.data?.mergeTagGroup;
 
   useEffect(() => {
     setCurrentMergeTag('');
     setError('');
     setWarning('');
-    if (open && existingUnlayerMergeTag) {
+    if (open && existingMergeTagGroup) {
       const existing = mergeTagsList.find(
-        (item) => item.id === existingUnlayerMergeTag
+        (item) => item.id === existingMergeTagGroup
       );
       if (existing?.expression) {
         setCurrentMergeTag(existing.expression);
       } else {
-        setCurrentMergeTag(existingUnlayerMergeTag);
+        setCurrentMergeTag(existingMergeTagGroup);
       }
     }
   }, [open]);
@@ -122,10 +122,10 @@ export default function MergeTagsModal({
     const after = '{{/each}}';
     const newMergeTagsList: MergeTagData[] = [];
     const existingMergeTag = mergeTagsList.find(
-      (item) => item.id === existingUnlayerMergeTag
+      (item) => item.id === existingMergeTagGroup
     );
     const mergeTagId = existingMergeTag
-      ? existingUnlayerMergeTag!
+      ? existingMergeTagGroup!
       : window.crypto.randomUUID();
 
     mergeTagsList.forEach((item) => {
@@ -161,7 +161,7 @@ export default function MergeTagsModal({
 
   const handleDelete = () => {
     const newMergeTagsList = mergeTagsList.filter(
-      (item) => item.id !== existingUnlayerMergeTag
+      (item) => item.id !== existingMergeTagGroup
     );
     setMergeTagsList(newMergeTagsList);
     refData?.done({
@@ -212,9 +212,9 @@ export default function MergeTagsModal({
 
         <DialogFooter>
           <div
-            className={`suprsend-flex suprsend-justify-between ${existingUnlayerMergeTag ? 'suprsend-flex-auto' : ''}`}
+            className={`suprsend-flex suprsend-justify-between ${existingMergeTagGroup ? 'suprsend-flex-auto' : ''}`}
           >
-            {!!existingUnlayerMergeTag && (
+            {!!existingMergeTagGroup && (
               <Button
                 type="button"
                 variant="outline"

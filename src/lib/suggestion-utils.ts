@@ -210,7 +210,7 @@ export function shouldShowSuggestions(
   return startBracketIndex > endBracketIndex;
 }
 
-export function variablesToUnlayerMergeTags(
+export function variablesToDesignerMergeTags(
   variables: Record<string, unknown>
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {};
