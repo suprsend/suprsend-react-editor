@@ -70,7 +70,7 @@ function HTMLEditorBanner() {
   );
 }
 
-export function PlainTextBanner({ onFetchFromHtml }: { onFetchFromHtml?: () => void }) {
+export function PlainTextBanner({ onFetchFromHtml }: { onFetchFromHtml?: () => Promise<void> }) {
   return (
     <div className="suprsend-px-3 suprsend-bg-blue-50 suprsend-text-gray-700 suprsend-text-xs suprsend-py-1.5 suprsend-flex suprsend-items-center suprsend-justify-between suprsend-my-1 suprsend-rounded">
       <div className="suprsend-flex suprsend-items-center suprsend-gap-2">

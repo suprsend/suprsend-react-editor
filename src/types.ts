@@ -88,6 +88,7 @@ export interface IEmailBody {
     display_conditions?: unknown[];
     merge_tags?: MergeTagData[];
   };
+  plain_text?: { text?: string };
   preheader?: string;
   email_markup?: string;
 }
@@ -216,7 +217,7 @@ export interface TextEditorsProps {
   value: string;
   onChange: (value: string) => void;
   variables?: Record<string, unknown>;
-  onFetchFromHtml?: () => void;
+  onFetchFromHtml?: () => Promise<string | undefined>;
 }
 
 export interface MockDataQueryParams {
