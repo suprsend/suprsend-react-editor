@@ -12,18 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import SuggestionInput from '@/components/custom-ui/SuggestionInput';
 import { HELPER_NAMES } from '@/lib/suggestion-utils';
-import type { MergeTagData } from '@/types';
-
-export interface MergeTagInfo {
-  data: {
-    mergeTagGroup?: string | null;
-    mergeTags?: Record<string, unknown>;
-  };
-  done: (result: {
-    mergeTagGroup: string | null;
-    mergeTagRule: string | null;
-  }) => void;
-}
+import type { MergeTagData, MergeTagInfo } from '@/types';
 
 interface MergeTagsModalProps {
   open: boolean;

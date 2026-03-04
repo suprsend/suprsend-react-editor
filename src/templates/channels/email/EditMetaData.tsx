@@ -30,13 +30,8 @@ import type {
   EmailMetaDataFormValues,
   EmailContentPayload,
   IEmailContentResponse,
+  IEmailSettingsPreviewBannerProps,
 } from '@/types';
-
-export interface IEmailSettingsPreviewBannerProps {
-  variantData: IEmailContentResponse;
-  onSave: (payload: EmailContentPayload) => void;
-  variables?: Record<string, unknown>;
-}
 
 export default function EmailSettingsPreviewBanner({
   variantData,
