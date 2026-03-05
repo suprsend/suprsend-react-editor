@@ -84,7 +84,7 @@ export const useVariantDetails = ({
         isPrivate,
         mode,
       }),
-  });
+  }, queryClient);
 };
 
 const updateVariantContent = async ({
@@ -128,7 +128,7 @@ export const useUpdateVariantContent = ({
         payload,
         isPrivate,
       }),
-  });
+  }, queryClient);
 };
 
 const uploadFile = async ({ workspaceUid, file }: UploadFileParams) => {
@@ -142,7 +142,7 @@ const uploadFile = async ({ workspaceUid, file }: UploadFileParams) => {
 export const useUploadFile = (workspaceUid: string) => {
   return useMutation({
     mutationFn: (file: File) => uploadFile({ workspaceUid, file }),
-  });
+  }, queryClient);
 };
 
 const getMockData = async ({
@@ -203,7 +203,7 @@ export const usePreCommitValidate = ({
     queryFn: () =>
       getPreCommitValidate({ templateSlug, workspaceUid, isPrivate }),
     enabled,
-  });
+  }, queryClient);
 };
 
 export const useMockData = ({ templateSlug }: UseMockDataParams) => {
@@ -227,7 +227,7 @@ export const useMockData = ({ templateSlug }: UseMockDataParams) => {
         actorDistinctId,
         mode,
       }),
-  });
+  }, queryClient);
 };
 
 const renderJsonnet = async (
@@ -240,7 +240,7 @@ const renderJsonnet = async (
 export const useJsonnetRender = () => {
   return useMutation({
     mutationFn: (body: JsonnetRenderBody) => renderJsonnet(body),
-  });
+  }, queryClient);
 };
 
 const commitTemplate = async ({
@@ -272,5 +272,5 @@ export const useCommitTemplate = ({
         commitMessage,
         variants,
       }),
-  });
+  }, queryClient);
 };
