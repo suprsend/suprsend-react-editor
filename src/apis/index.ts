@@ -9,11 +9,14 @@ import type {
   UseMockDataParams,
   GetMockDataParams,
   MockDataQueryParams,
+  JsonnetRenderBody,
+  JsonnetRenderResponse,
 } from '@/types';
 import { createQueryParams } from '@/lib/utils';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 
 const API_BASE_URL = 'https://stagingapi2.suprsend.com';
+const JSONNET_API_BASE_URL = 'https://stagingapi.suprsend.com/jsonnet';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -183,5 +186,18 @@ export const useMockData = ({ templateSlug }: UseMockDataParams) => {
         recipientDistinctId,
         actorDistinctId,
       }),
+  });
+};
+
+const renderJsonnet = async (
+  body: JsonnetRenderBody
+): Promise<JsonnetRenderResponse> => {
+  const resp = await axiosInst.post(`${JSONNET_API_BASE_URL}/render/`, body);
+  return resp.data;
+};
+
+export const useJsonnetRender = () => {
+  return useMutation({
+    mutationFn: (body: JsonnetRenderBody) => renderJsonnet(body),
   });
 };

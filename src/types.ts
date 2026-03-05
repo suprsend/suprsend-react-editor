@@ -186,6 +186,117 @@ export interface PreviewFrameProps extends WebpushPreviewProps {
   resolvedImageUrl: string;
 }
 
+// --- MS Teams ---
+
+export interface IMSTeamsContent {
+  body_type: 'card' | 'text';
+  body_card?: string;
+  body_text?: string;
+}
+
+export interface IMSTeamsContentResponse {
+  content: IMSTeamsContent;
+}
+
+export type MSTeamsFormValues = {
+  body_type: 'card' | 'text';
+  body_card: string;
+  body_text: string;
+};
+
+export type MSTeamsContentPayload = {
+  content: Partial<IMSTeamsContent>;
+};
+
+export interface MSTeamsChannelProps {
+  variantData: IMSTeamsContentResponse;
+  variables: Record<string, unknown>;
+}
+
+export interface MSTeamsPreviewProps {
+  bodyType: 'card' | 'text';
+  bodyCard: string;
+  bodyText: string;
+  variables: Record<string, unknown>;
+}
+
+export interface JsonnetPreviewState {
+  success: boolean;
+  html: string | null;
+  error: string | null;
+}
+
+export interface MarkdownPreviewProps {
+  bodyText: string;
+  variables: Record<string, unknown>;
+}
+
+export interface JsonnetPreviewProps {
+  bodyCard: string;
+  variables: Record<string, unknown>;
+}
+
+export type AdaptiveCardRenderResult =
+  | { success: true; html: string }
+  | { success: false; error: string };
+
+// --- Slack ---
+
+export interface ISlackContent {
+  body_type: 'block' | 'text';
+  body_block?: string;
+  body_text?: string;
+}
+
+export interface ISlackContentResponse {
+  content: ISlackContent;
+}
+
+export type SlackFormValues = {
+  body_type: 'block' | 'text';
+  body_block: string;
+  body_text: string;
+};
+
+export type SlackContentPayload = {
+  content: Partial<ISlackContent>;
+};
+
+export interface SlackChannelProps {
+  variantData: ISlackContentResponse;
+  variables: Record<string, unknown>;
+}
+
+export interface SlackPreviewProps {
+  bodyType: 'block' | 'text';
+  bodyBlock: string;
+  bodyText: string;
+  variables: Record<string, unknown>;
+}
+
+export interface SlackTextPreviewProps {
+  bodyText: string;
+  variables: Record<string, unknown>;
+}
+
+export interface SlackBlockPreviewProps {
+  bodyBlock: string;
+}
+
+// --- JSONNET Render ---
+
+export interface JsonnetRenderBody {
+  snippet: string;
+  data: Record<string, unknown>;
+  translations?: unknown;
+}
+
+export interface JsonnetRenderResponse {
+  success: boolean;
+  result?: unknown[];
+  error?: string;
+}
+
 // --- Android Push ---
 
 export interface IAndroidPushButton {
@@ -260,6 +371,8 @@ export type ChannelContentPayload =
   | EmailContentPayload
   | IOSPushContentPayload
   | WebpushContentPayload
+  | MSTeamsContentPayload
+  | SlackContentPayload
   | AndroidPushContentPayload;
 
 export interface UpdateVariantContentParams extends GetVariantDetailsParams {
