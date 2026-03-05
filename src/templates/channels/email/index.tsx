@@ -1,15 +1,5 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import {
-  X,
-  Plus,
-  Brush,
-  CodeXml,
-  Clipboard,
-  Loader2,
-  Smartphone,
-  TvMinimal,
-} from 'lucide-react';
-import CodeMirrorEditor from '@/components/custom-ui/CodeMirrorEditor';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { X, Plus, Brush, CodeXml, Clipboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
@@ -18,51 +8,31 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from '@/components/ui/tooltip';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/components/ui/resizable';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EditorTopBanner } from './TopBanners';
 import HtmlSwitchModal from './HTMLEditorSwitchModal';
 import EmailSettingsPreviewBanner from './EditMetaData';
-import { useUpdateVariantContent, useUploadFile } from '@/apis';
+import { useUpdateVariantContent } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import { usePostMessageBridge } from '@/lib/usePostMessageBridge';
 import type {
-  IEmailContentResponse,
   EmailContentPayload,
-  TextEditorsProps,
+  EditorMode,
+  ActiveTab,
+  EmailChannelProps,
 } from '@/types';
-import DisplayConditionsModal from './DisplayConditionsModal';
-import { renderHandlebars } from '@/components/custom-ui/HandlebarsRenderer';
-import { variablesToUnlayerMergeTags } from '@/lib/suggestion-utils';
-import OldDisplayConditionsModal from './OldDisplayConditionsModal';
-import MergeTagsModal from './MergeTagsModal';
-import type {
-  DisplayConditionInfo,
-  DisplayConditionData,
-} from './DisplayConditionsModal';
-import type { MergeTagInfo } from './MergeTagsModal';
-import type { MergeTagData } from '@/types';
+import { htmlToText } from '@/lib/utils';
+import EmailTemplatePlayground from './EmailTemplatePlayground';
 
-const EDITOR_TYPE_OPTIONS = [
-  { name: 'Design Editor', id: 'design_editor' },
-  { name: 'Plain Text', id: 'plain_text' },
-];
-
-type DesignEditorType = 'design' | 'html';
-
-interface IEditorTypeList {
-  name: string;
-  id: string;
-}
-
-interface EmailChannelProps {
-  variantData: IEmailContentResponse;
-  variables?: Record<string, unknown>;
-}
+/**
+ * Tab / data model:
+ *
+ * type='designer' → 2 tabs: Design Editor (designer.html) + Plain Text (designer.text)
+ * type='raw'      → 2 tabs: HTML Editor   (raw.html via CodeMirror)  + Plain Text (raw.text)
+ * type='plain_text' → 1 tab: Plain Text (plain_text.text)
+ *
+ * Closing the editor tab converts its HTML to text, saves as plain_text.text, sets type='plain_text'.
+ * Re-adding restores the previous editor mode (design or html).
+ */
 
 export default function EmailChannel({
   variantData,
@@ -75,136 +45,220 @@ export default function EmailChannel({
     variantId,
   });
 
+  const pendingPayloadRef = useRef<EmailContentPayload | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Immediately fire any pending debounced save.
+  // Must be called before direct mutate() calls (mode switches) to prevent
+  // stale saves from firing after the mode has already changed.
+  const flushSave = useCallback(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+    if (pendingPayloadRef.current) {
+      mutate(pendingPayloadRef.current);
+      pendingPayloadRef.current = null;
+    }
+  }, [mutate]);
+
   const saveContent = useCallback(
     (payload: EmailContentPayload) => {
+      pendingPayloadRef.current = payload;
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
-        mutate(payload);
+        if (pendingPayloadRef.current) {
+          mutate(pendingPayloadRef.current);
+          pendingPayloadRef.current = null;
+        }
+        debounceRef.current = null;
       }, 500);
     },
     [mutate]
   );
 
+  // --- Refs for latest HTML values (needed for close-tab conversion & copy) ---
   const designerHtmlRef = useRef<string>(
     variantData?.content?.body?.designer?.html ?? ''
   );
-
-  const bodyType = variantData?.content?.body?.type;
-  const initialDesignEditorType: DesignEditorType =
-    bodyType === 'raw' ? 'html' : 'design';
-
-  const [designEditorType, setDesignEditorType] = useState<DesignEditorType>(
-    initialDesignEditorType
-  );
-  const [editorTypeList, setEditorTypeList] = useState<IEditorTypeList[]>(() =>
-    EDITOR_TYPE_OPTIONS.map((opt) =>
-      opt.id === 'design_editor' && initialDesignEditorType === 'html'
-        ? { ...opt, name: 'HTML Editor' }
-        : opt
-    )
+  const exportHtmlRef = useRef<(() => Promise<string>) | null>(null);
+  const rawHtmlRef = useRef<string>(
+    variantData?.content?.body?.raw?.html ?? ''
   );
 
-  const [editorType, setEditorType] = useState<string>(
-    EDITOR_TYPE_OPTIONS[0].id
-  );
-  const [activeEditorTypes, setActiveEditorTypes] = useState<string[]>(() => {
-    const types = [EDITOR_TYPE_OPTIONS[0].id];
-    const body = variantData?.content?.body;
-    const hasPlainText =
-      body?.type === 'raw' ? !!body?.raw?.text : !!body?.designer?.text;
-    if (hasPlainText) {
-      types.push('plain_text');
-    }
-    return types;
-  });
+  // --- Core state ---
+  const apiBodyType = variantData?.content?.body?.type as string | undefined;
 
-  // Sync design/html switch from server data after fetch
-  useEffect(() => {
-    if (!bodyType) return;
-    const type: DesignEditorType = bodyType === 'raw' ? 'html' : 'design';
-    setDesignEditorType(type);
-    setEditorTypeList((prev) =>
-      prev.map((opt) =>
-        opt.id === 'design_editor'
-          ? { ...opt, name: type === 'html' ? 'HTML Editor' : 'Design Editor' }
-          : opt
-      )
-    );
-  }, [bodyType]);
+  // Which sub-editor: designer or raw HTML CodeMirror
+  // Persists across plain_text mode so re-adding restores the right editor
+  const [editorMode, setEditorMode] = useState<EditorMode>(
+    apiBodyType === 'raw' ? 'html' : 'design'
+  );
+
+  // Whether the editor tab (Design/HTML) is visible
+  const [hasEditorTab, setHasEditorTab] = useState(
+    apiBodyType !== 'plain_text'
+  );
+
+  // Currently active tab
+  const [activeTab, setActiveTab] = useState<ActiveTab>(
+    apiBodyType === 'plain_text' ? 'plain_text' : 'editor'
+  );
+
+  // Local state for each plain text field — variantData is stale (mutations don't refetch).
+  const [designerText, setDesignerText] = useState<string>(
+    variantData?.content?.body?.designer?.text ?? ''
+  );
+  const [rawText, setRawText] = useState<string>(
+    variantData?.content?.body?.raw?.text ?? ''
+  );
+  const [plainTextOnlyText, setPlainTextOnlyText] = useState<string>(
+    variantData?.content?.body?.plain_text?.text ?? ''
+  );
 
   const [htmlSwitchModalOpen, setHtmlSwitchModalOpen] = useState(false);
 
-  const handleSwitchToHtml = useCallback(() => {
-    setDesignEditorType('html');
-    mutate({ content: { body: { type: 'raw' } } });
-    setEditorTypeList((prev) =>
-      prev.map((editor) =>
-        editor.id === 'design_editor'
-          ? { ...editor, name: 'HTML Editor' }
-          : editor
-      )
-    );
-  }, [mutate, setDesignEditorType, setEditorTypeList]);
+  // --- One-time sync when API data arrives after mount (lazy loading) ---
+  const initializedRef = useRef(!!apiBodyType);
+  useEffect(() => {
+    if (initializedRef.current || !apiBodyType) return;
+    initializedRef.current = true;
+    setEditorMode(apiBodyType === 'raw' ? 'html' : 'design');
+    setHasEditorTab(apiBodyType !== 'plain_text');
+    setActiveTab(apiBodyType === 'plain_text' ? 'plain_text' : 'editor');
+    setDesignerText(variantData?.content?.body?.designer?.text ?? '');
+    setRawText(variantData?.content?.body?.raw?.text ?? '');
+    setPlainTextOnlyText(variantData?.content?.body?.plain_text?.text ?? '');
+  }, [apiBodyType, variantData]);
 
-  const missingEditor = EDITOR_TYPE_OPTIONS.find(
-    (editor) => !activeEditorTypes.includes(editor.id)
+  // --- Handlers ---
+
+  const handleCloseEditorTab = useCallback(async () => {
+    flushSave();
+    const body: { type: string; plain_text?: { text: string } } = {
+      type: 'plain_text',
+    };
+
+    // Only convert HTML when plain_text.text is empty
+    if (!plainTextOnlyText) {
+      let html = '';
+      if (editorMode === 'design') {
+        html = exportHtmlRef.current
+          ? await exportHtmlRef.current()
+          : designerHtmlRef.current;
+      } else {
+        html = rawHtmlRef.current;
+      }
+      const text = html ? htmlToText(html) : '';
+      body.plain_text = { text };
+      setPlainTextOnlyText(text);
+    }
+
+    setHasEditorTab(false);
+    setActiveTab('plain_text');
+    mutate({ content: { body } });
+  }, [editorMode, mutate, flushSave, plainTextOnlyText]);
+
+  const handleAddEditorTab = useCallback(() => {
+    flushSave();
+    const type = editorMode === 'html' ? 'raw' : 'designer';
+    setHasEditorTab(true);
+    setActiveTab('editor');
+    mutate({ content: { body: { type } } });
+  }, [editorMode, mutate, flushSave]);
+
+  const handleSwitchToDesign = useCallback(() => {
+    flushSave();
+    setEditorMode('design');
+    mutate({ content: { body: { type: 'designer' } } });
+  }, [mutate, flushSave]);
+
+  const handleSwitchToHtml = useCallback(() => {
+    flushSave();
+    setEditorMode('html');
+    mutate({ content: { body: { type: 'raw' } } });
+  }, [mutate, flushSave]);
+
+  const handleHtmlTabClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (editorMode === 'html') return;
+      if (localStorage.getItem('ss_email_html_switch_confirmed') === 'true') {
+        handleSwitchToHtml();
+      } else {
+        setHtmlSwitchModalOpen(true);
+      }
+    },
+    [editorMode, handleSwitchToHtml]
   );
 
-  let tooltipText = '';
-  if (missingEditor?.id === 'plain_text') {
-    tooltipText = 'Add Plain text';
-  } else if (missingEditor?.id === 'design_editor') {
-    if (designEditorType === 'design') {
-      tooltipText = 'Add Design Editor';
-    } else {
-      tooltipText = 'Add HTML Editor';
-    }
-  }
+  const handleCopyHtml = useCallback(async () => {
+    const html = exportHtmlRef.current
+      ? await exportHtmlRef.current()
+      : designerHtmlRef.current;
+    navigator.clipboard.writeText(html);
+  }, []);
+
+  const editorTabLabel =
+    editorMode === 'design' ? 'Design Editor' : 'HTML Editor';
 
   return (
     <div className="suprsend-h-full suprsend-flex suprsend-flex-col suprsend-m-1.5">
       <div>
         <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-mt-2">
+          {/* ---- Tab bar ---- */}
           <div className="suprsend-flex suprsend-mb-[-1px] suprsend-z-50">
-            {editorTypeList.map((editor) => {
-              if (!activeEditorTypes.includes(editor.id)) return null;
-              return (
-                <div
+            {/* Editor tab */}
+            {hasEditorTab && (
+              <div
+                className={cn(
+                  'suprsend-flex suprsend-items-center suprsend-gap-3 suprsend-border-b-background suprsend-px-3 suprsend-cursor-pointer suprsend-h-[36px]',
+                  activeTab === 'editor' &&
+                    'suprsend-border suprsend-rounded-md suprsend-rounded-b-none'
+                )}
+                onClick={() => setActiveTab('editor')}
+              >
+                <span
                   className={cn(
-                    'suprsend-flex suprsend-items-center suprsend-gap-3 suprsend-border-b-background suprsend-px-3 suprsend-cursor-pointer suprsend-h-[36px]',
-                    editor.id === editorType &&
-                      'suprsend-border suprsend-rounded-md suprsend-rounded-b-none'
+                    'suprsend-font-medium',
+                    activeTab === 'editor' && 'suprsend-text-primary'
                   )}
-                  onClick={() => setEditorType(editor.id)}
-                  key={editor.id}
                 >
-                  <span
-                    className={cn(
-                      'suprsend-font-medium',
-                      editor.id === editorType && 'suprsend-text-primary'
-                    )}
-                  >
-                    {editor.name}
-                  </span>
-                  {activeEditorTypes.length > 1 && editor.id === editorType && (
-                    <X
-                      className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground suprsend-cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const newActiveEditors = activeEditorTypes.filter(
-                          (id) => id !== editor.id
-                        );
-                        setActiveEditorTypes(newActiveEditors);
-                        setEditorType(newActiveEditors[0]);
-                      }}
-                    />
-                  )}
-                </div>
-              );
-            })}
+                  {editorTabLabel}
+                </span>
+                {activeTab === 'editor' && (
+                  <X
+                    className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground suprsend-cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCloseEditorTab();
+                    }}
+                  />
+                )}
+              </div>
+            )}
 
-            {activeEditorTypes.length < EDITOR_TYPE_OPTIONS.length && (
+            {/* Plain Text tab */}
+            <div
+              className={cn(
+                'suprsend-flex suprsend-items-center suprsend-gap-3 suprsend-border-b-background suprsend-px-3 suprsend-cursor-pointer suprsend-h-[36px]',
+                activeTab === 'plain_text' &&
+                  'suprsend-border suprsend-rounded-md suprsend-rounded-b-none'
+              )}
+              onClick={() => setActiveTab('plain_text')}
+            >
+              <span
+                className={cn(
+                  'suprsend-font-medium',
+                  activeTab === 'plain_text' && 'suprsend-text-primary'
+                )}
+              >
+                Plain Text
+              </span>
+            </div>
+
+            {/* Add editor tab button */}
+            {!hasEditorTab && (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -213,46 +267,30 @@ export default function EmailChannel({
                       size="icon"
                       aria-label="add-tab"
                       className="suprsend-ml-1 hover:suprsend-rounded-b-none hover:suprsend-border-b"
-                      onClick={() => {
-                        const missingEditor = EDITOR_TYPE_OPTIONS.find(
-                          (editor) => !activeEditorTypes.includes(editor.id)
-                        );
-                        if (missingEditor) {
-                          setActiveEditorTypes((prev) => [
-                            ...prev,
-                            missingEditor.id,
-                          ]);
-                          setEditorType(missingEditor.id);
-                        }
-                      }}
+                      onClick={handleAddEditorTab}
                     >
                       <Plus className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>{tooltipText}</p>
+                    <p>
+                      {editorMode === 'design'
+                        ? 'Add Design Editor'
+                        : 'Add HTML Editor'}
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             )}
           </div>
 
-          {activeEditorTypes.includes('design_editor') && (
+          {/* ---- Design / HTML toggle + Copy button ---- */}
+          {hasEditorTab && activeTab === 'editor' && (
             <div className="suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-mt-[-10px]">
               <Tabs
-                value={designEditorType}
-                onValueChange={(value) => {
-                  if (value === 'design') {
-                    setDesignEditorType('design');
-                    mutate({ content: { body: { type: 'designer' } } });
-                    const editedEmailEditors = editorTypeList.map((editor) => {
-                      if (editor.id === 'design_editor') {
-                        return { ...editor, name: 'Design Editor' };
-                      }
-                      return editor;
-                    });
-                    setEditorTypeList(editedEmailEditors);
-                  }
+                value={editorMode}
+                onValueChange={(v) => {
+                  if (v === 'design') handleSwitchToDesign();
                 }}
               >
                 <TabsList className="suprsend-h-auto suprsend-p-0.5">
@@ -262,20 +300,7 @@ export default function EmailChannel({
                   <TabsTrigger
                     value="html"
                     className="suprsend-gap-2"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (designEditorType !== 'html') {
-                        if (
-                          localStorage.getItem(
-                            'ss_email_html_switch_confirmed'
-                          ) === 'true'
-                        ) {
-                          handleSwitchToHtml();
-                        } else {
-                          setHtmlSwitchModalOpen(true);
-                        }
-                      }
-                    }}
+                    onClick={handleHtmlTabClick}
                   >
                     <CodeXml className="suprsend-h-3 suprsend-w-3" /> HTML
                   </TabsTrigger>
@@ -289,13 +314,8 @@ export default function EmailChannel({
                       size="icon"
                       className="!suprsend-h-7 !suprsend-w-7 suprsend-border suprsend-rounded-md"
                       aria-label="Copy HTML"
-                      disabled={
-                        editorType !== 'design_editor' ||
-                        designEditorType !== 'design'
-                      }
-                      onClick={() => {
-                        navigator.clipboard.writeText(designerHtmlRef.current);
-                      }}
+                      disabled={editorMode !== 'design'}
+                      onClick={handleCopyHtml}
                     >
                       <Clipboard className="suprsend-h-4 suprsend-w-4 suprsend-text-muted-foreground" />
                     </Button>
@@ -316,18 +336,27 @@ export default function EmailChannel({
       </div>
 
       <EditorTopBanner
-        editorType={editorType}
-        designEditorType={designEditorType}
+        editorType={activeTab === 'editor' ? 'design_editor' : 'plain_text'}
+        designEditorType={editorMode}
       />
 
       <div className="suprsend-flex-1 suprsend-min-h-0 suprsend-overflow-hidden">
         <EmailTemplatePlayground
-          designEditorType={designEditorType}
-          editorType={editorType}
+          editorMode={editorMode}
+          activeTab={activeTab}
+          hasEditorTab={hasEditorTab}
           variantData={variantData}
           saveContent={saveContent}
           designerHtmlRef={designerHtmlRef}
+          exportHtmlRef={exportHtmlRef}
+          rawHtmlRef={rawHtmlRef}
           variables={variables}
+          designerText={designerText}
+          onDesignerTextChange={setDesignerText}
+          rawText={rawText}
+          onRawTextChange={setRawText}
+          plainTextOnlyText={plainTextOnlyText}
+          onPlainTextOnlyTextChange={setPlainTextOnlyText}
         />
       </div>
 
@@ -340,410 +369,5 @@ export default function EmailChannel({
         }}
       />
     </div>
-  );
-}
-
-interface IEmailTemplatePlayground {
-  designEditorType: DesignEditorType;
-  editorType: string;
-  variantData: IEmailContentResponse;
-  saveContent: (payload: EmailContentPayload) => void;
-  designerHtmlRef: React.RefObject<string>;
-  variables?: Record<string, unknown>;
-}
-
-function EmailTemplatePlayground({
-  designEditorType,
-  editorType,
-  saveContent,
-  designerHtmlRef,
-  variantData,
-  variables = {},
-}: IEmailTemplatePlayground) {
-  const userId = 'staging-1'; // TODO: replace with userId from API when ready
-
-  const { workspaceUid } = useTemplateEditorContext();
-  const { mutateAsync: uploadFile } = useUploadFile(workspaceUid);
-  const [iframeLoading, setIframeLoading] = useState(true);
-
-  const body = variantData?.content?.body;
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const designJsonRef = useRef(body?.designer?.design_json);
-  const { on, post } = usePostMessageBridge(iframeRef);
-
-  const displayConditionInfoRef = useRef<DisplayConditionInfo | null>(null);
-  const [displayConditionOpen, setDisplayConditionOpen] = useState(false);
-  const [oldDisplayConditionOpen, setOldDisplayConditionOpen] = useState(false);
-  const initialDisplayConditions =
-    (variantData?.content?.body?.designer
-      ?.display_conditions as DisplayConditionData[]) ?? [];
-  const displayConditionsListRef = useRef<DisplayConditionData[]>(
-    initialDisplayConditions
-  );
-  const [displayConditionsList, setDisplayConditionsList] = useState<
-    DisplayConditionData[]
-  >(initialDisplayConditions);
-
-  const handleSetDisplayConditionsList = useCallback(
-    (list: DisplayConditionData[]) => {
-      displayConditionsListRef.current = list;
-      setDisplayConditionsList(list);
-      saveContent({
-        content: { body: { designer: { display_conditions: list } } },
-      });
-    },
-    [saveContent]
-  );
-
-  const mergeTagInfoRef = useRef<MergeTagInfo | null>(null);
-  const [mergeTagModalOpen, setMergeTagModalOpen] = useState(false);
-  const initialMergeTags =
-    (variantData?.content?.body?.designer?.merge_tags as MergeTagData[]) ?? [];
-  const mergeTagsListRef = useRef<MergeTagData[]>(initialMergeTags);
-  const [mergeTagsList, setMergeTagsList] =
-    useState<MergeTagData[]>(initialMergeTags);
-
-  const handleSetMergeTagsList = useCallback(
-    (list: MergeTagData[]) => {
-      mergeTagsListRef.current = list;
-      setMergeTagsList(list);
-      saveContent({
-        content: { body: { designer: { merge_tags: list } } },
-      });
-      post('SET_MERGE_TAGS', {
-        mergeTagsList: list,
-        unlayerMergeTags: variablesToUnlayerMergeTags(variables),
-      });
-    },
-    [saveContent, post, variables]
-  );
-
-  // Keep designJsonRef in sync with latest server data
-  useEffect(() => {
-    designJsonRef.current = body?.designer?.design_json;
-  }, [body?.designer?.design_json]);
-
-  // Reset iframe loading state when switching from HTML back to design mode
-  // (iframe remounts in that case). Not needed for tab switches since iframe stays mounted.
-  useEffect(() => {
-    if (designEditorType === 'design') {
-      setIframeLoading(true);
-    }
-  }, [designEditorType]);
-
-  // Listen for postMessage events from iframe
-  useEffect(() => {
-    const unsubConfig = on('REQUEST_CONFIG', () => {
-      post('BRAND_CONFIG', {
-        brandData: variables?.['$brand'],
-      });
-    });
-
-    const unsubReady = on('EDITOR_READY', () => {
-      setIframeLoading(false);
-      const designJson = designJsonRef.current;
-      if (designJson && Object.keys(designJson).length > 0) {
-        post('LOAD_DESIGN', { design_json: designJson });
-      }
-      post('INIT_MERGE_TAGS', {
-        variables,
-        mergeTagsList: mergeTagsListRef.current,
-        unlayerMergeTags: variablesToUnlayerMergeTags(variables),
-      });
-    });
-
-    const unsubUpdate = on('DESIGN_UPDATED', (payload) => {
-      const { html, design_json } = payload as {
-        html: string;
-        design_json: Record<string, unknown>;
-      };
-      designerHtmlRef.current = html;
-      saveContent({
-        content: {
-          body: {
-            designer: {
-              html,
-              design_json,
-              display_conditions: displayConditionsListRef.current,
-              merge_tags: mergeTagsListRef.current,
-            },
-          },
-        },
-      });
-    });
-
-    const unsubDisplayCondition = on('DISPLAY_CONDITION_OPEN', (payload) => {
-      const data = (payload as { data: DisplayConditionData }).data;
-      displayConditionInfoRef.current = {
-        data,
-        done: (conditionData) => {
-          post('DISPLAY_CONDITION_DONE', { conditionData });
-        },
-      };
-      // Route: v1 condition (has `before` but not version '2') → old; everything else → v2
-      const isV1 = !!(data?.before && data.version !== '2');
-      if (isV1) {
-        setOldDisplayConditionOpen(true);
-      } else {
-        setDisplayConditionOpen(true);
-      }
-    });
-
-    const unsubMergeTag = on('MERGE_TAG_OPEN', (payload) => {
-      const data = (
-        payload as {
-          data: {
-            mergeTagGroup?: string | null;
-            mergeTags?: Record<string, unknown>;
-          };
-        }
-      ).data;
-      mergeTagInfoRef.current = {
-        data,
-        done: (result) => {
-          post('MERGE_TAG_DONE', { result });
-        },
-      };
-      setMergeTagModalOpen(true);
-    });
-
-    const unsubUpload = on('IMAGE_UPLOAD', async (payload) => {
-      const { file, requestId } = payload as { file: File; requestId: string };
-      try {
-        const result = await uploadFile(file);
-        if (result.error) throw new Error(result.error);
-        post('IMAGE_UPLOAD_DONE', { requestId, url: result.url });
-      } catch (error) {
-        console.error('Image upload failed:', error);
-        post('IMAGE_UPLOAD_DONE', { requestId, url: null });
-      }
-    });
-
-    return () => {
-      unsubConfig();
-      unsubReady();
-      unsubUpdate();
-      unsubDisplayCondition();
-      unsubMergeTag();
-      unsubUpload();
-    };
-  }, [on, post, saveContent, designerHtmlRef, uploadFile, variables]);
-
-  const handleEditorChange = useCallback(
-    (type: 'html' | 'text', value: string) => {
-      if (type === 'html') {
-        const currentRaw = body?.raw;
-        saveContent({
-          content: {
-            body: {
-              raw: {
-                html: value,
-                text: currentRaw?.text ?? '',
-              },
-            },
-          },
-        });
-      } else if (designEditorType === 'design') {
-        saveContent({
-          content: { body: { designer: { text: value } } },
-        });
-      } else {
-        const currentRaw = body?.raw;
-        saveContent({
-          content: {
-            body: {
-              raw: {
-                html: currentRaw?.html ?? '',
-                text: value,
-              },
-            },
-          },
-        });
-      }
-    },
-    [saveContent, body?.raw, designEditorType]
-  );
-
-  const plainTextValue =
-    designEditorType === 'design'
-      ? (body?.designer?.text ?? '')
-      : (body?.raw?.text ?? '');
-
-  const showDesignerIframe =
-    editorType === 'design_editor' && designEditorType === 'design';
-
-  return (
-    <div className="suprsend-relative suprsend-w-full suprsend-h-full">
-      <DisplayConditionsModal
-        open={displayConditionOpen}
-        setOpen={setDisplayConditionOpen}
-        displayConditionInfoRef={displayConditionInfoRef}
-        displayConditionsList={displayConditionsList}
-        setDisplayConditionsList={handleSetDisplayConditionsList}
-      />
-      <OldDisplayConditionsModal
-        open={oldDisplayConditionOpen}
-        setOpen={setOldDisplayConditionOpen}
-        displayConditionInfoRef={displayConditionInfoRef}
-        displayConditionsList={displayConditionsList}
-        setDisplayConditionsList={handleSetDisplayConditionsList}
-      />
-      <MergeTagsModal
-        open={mergeTagModalOpen}
-        setOpen={setMergeTagModalOpen}
-        mergeTagInfoRef={mergeTagInfoRef}
-        mergeTagsList={mergeTagsList}
-        setMergeTagsList={handleSetMergeTagsList}
-        variables={variables}
-      />
-      {designEditorType === 'design' && (
-        <div
-          className="suprsend-absolute suprsend-inset-0"
-          style={showDesignerIframe ? undefined : { visibility: 'hidden' }}
-        >
-          {iframeLoading && (
-            <div className="suprsend-absolute suprsend-inset-0 suprsend-flex suprsend-items-center suprsend-justify-center suprsend-bg-background suprsend-z-10">
-              <Loader2
-                className="suprsend-h-6 suprsend-w-6 suprsend-text-muted-foreground"
-                style={{ animation: 'spin 1s linear infinite' }}
-              />
-            </div>
-          )}
-          <iframe
-            ref={iframeRef}
-            src={`http://localhost:3000/dropin_email_editor?userId=${encodeURIComponent(userId)}`}
-            className="suprsend-w-full suprsend-h-full"
-          />
-        </div>
-      )}
-
-      {editorType === 'design_editor' && designEditorType !== 'design' && (
-        <TextEditors
-          type="html"
-          value={body?.raw?.html ?? ''}
-          onChange={(v) => handleEditorChange('html', v)}
-          variables={variables}
-        />
-      )}
-
-      {editorType !== 'design_editor' && (
-        <TextEditors
-          type="plaintext"
-          value={plainTextValue}
-          onChange={(v) => handleEditorChange('text', v)}
-          variables={variables}
-        />
-      )}
-    </div>
-  );
-}
-
-function TextEditors({
-  type,
-  value,
-  onChange,
-  variables = {},
-}: TextEditorsProps) {
-  const [activePreviewTab, setActivePreviewTab] = useState<
-    'desktop' | 'mobile'
-  >('desktop');
-
-  const renderedContent = useMemo(
-    () => renderHandlebars(value, variables),
-    [value, variables]
-  );
-
-  const previewIframeRef = useRef<HTMLIFrameElement>(null);
-
-  const resizePreviewIframe = useCallback(() => {
-    const iframe = previewIframeRef.current;
-    const doc = iframe?.contentDocument;
-    if (!doc) return;
-    if (doc.body) doc.body.style.overflow = 'hidden';
-    if (doc.documentElement) doc.documentElement.style.overflow = 'hidden';
-    const height = Math.max(
-      doc.body?.scrollHeight ?? 0,
-      doc.documentElement?.scrollHeight ?? 0
-    );
-    if (iframe) iframe.style.height = `${height}px`;
-  }, []);
-
-  return (
-    <ResizablePanelGroup direction="horizontal" className="suprsend-border">
-      <ResizablePanel
-        defaultSize={50}
-        className="suprsend-overflow-hidden mt-1 suprsend-h-full"
-      >
-        <CodeMirrorEditor
-          value={value}
-          onChange={onChange}
-          language={type === 'html' ? 'html' : undefined}
-          className="suprsend-h-full suprsend-border-0 suprsend-rounded-none"
-        />
-      </ResizablePanel>
-      <ResizableHandle withHandle />
-      <ResizablePanel
-        defaultSize={50}
-        className="suprsend-flex suprsend-flex-col"
-      >
-        <div className="suprsend-border-b suprsend-flex suprsend-items-center suprsend-justify-between suprsend-shrink-0">
-          <div className="suprsend-p-2">
-            <p className="suprsend-text-sm suprsend-font-medium">Preview</p>
-          </div>
-          {type === 'html' && (
-            <div className="suprsend-mr-2">
-              <Tabs
-                defaultValue="desktop"
-                onValueChange={(v) =>
-                  setActivePreviewTab(v as 'desktop' | 'mobile')
-                }
-              >
-                <TabsList className="!suprsend-h-7">
-                  <TabsTrigger value="desktop" className="h-5">
-                    <TvMinimal className="suprsend-w-3 suprsend-h-3" />
-                  </TabsTrigger>
-                  <TabsTrigger value="mobile" className="h-5">
-                    <Smartphone className="suprsend-w-3 suprsend-h-3" />
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-          )}
-        </div>
-
-        <div className="suprsend-flex-1 suprsend-min-h-0 suprsend-overflow-auto suprsend-bg-muted/30">
-          {type === 'html' ? (
-            <div
-              className={cn(
-                'suprsend-p-4',
-                activePreviewTab === 'mobile' &&
-                  'suprsend-flex suprsend-justify-center'
-              )}
-            >
-              <iframe
-                ref={previewIframeRef}
-                srcDoc={renderedContent}
-                title="Email preview"
-                onLoad={resizePreviewIframe}
-                className={cn(
-                  'suprsend-bg-white suprsend-border suprsend-border-muted-foreground/10',
-                  activePreviewTab === 'desktop'
-                    ? 'suprsend-w-full'
-                    : 'suprsend-w-[390px] suprsend-rounded-lg'
-                )}
-              />
-            </div>
-          ) : (
-            <pre className="suprsend-p-4 suprsend-text-xs suprsend-whitespace-pre-wrap suprsend-break-words suprsend-font-mono suprsend-text-gray-700">
-              {renderedContent || (
-                <span className="suprsend-text-muted-foreground">
-                  Nothing to preview
-                </span>
-              )}
-            </pre>
-          )}
-        </div>
-      </ResizablePanel>
-    </ResizablePanelGroup>
   );
 }

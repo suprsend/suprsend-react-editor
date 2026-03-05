@@ -10,7 +10,10 @@ import MSTeamsIcon from '@/assets/msteamPreview.svg?react';
 import type {
   MSTeamsPreviewProps,
   JsonnetPreviewState,
+  JsonnetPreviewProps,
+  MarkdownPreviewProps,
   JsonnetRenderBody,
+  AdaptiveCardRenderResult,
 } from '@/types';
 
 // ── Helpers ──
@@ -25,9 +28,7 @@ function formatTime() {
   });
 }
 
-function renderAdaptiveCard(
-  cardJson: unknown
-): { success: true; html: string } | { success: false; error: string } {
+function renderAdaptiveCard(cardJson: unknown): AdaptiveCardRenderResult {
   try {
     const adaptiveCard = new AdaptiveCards.AdaptiveCard();
     AdaptiveCards.AdaptiveCard.onProcessMarkdown = (text, result) => {
@@ -87,13 +88,7 @@ function MessageBubble({ children }: { children: React.ReactNode }) {
 
 // ── Markdown Preview (auto-rendered) ──
 
-function MarkdownPreview({
-  bodyText,
-  variables,
-}: {
-  bodyText: string;
-  variables: Record<string, unknown>;
-}) {
+function MarkdownPreview({ bodyText, variables }: MarkdownPreviewProps) {
   const rendered = useMemo(
     () => renderHandlebars(bodyText, variables),
     [bodyText, variables]
@@ -206,13 +201,7 @@ function MarkdownPreview({
 
 // ── JSONNET Preview (manual load) ──
 
-function JsonnetPreview({
-  bodyCard,
-  variables,
-}: {
-  bodyCard: string;
-  variables: Record<string, unknown>;
-}) {
+function JsonnetPreview({ bodyCard, variables }: JsonnetPreviewProps) {
   const [previewState, setPreviewState] = useState<JsonnetPreviewState | null>(
     null
   );

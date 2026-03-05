@@ -2,13 +2,11 @@ import { useMemo } from 'react';
 import { renderHandlebars } from '@/components/custom-ui/HandlebarsRenderer';
 import { Button } from '@/components/ui/button';
 import SlackIcon from '@/assets/slackChannel.svg?react';
-
-interface SlackPreviewProps {
-  bodyType: 'block' | 'text';
-  bodyBlock: string;
-  bodyText: string;
-  variables: Record<string, unknown>;
-}
+import type {
+  SlackPreviewProps,
+  SlackTextPreviewProps,
+  SlackBlockPreviewProps,
+} from '@/types';
 
 function formatTime() {
   return new Date().toLocaleTimeString([], {
@@ -55,13 +53,7 @@ function SlackFrame({ children }: { children: React.ReactNode }) {
 
 // ── Text Preview (auto-rendered) ──
 
-function TextPreview({
-  bodyText,
-  variables,
-}: {
-  bodyText: string;
-  variables: Record<string, unknown>;
-}) {
+function TextPreview({ bodyText, variables }: SlackTextPreviewProps) {
   const rendered = useMemo(
     () => renderHandlebars(bodyText, variables),
     [bodyText, variables]
@@ -86,7 +78,7 @@ function TextPreview({
 
 // ── Block/JSONNET Preview (redirect to Slack Block Kit Builder) ──
 
-function BlockPreview({ bodyBlock }: { bodyBlock: string }) {
+function BlockPreview({ bodyBlock }: SlackBlockPreviewProps) {
   if (!bodyBlock) {
     return (
       <div className="suprsend-w-full suprsend-max-w-lg suprsend-flex suprsend-items-center suprsend-justify-center suprsend-min-h-[200px]">

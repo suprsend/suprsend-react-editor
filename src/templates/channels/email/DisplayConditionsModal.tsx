@@ -26,6 +26,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import type {
+  Condition,
+  OuterCondition,
+  DisplayConditionData,
+  DisplayConditionInfo,
+} from '@/types';
 
 const OPERATOR_OPTIONS = [
   { name: '==', value: '==' },
@@ -35,33 +41,6 @@ const OPERATOR_OPTIONS = [
   { name: '<', value: '<' },
   { name: '<=', value: '<=' },
 ];
-
-export interface Condition {
-  variable: string;
-  op: string;
-  value: string;
-}
-
-export interface OuterCondition {
-  op: 'AND' | 'OR';
-  args: Condition[];
-}
-
-export interface DisplayConditionData {
-  id?: string;
-  version?: string;
-  label?: string;
-  description?: string;
-  expression?: string;
-  conditions?: OuterCondition[];
-  before?: string;
-  after?: string;
-}
-
-export interface DisplayConditionInfo {
-  data: DisplayConditionData;
-  done: (data: DisplayConditionData) => void;
-}
 
 const defaultCondition: OuterCondition[] = [
   {
