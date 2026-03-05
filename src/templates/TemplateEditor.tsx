@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { TabBar } from '@/components/custom-ui/channelsTab';
 import EmailChannel from '@/templates/channels/email';
-import IOSPushChannel from '@/templates/channels/IOSPush';
+import IOSPushChannel from '@/templates/channels/iospush';
 import WebpushChannel from '@/templates/channels/webpush';
 import MSTeamsChannel from '@/templates/channels/msteams';
 import SlackChannel from '@/templates/channels/slack';
+import AndroidPushChannel from '@/templates/channels/androidpush';
 import type { SuprSendTemplateEditorProps } from '@/types';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { useMockData, useVariantDetails } from '@/apis';
@@ -99,7 +100,10 @@ export default function SuprSendTemplateEditor({
           />
         )}
         {selectedChannel === 'androidpush' && (
-          <p>Android Push Channel Editor Coming Soon...</p>
+          <AndroidPushChannel
+            variantData={variantData}
+            variables={mockData?.transformed_data ?? {}}
+          />
         )}
         {selectedChannel === 'iospush' && (
           <IOSPushChannel

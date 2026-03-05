@@ -2,19 +2,11 @@ import { useCallback } from 'react';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 import SuggestionInput from '@/components/custom-ui/SuggestionInput';
 import SuggestionInputWithEmoji from '@/components/custom-ui/SuggestionInputWithEmoji';
-import IPhoneFrame from '@/components/custom-ui/IPhoneFrame';
 import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import { makeAbsoluteUrl } from '@/lib/utils';
-import HandlebarsRenderer, {
-  renderHandlebars,
-} from '@/components/custom-ui/HandlebarsRenderer';
-import type {
-  IOSPushChannelProps,
-  IOSPushPreviewProps,
-  IOSPushFormValues,
-} from '@/types';
+import type { IOSPushChannelProps, IOSPushFormValues } from '@/types';
+import IOSPushPreview from './Preview';
 
 export default function IOSPushChannel({
   variantData,
@@ -152,46 +144,5 @@ export default function IOSPushChannel({
         />
       </div>
     </div>
-  );
-}
-
-function IOSPushPreview({ formValues, variables }: IOSPushPreviewProps) {
-  const resolvedImageUrl = formValues.image_url
-    ? makeAbsoluteUrl(renderHandlebars(formValues.image_url, variables))
-    : '';
-
-  return (
-    <IPhoneFrame>
-      {/* Notification card */}
-      <div className="suprsend-bg-white suprsend-opacity-70 suprsend-rounded-[14px] suprsend-px-3 suprsend-py-2.5 suprsend-backdrop-blur-[20px]">
-        {/* Header row */}
-        <div className="suprsend-flex suprsend-items-start suprsend-justify-between suprsend-mb-1">
-          <HandlebarsRenderer
-            template={formValues.header || 'Notification Title'}
-            data={variables}
-            className="suprsend-m-0 suprsend-text-[11px] suprsend-font-semibold suprsend-text-foreground suprsend-break-words"
-          />
-          <span className="suprsend-text-[11px] suprsend-text-muted-foreground">
-            now
-          </span>
-        </div>
-
-        {/* Body */}
-        <HandlebarsRenderer
-          template={formValues.body || 'Notification body text'}
-          data={variables}
-          className="suprsend-m-0 suprsend-text-[11px] suprsend-text-muted-foreground suprsend-break-words"
-        />
-
-        {/* Image */}
-        {resolvedImageUrl && (
-          <img
-            src={resolvedImageUrl}
-            alt="notification"
-            className="suprsend-w-full suprsend-max-h-[150px] suprsend-object-cover suprsend-rounded-lg suprsend-mt-1.5"
-          />
-        )}
-      </div>
-    </IPhoneFrame>
   );
 }

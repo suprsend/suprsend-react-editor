@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 export type ChannelId =
   | 'android'
   | 'email'
@@ -295,6 +297,74 @@ export interface JsonnetRenderResponse {
   error?: string;
 }
 
+// --- Android Push ---
+
+export interface IAndroidPushButton {
+  id: string;
+  url: string;
+  text: string;
+}
+
+export interface IAndroidPushExtraPayloadEntry {
+  key: string;
+  value: string;
+}
+
+export interface IAndroidPushContent {
+  header: string;
+  body: string;
+  subtext: string;
+  image_url: string;
+  action_url: string;
+  buttons: IAndroidPushButton[];
+  is_silent: boolean;
+  is_sticky: boolean;
+  timeout_sec: number;
+  group: string;
+  icon_small: string;
+  channel_sound: string;
+  extra_payload: Record<string, string>;
+}
+
+export interface AndroidPushFormValues {
+  header: string;
+  body: string;
+  subtext: string;
+  image_url: string;
+  action_url: string;
+  buttons: IAndroidPushButton[];
+  is_silent: boolean;
+  is_sticky: boolean;
+  timeout_sec: number;
+  group: string;
+  icon_small: string;
+  channel_sound: string;
+  extra_payload: IAndroidPushExtraPayloadEntry[];
+}
+
+export interface IAndroidPushContentResponse {
+  content: IAndroidPushContent;
+}
+
+export type AndroidPushContentPayload = {
+  content: Partial<IAndroidPushContent>;
+};
+
+export interface AndroidPushChannelProps {
+  variantData: IAndroidPushContentResponse;
+  variables: Record<string, unknown>;
+}
+
+export interface PhoneFrameProps {
+  children?: ReactNode;
+  className?: string;
+}
+
+export interface AndroidPushPreviewProps {
+  formValues: AndroidPushFormValues;
+  variables: Record<string, unknown>;
+}
+
 // --- Generic payload union for API ---
 
 export type ChannelContentPayload =
@@ -302,7 +372,8 @@ export type ChannelContentPayload =
   | IOSPushContentPayload
   | WebpushContentPayload
   | MSTeamsContentPayload
-  | SlackContentPayload;
+  | SlackContentPayload
+  | AndroidPushContentPayload;
 
 export interface UpdateVariantContentParams extends GetVariantDetailsParams {
   payload: ChannelContentPayload;
