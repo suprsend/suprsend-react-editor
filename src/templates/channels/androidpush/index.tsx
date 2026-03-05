@@ -24,7 +24,7 @@ export default function AndroidPushChannel({
   variantData,
   variables,
 }: AndroidPushChannelProps) {
-  const { templateSlug, variantId } = useTemplateEditorContext();
+  const { templateSlug, variantId, isLive } = useTemplateEditorContext();
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const { mutate } = useUpdateVariantContent({
@@ -128,6 +128,7 @@ export default function AndroidPushChannel({
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
+                  disabled={isLive}
                 />
               )}
             />
@@ -150,6 +151,7 @@ export default function AndroidPushChannel({
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
+                  disabled={isLive}
                 />
               )}
             />
@@ -169,6 +171,7 @@ export default function AndroidPushChannel({
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
+                  disabled={isLive}
                 />
               )}
             />
@@ -189,6 +192,7 @@ export default function AndroidPushChannel({
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
+                  disabled={isLive}
                 />
               )}
             />
@@ -208,6 +212,7 @@ export default function AndroidPushChannel({
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
+                  disabled={isLive}
                 />
               )}
             />
@@ -235,6 +240,7 @@ export default function AndroidPushChannel({
                         enableHighlighting
                         enableSuggestions
                         variables={variables}
+                        disabled={isLive}
                       />
                     )}
                   />
@@ -251,18 +257,21 @@ export default function AndroidPushChannel({
                         enableHighlighting
                         enableSuggestions
                         variables={variables}
+                        disabled={isLive}
                       />
                     )}
                   />
                 </div>
-                <X
-                  className="suprsend-w-4 suprsend-h-4 suprsend-cursor-pointer suprsend-text-muted-foreground"
-                  onClick={() => removeButton(index)}
-                />
+                {!isLive && (
+                  <X
+                    className="suprsend-w-4 suprsend-h-4 suprsend-cursor-pointer suprsend-text-muted-foreground"
+                    onClick={() => removeButton(index)}
+                  />
+                )}
               </div>
             ))}
 
-            {buttonFields.length < 3 && (
+            {buttonFields.length < 3 && !isLive && (
               <Button
                 variant="outline"
                 size="sm"
@@ -300,6 +309,7 @@ export default function AndroidPushChannel({
                       <Switch
                         checked={field.value}
                         onCheckedChange={field.onChange}
+                        disabled={isLive}
                       />
                     )}
                   />
@@ -314,6 +324,7 @@ export default function AndroidPushChannel({
                       <Switch
                         checked={field.value}
                         onCheckedChange={field.onChange}
+                        disabled={isLive}
                       />
                     )}
                   />
@@ -333,6 +344,7 @@ export default function AndroidPushChannel({
                           field.onChange(val ? Number(val) : 0);
                         }}
                         placeholder="0"
+                        disabled={isLive}
                       />
                     )}
                   />
@@ -348,6 +360,7 @@ export default function AndroidPushChannel({
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Notification group"
+                        disabled={isLive}
                       />
                     )}
                   />
@@ -363,6 +376,7 @@ export default function AndroidPushChannel({
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Small icon identifier name"
+                        disabled={isLive}
                       />
                     )}
                   />
@@ -378,6 +392,7 @@ export default function AndroidPushChannel({
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Sound file name"
+                        disabled={isLive}
                       />
                     )}
                   />
@@ -405,6 +420,7 @@ export default function AndroidPushChannel({
                               enableHighlighting
                               enableSuggestions
                               variables={variables}
+                              disabled={isLive}
                             />
                           )}
                         />
@@ -421,25 +437,30 @@ export default function AndroidPushChannel({
                               enableHighlighting
                               enableSuggestions
                               variables={variables}
+                              disabled={isLive}
                             />
                           )}
                         />
                       </div>
-                      <X
-                        className="suprsend-w-4 suprsend-h-4 suprsend-cursor-pointer suprsend-text-muted-foreground"
-                        onClick={() => removePayload(index)}
-                      />
+                      {!isLive && (
+                        <X
+                          className="suprsend-w-4 suprsend-h-4 suprsend-cursor-pointer suprsend-text-muted-foreground"
+                          onClick={() => removePayload(index)}
+                        />
+                      )}
                     </div>
                   ))}
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => appendPayload({ key: '', value: '' })}
-                  >
-                    <Plus className="suprsend-w-4 suprsend-h-4 suprsend-text-muted-foreground" />
-                    Add key-value pair
-                  </Button>
+                  {!isLive && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => appendPayload({ key: '', value: '' })}
+                    >
+                      <Plus className="suprsend-w-4 suprsend-h-4 suprsend-text-muted-foreground" />
+                      Add key-value pair
+                    </Button>
+                  )}
                 </div>
               </div>
             </CollapsibleContent>

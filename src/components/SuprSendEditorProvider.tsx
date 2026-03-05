@@ -22,8 +22,10 @@ export default function SuprSendTemplateEditorProvider({
   refreshAccessToken,
   recipientDistinctId,
   actorDistinctId,
+  mode,
 }: FullSuprSendTemplateEditorProviderProps) {
   const isPrivate = true; // TODO: Determine if the template is private based on your logic
+  const isLive = mode === 'live';
 
   const value = useMemo<TemplateEditorContextValue>(
     () => ({
@@ -35,10 +37,12 @@ export default function SuprSendTemplateEditorProvider({
       locale,
       conditions,
       isPrivate,
+      isLive,
       accessToken,
       refreshAccessToken,
       recipientDistinctId,
       actorDistinctId,
+      mode,
     }),
     [
       workspaceUid,
@@ -49,10 +53,12 @@ export default function SuprSendTemplateEditorProvider({
       locale,
       conditions,
       isPrivate,
+      isLive,
       accessToken,
       refreshAccessToken,
       recipientDistinctId,
       actorDistinctId,
+      mode,
     ]
   );
 

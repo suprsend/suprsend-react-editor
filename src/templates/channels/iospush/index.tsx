@@ -12,7 +12,7 @@ export default function IOSPushChannel({
   variantData,
   variables,
 }: IOSPushChannelProps) {
-  const { templateSlug, variantId } = useTemplateEditorContext();
+  const { templateSlug, variantId, isLive } = useTemplateEditorContext();
 
   const { mutate } = useUpdateVariantContent({
     templateSlug,
@@ -62,6 +62,7 @@ export default function IOSPushChannel({
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
+                  disabled={isLive}
                 />
               )}
             />
@@ -84,6 +85,7 @@ export default function IOSPushChannel({
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
+                  disabled={isLive}
                 />
               )}
             />
@@ -103,6 +105,7 @@ export default function IOSPushChannel({
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
+                  disabled={isLive}
                 />
               )}
             />
@@ -122,6 +125,7 @@ export default function IOSPushChannel({
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
+                  disabled={isLive}
                 />
               )}
             />

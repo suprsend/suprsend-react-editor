@@ -13,7 +13,7 @@ export default function MSTeamsChannel({
   variantData,
   variables,
 }: MSTeamsChannelProps) {
-  const { templateSlug, variantId } = useTemplateEditorContext();
+  const { templateSlug, variantId, isLive } = useTemplateEditorContext();
 
   const { mutate } = useUpdateVariantContent({
     templateSlug,
@@ -61,10 +61,13 @@ export default function MSTeamsChannel({
           {/* Body Type Toggle */}
           <Tabs
             value={formValues.body_type}
-            onValueChange={(val) =>
-              setValue('body_type', val as 'card' | 'text', {
-                shouldDirty: true,
-              })
+            onValueChange={
+              isLive
+                ? undefined
+                : (val) =>
+                    setValue('body_type', val as 'card' | 'text', {
+                      shouldDirty: true,
+                    })
             }
           >
             <TabsList>
@@ -90,6 +93,7 @@ export default function MSTeamsChannel({
               }
               placeholder="Paste your Adaptive Card JSON / JSONNET here..."
               height="400px"
+              disabled={isLive}
             />
           ) : (
             <SuggestionInputWithEmoji
@@ -100,6 +104,7 @@ export default function MSTeamsChannel({
               variables={variables}
               as="textarea"
               rows={19}
+              disabled={isLive}
             />
           )}
         </div>

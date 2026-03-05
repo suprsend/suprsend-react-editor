@@ -20,6 +20,7 @@ export default function CodeEditorWithEmoji({
   mandatory = true,
   value = '',
   onChange,
+  disabled,
   ...rest
 }: CodeEditorWithEmojiProps) {
   const editorRef = useRef<CodeMirrorEditorHandle>(null);
@@ -72,18 +73,21 @@ export default function CodeEditorWithEmoji({
             ref={editorRef}
             value={value}
             onChange={onChange}
+            disabled={disabled}
             {...rest}
             onUpdate={handleUpdate}
           />
         </div>
 
-        <EmojiPickerTrigger
-          open={emojiOpen}
-          onOpenChange={setEmojiOpen}
-          onEmojiClick={insertEmoji}
-          align="end"
-          triggerClassName="suprsend-mt-2"
-        />
+        {!disabled && (
+          <EmojiPickerTrigger
+            open={emojiOpen}
+            onOpenChange={setEmojiOpen}
+            onEmojiClick={insertEmoji}
+            align="end"
+            triggerClassName="suprsend-mt-2"
+          />
+        )}
       </div>
     </>
   );

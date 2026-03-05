@@ -10,9 +10,13 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import type { CommitModalProps, CommitButtonProps } from '@/types';
+import type {
+  CommitModalProps,
+  CommitButtonProps,
+  CommitVariant,
+} from '@/types';
 import { GitCommitHorizontal, Loader2 } from 'lucide-react';
-import { usePreCommitValidate } from '@/apis';
+import { usePreCommitValidate, useCommitTemplate } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 
 function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
@@ -28,23 +32,52 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
     enabled: open,
   });
 
-  const [selectedFiles, setSelectedFiles] = useState<Record<string, boolean>>({
-    'Email > Default Variant': true,
-    'Email > Variant 1': true,
-  } as Record<string, boolean>);
+  const commitMutation = useCommitTemplate({ templateSlug });
 
-  const handleFileToggle = (file: string) => {
-    setSelectedFiles((prev) => ({
+  const variants: CommitVariant[] = preCommitData?.variants ?? [];
+
+  const [selectedVariants, setSelectedVariants] = useState<
+    Record<string, boolean>
+  >({});
+
+  const getVariantKey = (v: CommitVariant) => `${v.channel}:${v.id}`;
+
+  // Reset selections when preCommitData loads
+  const [prevVariants, setPrevVariants] = useState(variants);
+  if (variants !== prevVariants && variants.length > 0) {
+    setPrevVariants(variants);
+    const initial: Record<string, boolean> = {};
+    for (const v of variants) {
+      initial[getVariantKey(v)] = true;
+    }
+    setSelectedVariants(initial);
+  }
+
+  const handleVariantToggle = (key: string) => {
+    setSelectedVariants((prev) => ({
       ...prev,
-      [file]: !prev[file],
+      [key]: !prev[key],
     }));
   };
 
+  const selectedList = variants.filter((v) => selectedVariants[getVariantKey(v)]);
+
   const handleCommit = () => {
-    console.log('Committing with description:', description);
-    console.log('Selected files:', selectedFiles);
-    onOpenChange(false);
-    onCommit();
+    commitMutation.mutate(
+      {
+        commitMessage: description,
+        variants: selectedList.map((v) => ({
+          channel: v.channel,
+          id: v.id,
+        })),
+      },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          onCommit();
+        },
+      }
+    );
   };
 
   return (
@@ -67,16 +100,6 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
           </div>
         ) : (
           <div className="suprsend-space-y-6">
-            {preCommitData && (
-              <div className="suprsend-rounded-md suprsend-border suprsend-p-4 suprsend-text-sm suprsend-bg-muted/50">
-                <p className="suprsend-font-medium suprsend-mb-2">
-                  Validation Result
-                </p>
-                <pre className="suprsend-text-xs suprsend-whitespace-pre-wrap suprsend-text-muted-foreground">
-                  {JSON.stringify(preCommitData, null, 2)}
-                </pre>
-              </div>
-            )}
             <div className="suprsend-space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
@@ -89,28 +112,31 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
             </div>
             <div className="suprsend-space-y-3">
               <p className="suprsend-text-sm suprsend-text-muted-foreground">
-                Below 2 files have been updated. Select the ones you want to
-                commit
+                Below {variants.length} file{variants.length !== 1 ? 's' : ''}{' '}
+                have been updated. Select the ones you want to commit
               </p>
               <div className="suprsend-space-y-3">
-                {Object.keys(selectedFiles).map((file) => (
-                  <div
-                    key={file}
-                    className="suprsend-flex suprsend-items-center suprsend-space-x-3"
-                  >
-                    <Checkbox
-                      id={file}
-                      checked={selectedFiles[file]}
-                      onCheckedChange={() => handleFileToggle(file)}
-                    />
-                    <Label
-                      htmlFor={file}
-                      className="suprsend-text-sm suprsend-font-normal suprsend-cursor-pointer"
+                {variants.map((variant) => {
+                  const key = getVariantKey(variant);
+                  return (
+                    <div
+                      key={key}
+                      className="suprsend-flex suprsend-items-center suprsend-space-x-3"
                     >
-                      {file}
-                    </Label>
-                  </div>
-                ))}
+                      <Checkbox
+                        id={key}
+                        checked={!!selectedVariants[key]}
+                        onCheckedChange={() => handleVariantToggle(key)}
+                      />
+                      <Label
+                        htmlFor={key}
+                        className="suprsend-text-sm suprsend-font-normal suprsend-cursor-pointer"
+                      >
+                        {variant.channel} &gt; {variant.id}
+                      </Label>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -120,8 +146,20 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleCommit} disabled={isLoading}>
-            Commit
+          <Button
+            onClick={handleCommit}
+            disabled={
+              isLoading || commitMutation.isPending || selectedList.length === 0
+            }
+          >
+            {commitMutation.isPending ? (
+              <>
+                <Loader2 className="suprsend-h-3.5 suprsend-w-3.5 suprsend-animate-spin" />
+                Committing...
+              </>
+            ) : (
+              'Commit'
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -130,6 +168,7 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
 }
 
 export default function CommitButton({ onCommit }: CommitButtonProps) {
+  const { isLive } = useTemplateEditorContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -137,6 +176,7 @@ export default function CommitButton({ onCommit }: CommitButtonProps) {
       <Button
         type="button"
         className="suprsend-h-7 suprsend-rounded suprsend-flex suprsend-items-center suprsend-gap-1.5"
+        disabled={isLive}
         onClick={() => {
           setIsModalOpen(true);
         }}
