@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 export type ChannelId =
   | 'android'
   | 'email'
@@ -240,6 +242,11 @@ export type AndroidPushContentPayload = {
 export interface AndroidPushChannelProps {
   variantData: IAndroidPushContentResponse;
   variables: Record<string, unknown>;
+}
+
+export interface PhoneFrameProps {
+  children?: ReactNode;
+  className?: string;
 }
 
 export interface AndroidPushPreviewProps {

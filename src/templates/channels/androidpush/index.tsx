@@ -113,7 +113,6 @@ export default function AndroidPushChannel({
       {/* Form */}
       <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto">
         <div className="suprsend-max-w-2xl suprsend-space-y-6">
-          {/* Title */}
           <div className="suprsend-space-y-1">
             <Controller
               name="header"
@@ -134,7 +133,6 @@ export default function AndroidPushChannel({
             />
           </div>
 
-          {/* Body */}
           <div className="suprsend-space-y-1">
             <Controller
               name="body"
@@ -157,7 +155,6 @@ export default function AndroidPushChannel({
             />
           </div>
 
-          {/* Subtext */}
           <div className="suprsend-space-y-1">
             <Controller
               name="subtext"
@@ -177,7 +174,6 @@ export default function AndroidPushChannel({
             />
           </div>
 
-          {/* Banner Image */}
           <div className="suprsend-space-y-1">
             <Controller
               name="image_url"
@@ -198,7 +194,6 @@ export default function AndroidPushChannel({
             />
           </div>
 
-          {/* Action URL */}
           <div className="suprsend-space-y-1">
             <Controller
               name="action_url"
@@ -218,7 +213,6 @@ export default function AndroidPushChannel({
             />
           </div>
 
-          {/* Action Buttons */}
           <div className="suprsend-space-y-3">
             <p className="suprsend-text-sm suprsend-font-semibold suprsend-text-foreground">
               Action Buttons
@@ -280,10 +274,8 @@ export default function AndroidPushChannel({
             )}
           </div>
 
-          {/* Separator */}
           <div className="suprsend-border-t suprsend-border-dashed suprsend-border-border" />
 
-          {/* Advanced Configuration */}
           <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
             <CollapsibleTrigger className="suprsend-flex suprsend-items-center suprsend-gap-1 suprsend-cursor-pointer">
               <p className="suprsend-text-sm suprsend-font-semibold suprsend-text-foreground">
@@ -299,7 +291,6 @@ export default function AndroidPushChannel({
 
             <CollapsibleContent>
               <div className="suprsend-space-y-5 suprsend-pt-4">
-                {/* Silent */}
                 <div className="suprsend-flex suprsend-items-center suprsend-gap-3">
                   <Label>Silent</Label>
                   <Controller
@@ -314,7 +305,6 @@ export default function AndroidPushChannel({
                   />
                 </div>
 
-                {/* Sticky Notifications */}
                 <div className="suprsend-flex suprsend-items-center suprsend-gap-3">
                   <Label>Sticky Notifications</Label>
                   <Controller
@@ -329,7 +319,6 @@ export default function AndroidPushChannel({
                   />
                 </div>
 
-                {/* Timeout */}
                 <div className="suprsend-space-y-1">
                   <Label>Timeout (in seconds)</Label>
                   <Controller
@@ -349,7 +338,6 @@ export default function AndroidPushChannel({
                   />
                 </div>
 
-                {/* Notification Group */}
                 <div className="suprsend-space-y-1">
                   <Label>Notification Group</Label>
                   <Controller
@@ -365,7 +353,6 @@ export default function AndroidPushChannel({
                   />
                 </div>
 
-                {/* App Icon */}
                 <div className="suprsend-space-y-1">
                   <Label>App Icon</Label>
                   <Controller
@@ -381,7 +368,6 @@ export default function AndroidPushChannel({
                   />
                 </div>
 
-                {/* Sound */}
                 <div className="suprsend-space-y-1">
                   <Label>Sound</Label>
                   <Controller
@@ -397,7 +383,6 @@ export default function AndroidPushChannel({
                   />
                 </div>
 
-                {/* Custom Key-Value Pairs */}
                 <div className="suprsend-space-y-3">
                   <p className="suprsend-text-sm suprsend-font-semibold suprsend-text-foreground">
                     Custom key-value pairs

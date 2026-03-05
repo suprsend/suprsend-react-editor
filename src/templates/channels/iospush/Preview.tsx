@@ -1,19 +1,14 @@
 import { useMemo } from 'react';
-import type { ReactNode } from 'react';
 import { Flashlight, Camera, Signal, Wifi, BatteryFull } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import HandlebarsRenderer, {
   renderHandlebars,
 } from '@/components/custom-ui/HandlebarsRenderer';
 import { makeAbsoluteUrl } from '@/lib/utils';
-import type { IOSPushPreviewProps } from '@/types';
+import type { PhoneFrameProps, IOSPushPreviewProps } from '@/types';
 
 // --- iPhone Frame (reusable) ---
 
-interface IPhoneFrameProps {
-  children?: ReactNode;
-  className?: string;
-}
 
 function useCurrentDateTime() {
   return useMemo(() => {
@@ -31,7 +26,7 @@ function useCurrentDateTime() {
   }, []);
 }
 
-export function IPhoneFrame({ children, className }: IPhoneFrameProps) {
+export function IPhoneFrame({ children, className }: PhoneFrameProps) {
   const { dateStr, timeStr } = useCurrentDateTime();
 
   return (
