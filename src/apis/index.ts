@@ -167,6 +167,38 @@ const getMockData = async ({
   return resp.data;
 };
 
+const getPreCommitValidate = async ({
+  templateSlug,
+  workspaceUid,
+  isPrivate,
+}: {
+  templateSlug: string;
+  workspaceUid: string;
+  isPrivate: boolean;
+}) => {
+  const url = isPrivate
+    ? `${API_BASE_URL}/v2/${workspaceUid}/staging/template/${templateSlug}/pre_commit_validate/`
+    : `${API_BASE_URL}/v2/${workspaceUid}/staging/template/${templateSlug}/embedded/pre_commit_validate/`;
+  const resp = await axiosInst.get(url);
+  return resp.data;
+};
+
+export const usePreCommitValidate = ({
+  templateSlug,
+  enabled,
+}: {
+  templateSlug: string;
+  enabled: boolean;
+}) => {
+  const { workspaceUid, isPrivate } = useTemplateEditorContext();
+  return useQuery({
+    queryKey: [`staging/template/${templateSlug}/pre_commit_validate`],
+    queryFn: () =>
+      getPreCommitValidate({ templateSlug, workspaceUid, isPrivate }),
+    enabled,
+  });
+};
+
 export const useMockData = ({ templateSlug }: UseMockDataParams) => {
   const {
     tenantId,
