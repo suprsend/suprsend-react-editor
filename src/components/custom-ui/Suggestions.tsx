@@ -15,6 +15,7 @@ export interface SuggestionsProps {
   currentCaretPos: number;
   caretCoordinates: CaretCoordinates;
   onSelectOption: (selectedValue: string) => void;
+  onSuggestionsMouseDown?: () => void;
 }
 
 export default function Suggestions({
@@ -23,15 +24,19 @@ export default function Suggestions({
   currentCaretPos,
   caretCoordinates,
   onSelectOption,
+  onSuggestionsMouseDown,
 }: SuggestionsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Stop native pointerdown from reaching document-level listeners (e.g. Radix Dialog dismiss)
+  // Prevent pointerdown from bubbling to document where Radix Dialog's
+  // dismiss handler listens (bubble phase). Using bubble phase here ensures
+  // the event still reaches child elements (option clicks work) but never
+  // reaches document, so Radix won't treat it as an outside click.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const stop = (e: PointerEvent) => e.stopPropagation();
-    el.addEventListener('pointerdown', stop);
+    el.addEventListener('pointerdown', stop); // bubble phase
     return () => el.removeEventListener('pointerdown', stop);
   }, []);
 
@@ -100,12 +105,19 @@ export default function Suggestions({
     <div
       ref={containerRef}
       data-suggestions-portal
-      className="suprsend-absolute suprsend-z-50 suprsend-border suprsend-rounded suprsend-bg-muted suprsend-flex-row suprsend-flex suprsend-shadow"
+      className="suprsend-fixed suprsend-z-[9999] suprsend-border suprsend-rounded suprsend-bg-muted suprsend-flex-row suprsend-flex suprsend-shadow"
       tabIndex={-1}
-      onMouseDown={(e) => e.preventDefault()}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        onSuggestionsMouseDown?.();
+      }}
       style={{
         left: caretCoordinates.left,
         top: caretCoordinates.top + 15,
+        // Radix Dialog's modal mode sets `pointer-events: none` on document.body
+        // to block interaction with background content. Since these suggestions are
+        // portaled to body, they inherit that and become unclickable. Override here.
+        pointerEvents: 'auto',
       }}
     >
       {/* Section sidebar */}
