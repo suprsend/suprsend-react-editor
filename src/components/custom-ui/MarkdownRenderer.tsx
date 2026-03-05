@@ -2,8 +2,7 @@ import { useMemo } from 'react';
 import markdownit from 'markdown-it';
 import DOMPurify from 'dompurify';
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const md = markdownit();
+const md = markdownit();
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function markdownToHtml(markdown: string): string {

@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import * as AdaptiveCards from 'adaptivecards';
-import { md } from '@/components/custom-ui/MarkdownRenderer';
-import MarkdownRenderer from '@/components/custom-ui/MarkdownRenderer';
+import MarkdownRenderer, {
+  markdownToHtml,
+} from '@/components/custom-ui/MarkdownRenderer';
 import { renderHandlebars } from '@/components/custom-ui/HandlebarsRenderer';
 import { useJsonnetRender } from '@/apis';
 import { Button } from '@/components/ui/button';
@@ -30,7 +31,7 @@ function renderAdaptiveCard(cardJson: unknown): AdaptiveCardRenderResult {
   try {
     const adaptiveCard = new AdaptiveCards.AdaptiveCard();
     AdaptiveCards.AdaptiveCard.onProcessMarkdown = (text, result) => {
-      result.outputHtml = md.render(text);
+      result.outputHtml = markdownToHtml(text);
       result.didProcess = true;
     };
     adaptiveCard.parse(cardJson);
@@ -178,9 +179,7 @@ function JsonnetPreview({ bodyCard, variables }: JsonnetPreviewProps) {
         </div>
       ) : (
         <MessageBubble>
-          <div
-            dangerouslySetInnerHTML={{ __html: previewState.html ?? '' }}
-          />
+          <div dangerouslySetInnerHTML={{ __html: previewState.html ?? '' }} />
         </MessageBubble>
       )}
 
