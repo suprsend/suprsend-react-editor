@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import * as AdaptiveCards from 'adaptivecards';
-import markdownit from 'markdown-it';
-import Markdown from 'react-markdown';
+import { md } from '@/components/custom-ui/MarkdownRenderer';
+import MarkdownRenderer from '@/components/custom-ui/MarkdownRenderer';
 import { renderHandlebars } from '@/components/custom-ui/HandlebarsRenderer';
 import { useJsonnetRender } from '@/apis';
 import { Button } from '@/components/ui/button';
@@ -17,8 +17,6 @@ import type {
 } from '@/types';
 
 // ── Helpers ──
-
-const md = markdownit();
 
 function formatTime() {
   return new Date().toLocaleTimeString([], {
@@ -109,91 +107,7 @@ function MarkdownPreview({ bodyText, variables }: MarkdownPreviewProps) {
   return (
     <TeamsFrame>
       <MessageBubble>
-        <Markdown
-          components={{
-            a({ children, href }) {
-              return (
-                <a
-                  href={href}
-                  style={{
-                    color: '#6264A7',
-                    textDecoration: 'none',
-                    whiteSpace: 'normal',
-                  }}
-                >
-                  {children}
-                </a>
-              );
-            },
-            p({ children }) {
-              return (
-                <p style={{ margin: 0, overflowWrap: 'anywhere' }}>
-                  {children}
-                </p>
-              );
-            },
-            blockquote({ children }) {
-              return (
-                <blockquote
-                  style={{
-                    margin: 0,
-                    paddingLeft: 10,
-                    borderLeft: '3px #DBDADA solid',
-                    marginBottom: 5,
-                    backgroundColor: '#F8F8F8',
-                  }}
-                >
-                  {children}
-                </blockquote>
-              );
-            },
-            code({ children }) {
-              return (
-                <code style={{ backgroundColor: '#F8F8F8', padding: 1 }}>
-                  {children}
-                </code>
-              );
-            },
-            ul({ children }) {
-              return (
-                <ul
-                  style={{
-                    whiteSpace: 'normal',
-                    margin: 0,
-                    paddingLeft: 15,
-                    listStyle: 'revert',
-                  }}
-                >
-                  {children}
-                </ul>
-              );
-            },
-            ol({ children }) {
-              return (
-                <ol
-                  style={{
-                    whiteSpace: 'normal',
-                    margin: 0,
-                    paddingLeft: 15,
-                    listStyle: 'revert',
-                  }}
-                >
-                  {children}
-                </ol>
-              );
-            },
-            img(props) {
-              return (
-                <img
-                  style={{ maxWidth: '100%', objectFit: 'contain' }}
-                  {...props}
-                />
-              );
-            },
-          }}
-        >
-          {rendered}
-        </Markdown>
+        <MarkdownRenderer>{rendered}</MarkdownRenderer>
       </MessageBubble>
     </TeamsFrame>
   );
