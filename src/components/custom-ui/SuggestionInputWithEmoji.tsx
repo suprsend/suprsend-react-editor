@@ -23,6 +23,7 @@ export default function SuggestionInputWithEmoji({
   value,
   onChange,
   as,
+  disabled,
   ...rest
 }: SuggestionInputWithEmojiProps) {
   const isTextarea = as === 'textarea';
@@ -97,17 +98,20 @@ export default function SuggestionInputWithEmoji({
             as={as}
             label={undefined}
             mandatory={false}
+            disabled={disabled}
             {...rest}
           />
         </div>
 
-        <EmojiPickerTrigger
-          open={emojiOpen}
-          onOpenChange={setEmojiOpen}
-          onEmojiClick={insertEmoji}
-          align="end"
-          triggerClassName={isTextarea ? 'suprsend-mt-2' : undefined}
-        />
+        {!disabled && (
+          <EmojiPickerTrigger
+            open={emojiOpen}
+            onOpenChange={setEmojiOpen}
+            onEmojiClick={insertEmoji}
+            align="end"
+            triggerClassName={isTextarea ? 'suprsend-mt-2' : undefined}
+          />
+        )}
       </div>
     </>
   );

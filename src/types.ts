@@ -11,6 +11,8 @@ export type ChannelId =
   | 'webpush'
   | 'whatsapp';
 
+export type TemplateMode = 'live' | 'draft';
+
 export interface SuprSendTemplateEditorProviderProps {
   workspaceUid: string;
   templateSlug: string;
@@ -18,6 +20,7 @@ export interface SuprSendTemplateEditorProviderProps {
   channels: ChannelId[];
   tenantId: string | null;
   locale: string;
+  mode?: TemplateMode;
   conditions?: unknown;
   accessToken?: string;
   refreshAccessToken?: (oldToken: string) => Promise<string>;
@@ -31,6 +34,7 @@ export interface FullSuprSendTemplateEditorProviderProps extends SuprSendTemplat
 
 export interface TemplateEditorContextValue extends SuprSendTemplateEditorProviderProps {
   isPrivate: boolean;
+  isLive: boolean;
 }
 
 export interface SuprSendTemplateEditorProps {
@@ -47,6 +51,28 @@ export interface CommitButtonProps {
   onCommit: () => void;
 }
 
+export interface CommitVariant {
+  channel: string;
+  id: string;
+}
+
+export interface CommitTemplateParams {
+  templateSlug: string;
+  workspaceUid: string;
+  isPrivate: boolean;
+  commitMessage: string;
+  variants: CommitVariant[];
+}
+
+export interface UseCommitTemplateParams {
+  templateSlug: string;
+}
+
+export interface CommitTemplateMutationPayload {
+  commitMessage: string;
+  variants: CommitVariant[];
+}
+
 export interface UseVariantDetailsParams {
   templateSlug: string;
   chanelSlug: string;
@@ -59,6 +85,7 @@ export interface GetVariantDetailsParams extends UseVariantDetailsParams {
   conditions: unknown;
   workspaceUid: string;
   isPrivate: boolean;
+  mode?: TemplateMode;
 }
 
 export interface EmailMetaDataFormValues {
@@ -459,6 +486,7 @@ export interface GetMockDataParams extends UseMockDataParams {
   isPrivate: boolean;
   recipientDistinctId?: string;
   actorDistinctId?: string;
+  mode?: TemplateMode;
 }
 
 export interface TextEditorsProps {
@@ -467,6 +495,7 @@ export interface TextEditorsProps {
   onChange: (value: string) => void;
   variables?: Record<string, unknown>;
   onFetchFromHtml?: () => Promise<string | undefined>;
+  disabled?: boolean;
 }
 
 export interface MockDataQueryParams {
@@ -501,6 +530,8 @@ export interface EmailTemplatePlaygroundProps {
   onRawTextChange: (v: string) => void;
   plainTextOnlyText: string;
   onPlainTextOnlyTextChange: (v: string) => void;
+  disabled?: boolean;
+  showVariables?: boolean;
 }
 
 export interface IEmailSettingsPreviewBannerProps {

@@ -1,15 +1,13 @@
 import '../index.css';
 import { useMemo } from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
 import type {
   FullSuprSendTemplateEditorProviderProps,
   TemplateEditorContextValue,
 } from '@/types';
 import { TemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { useAuthInterceptor } from '@/lib/useAuthInterceptor';
-import { queryClient } from '@/apis';
 
-export default function SuprSendTemplateEditorProvider({
+export default function SuprSendEditorProvider({
   workspaceUid,
   templateSlug,
   variantId,
@@ -22,8 +20,10 @@ export default function SuprSendTemplateEditorProvider({
   refreshAccessToken,
   recipientDistinctId,
   actorDistinctId,
+  mode,
 }: FullSuprSendTemplateEditorProviderProps) {
   const isPrivate = true; // TODO: Determine if the template is private based on your logic
+  const isLive = mode === 'live';
 
   const value = useMemo<TemplateEditorContextValue>(
     () => ({
@@ -35,10 +35,12 @@ export default function SuprSendTemplateEditorProvider({
       locale,
       conditions,
       isPrivate,
+      isLive,
       accessToken,
       refreshAccessToken,
       recipientDistinctId,
       actorDistinctId,
+      mode,
     }),
     [
       workspaceUid,
@@ -49,20 +51,20 @@ export default function SuprSendTemplateEditorProvider({
       locale,
       conditions,
       isPrivate,
+      isLive,
       accessToken,
       refreshAccessToken,
       recipientDistinctId,
       actorDistinctId,
+      mode,
     ]
   );
 
   useAuthInterceptor({ accessToken, refreshAccessToken, isPrivate });
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TemplateEditorContext.Provider value={value}>
-        {children}
-      </TemplateEditorContext.Provider>
-    </QueryClientProvider>
+    <TemplateEditorContext.Provider value={value}>
+      {children}
+    </TemplateEditorContext.Provider>
   );
 }
