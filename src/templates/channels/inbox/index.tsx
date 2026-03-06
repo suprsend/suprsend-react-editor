@@ -7,6 +7,7 @@ import { useUpdateVariantContent, useInboxTags } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { X, Plus, ChevronRight } from 'lucide-react';
 import type { InboxChannelProps, InboxFormValues } from '@/types';
+import InboxPreview from './Preview';
 import {
   ReactSelect,
   type DefaultOption,
@@ -43,7 +44,7 @@ export default function InboxChannel({
   variantData,
   variables,
 }: InboxChannelProps) {
-  const { templateSlug, variantId } = useTemplateEditorContext();
+  const { templateSlug, variantId, isLive } = useTemplateEditorContext();
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [tagSearch, setTagSearch] = useState('');
 
@@ -150,6 +151,7 @@ export default function InboxChannel({
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
+                  disabled={isLive}
                 />
               )}
             />
@@ -172,6 +174,7 @@ export default function InboxChannel({
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
+                  disabled={isLive}
                 />
               )}
             />
@@ -204,6 +207,7 @@ export default function InboxChannel({
                       enableHighlighting
                       enableSuggestions
                       variables={variables}
+                      disabled={isLive}
                     />
                   )}
                 />
@@ -221,6 +225,7 @@ export default function InboxChannel({
                       enableHighlighting
                       enableSuggestions
                       variables={variables}
+                      disabled={isLive}
                     />
                   )}
                 />
@@ -244,6 +249,7 @@ export default function InboxChannel({
                       enableHighlighting
                       enableSuggestions
                       variables={variables}
+                      disabled={isLive}
                     />
                   )}
                 />
@@ -261,6 +267,7 @@ export default function InboxChannel({
                       enableHighlighting
                       enableSuggestions
                       variables={variables}
+                      disabled={isLive}
                     />
                   )}
                 />
@@ -282,6 +289,7 @@ export default function InboxChannel({
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
+                  disabled={isLive}
                 />
               )}
             />
@@ -293,6 +301,7 @@ export default function InboxChannel({
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    disabled={isLive}
                   />
                 )}
               />
@@ -322,6 +331,7 @@ export default function InboxChannel({
                             enableHighlighting
                             enableSuggestions
                             variables={variables}
+                            disabled={isLive}
                           />
                         )}
                       />
@@ -338,13 +348,19 @@ export default function InboxChannel({
                             enableHighlighting
                             enableSuggestions
                             variables={variables}
+                            disabled={isLive}
                           />
                         )}
                       />
                     </div>
                     <X
-                      className="suprsend-w-4 suprsend-h-4 suprsend-cursor-pointer suprsend-text-muted-foreground"
-                      onClick={() => removeButton(index)}
+                      className={cn(
+                        'suprsend-w-4 suprsend-h-4 suprsend-text-muted-foreground',
+                        isLive
+                          ? 'suprsend-opacity-50 suprsend-cursor-not-allowed'
+                          : 'suprsend-cursor-pointer'
+                      )}
+                      onClick={() => !isLive && removeButton(index)}
                     />
                   </div>
                   <div className="suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-ml-1">
@@ -355,6 +371,7 @@ export default function InboxChannel({
                         <Checkbox
                           checked={f.value}
                           onCheckedChange={f.onChange}
+                          disabled={isLive}
                         />
                       )}
                     />
@@ -371,6 +388,7 @@ export default function InboxChannel({
                 <Button
                   variant="outline"
                   size="sm"
+                  disabled={isLive}
                   onClick={() =>
                     appendButton({ text: '', url: '', open_in_new_tab: false })
                   }
@@ -432,6 +450,7 @@ export default function InboxChannel({
                     }}
                     placeholder="Search or create tag..."
                     isClearable
+                    isDisabled={isLive}
                   />
                 </div>
 
@@ -444,6 +463,7 @@ export default function InboxChannel({
                       <Switch
                         checked={field.value}
                         onCheckedChange={field.onChange}
+                        disabled={isLive}
                       />
                     )}
                   />
@@ -459,6 +479,7 @@ export default function InboxChannel({
                         <Switch
                           checked={field.value}
                           onCheckedChange={field.onChange}
+                          disabled={isLive}
                         />
                       )}
                     />
@@ -472,7 +493,7 @@ export default function InboxChannel({
                         render={({ field }) => (
                           <RadioGroup
                             value={field.value}
-                            onValueChange={(val) => {
+                            onValueChange={(val: string) => {
                               field.onChange(val);
                               if (val === 'relative') {
                                 setValue('expiry.value', '0d0h0m0s', {
@@ -485,6 +506,7 @@ export default function InboxChannel({
                               }
                             }}
                             className="suprsend-flex suprsend-flex-row suprsend-gap-4"
+                            disabled={isLive}
                           >
                             <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
                               <RadioGroupItem value="relative" />
@@ -510,6 +532,7 @@ export default function InboxChannel({
                             <DurationInput
                               value={field.value || '0d0h0m0s'}
                               onChange={field.onChange}
+                              disabled={isLive}
                             />
                           )}
                         />
@@ -528,6 +551,7 @@ export default function InboxChannel({
                             <Switch
                               checked={field.value}
                               onCheckedChange={field.onChange}
+                              disabled={isLive}
                             />
                           )}
                         />
@@ -545,6 +569,7 @@ export default function InboxChannel({
                       <Select
                         value={field.value}
                         onValueChange={field.onChange}
+                        disabled={isLive}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select importance" />
@@ -572,6 +597,7 @@ export default function InboxChannel({
                         onChange={field.onChange}
                         placeholder='{"key": "value"}'
                         rows={4}
+                        disabled={isLive}
                       />
                     )}
                   />
@@ -591,7 +617,10 @@ export default function InboxChannel({
           backgroundSize: '16px 16px',
         }}
       >
-        {/* Preview will be added later */}
+        <InboxPreview
+          formValues={formValues as InboxFormValues}
+          variables={variables}
+        />
       </div>
     </div>
   );

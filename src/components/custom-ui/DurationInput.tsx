@@ -29,6 +29,7 @@ interface DurationSelectProps {
   options: number[];
   getLabel: (n: number) => string;
   onChange: (value: number) => void;
+  disabled?: boolean;
 }
 
 function DurationSelect({
@@ -37,6 +38,7 @@ function DurationSelect({
   options,
   getLabel,
   onChange,
+  disabled,
 }: DurationSelectProps) {
   return (
     <div className="suprsend-space-y-1">
@@ -44,6 +46,7 @@ function DurationSelect({
       <Select
         value={String(value)}
         onValueChange={(val) => onChange(Number(val))}
+        disabled={disabled}
       >
         <SelectTrigger>
           <SelectValue />
@@ -63,9 +66,10 @@ function DurationSelect({
 interface DurationInputProps {
   value: string;
   onChange: (value: string) => void;
+  disabled?: boolean;
 }
 
-export default function DurationInput({ value, onChange }: DurationInputProps) {
+export default function DurationInput({ value, onChange, disabled }: DurationInputProps) {
   const { d: days, h: hours, m: minutes, s: seconds } = parseDurationString(value);
 
   return (
@@ -78,6 +82,7 @@ export default function DurationInput({ value, onChange }: DurationInputProps) {
         onChange={(newValue) =>
           onChange(`${newValue}d${hours}h${minutes}m${seconds}s`)
         }
+        disabled={disabled}
       />
       <DurationSelect
         label="Hours"
@@ -87,6 +92,7 @@ export default function DurationInput({ value, onChange }: DurationInputProps) {
         onChange={(newValue) =>
           onChange(`${days}d${newValue}h${minutes}m${seconds}s`)
         }
+        disabled={disabled}
       />
       <DurationSelect
         label="Minutes"
@@ -96,6 +102,7 @@ export default function DurationInput({ value, onChange }: DurationInputProps) {
         onChange={(newValue) =>
           onChange(`${days}d${hours}h${newValue}m${seconds}s`)
         }
+        disabled={disabled}
       />
       <DurationSelect
         label="Seconds"
@@ -105,6 +112,7 @@ export default function DurationInput({ value, onChange }: DurationInputProps) {
         onChange={(newValue) =>
           onChange(`${days}d${hours}h${minutes}m${newValue}s`)
         }
+        disabled={disabled}
       />
     </div>
   );
