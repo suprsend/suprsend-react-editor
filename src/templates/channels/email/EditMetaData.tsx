@@ -8,6 +8,7 @@ import {
   ExternalLink,
   HelpCircle,
   Pencil,
+  Maximize2,
 } from 'lucide-react';
 import SuggestionCodeEditor from '@/components/custom-ui/SuggestionCodeEditor';
 import {
@@ -26,6 +27,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useAutosave } from '@/lib/useAutosave';
+import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import type {
   EmailMetaDataFormValues,
   EmailContentPayload,
@@ -38,6 +40,7 @@ export default function EmailSettingsPreviewBanner({
   onSave,
   variables = {},
 }: IEmailSettingsPreviewBannerProps) {
+  const { isLive } = useTemplateEditorContext();
   const emailContent = variantData?.content;
   const [emailSettingsOpen, setEmailSettingsOpen] = useState(false);
   const [otherSettingsOpen, setOtherSettingsOpen] = useState(false);
@@ -71,7 +74,11 @@ export default function EmailSettingsPreviewBanner({
       </div>
       <Dialog open={emailSettingsOpen} onOpenChange={setEmailSettingsOpen}>
         <DialogTrigger asChild>
-          <Pencil className="suprsend-h-3.5 suprsend-w-3.5 suprsend-cursor-pointer suprsend-text-muted-foreground" />
+          {isLive ? (
+            <Maximize2 className="suprsend-h-3.5 suprsend-w-3.5 suprsend-cursor-pointer suprsend-text-muted-foreground" />
+          ) : (
+            <Pencil className="suprsend-h-3.5 suprsend-w-3.5 suprsend-cursor-pointer suprsend-text-muted-foreground" />
+          )}
         </DialogTrigger>
         <EmailMetaDataModal
           otherSettingsOpen={otherSettingsOpen}
@@ -109,6 +116,7 @@ function EmailMetaDataModal({
   onFieldsChange,
   variables,
 }: EmailMetaDataModalProps) {
+  const { isLive } = useTemplateEditorContext();
   const emailContent = variantData?.content;
   const [infoBannerVisible, setInfoBannerVisible] = useState(
     () => localStorage.getItem('ss_email_banner_metadata_dismissed') !== 'true'
@@ -172,6 +180,7 @@ function EmailMetaDataModal({
                 onChange={field.onChange}
                 enableHighlighting
                 enableSuggestions
+                disabled={isLive}
               />
             )}
           />
@@ -191,6 +200,7 @@ function EmailMetaDataModal({
                   onChange={field.onChange}
                   enableHighlighting
                   enableSuggestions
+                  disabled={isLive}
                 />
               )}
             />
@@ -208,6 +218,7 @@ function EmailMetaDataModal({
                   onChange={field.onChange}
                   enableHighlighting
                   enableSuggestions
+                  disabled={isLive}
                 />
               )}
             />
@@ -280,6 +291,7 @@ function EmailMetaDataModal({
                       placeholder="Preview text..."
                       enableHighlighting
                       enableSuggestions
+                      disabled={isLive}
                     />
                   )}
                 />
@@ -300,6 +312,7 @@ function EmailMetaDataModal({
                         placeholder="cc1@example.com, cc2@example.com"
                         enableHighlighting
                         enableSuggestions
+                        disabled={isLive}
                       />
                     )}
                   />
@@ -318,6 +331,7 @@ function EmailMetaDataModal({
                         placeholder="bcc1@example.com, bcc2@example.com"
                         enableHighlighting
                         enableSuggestions
+                        disabled={isLive}
                       />
                     )}
                   />
@@ -338,6 +352,7 @@ function EmailMetaDataModal({
                       placeholder="reply@example.com"
                       enableHighlighting
                       enableSuggestions
+                      disabled={isLive}
                     />
                   )}
                 />
@@ -357,6 +372,7 @@ function EmailMetaDataModal({
                       placeholder="to1@example.com, to2@example.com..."
                       enableHighlighting
                       enableSuggestions
+                      disabled={isLive}
                     />
                   )}
                 />
@@ -402,6 +418,7 @@ function EmailMetaDataModal({
                       enableSuggestions
                       language="json"
                       height="300px"
+                      disabled={isLive}
                     />
                   )}
                 />

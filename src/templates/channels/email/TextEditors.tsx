@@ -18,6 +18,7 @@ export default function TextEditors({
   onChange,
   variables = {},
   onFetchFromHtml,
+  disabled = false,
 }: TextEditorsProps) {
   const [activePreviewTab, setActivePreviewTab] = useState<
     'desktop' | 'mobile'
@@ -78,7 +79,7 @@ export default function TextEditors({
         defaultSize={50}
         className="suprsend-overflow-hidden suprsend-flex suprsend-flex-col suprsend-h-full"
       >
-        {type === 'plaintext' && onFetchFromHtml && (
+        {type === 'plaintext' && onFetchFromHtml && !disabled && (
           <PlainTextBanner onFetchFromHtml={handleFetchFromHtml} />
         )}
         <SuggestionCodeEditor
@@ -94,6 +95,7 @@ export default function TextEditors({
           height=""
           containerClassName="suprsend-flex-1 suprsend-min-h-0 !suprsend-mt-0"
           className="suprsend-h-full suprsend-border-0 suprsend-rounded-none"
+          disabled={disabled}
         />
       </ResizablePanel>
       <ResizableHandle withHandle />

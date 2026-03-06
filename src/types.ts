@@ -466,6 +466,8 @@ export interface EmailTemplatePlaygroundProps {
   onRawTextChange: (v: string) => void;
   plainTextOnlyText: string;
   onPlainTextOnlyTextChange: (v: string) => void;
+  disabled?: boolean;
+  showVariables?: boolean;
 }
 
 export interface IEmailSettingsPreviewBannerProps {
