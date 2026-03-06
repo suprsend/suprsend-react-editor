@@ -9,8 +9,6 @@ import {
   TooltipContent,
 } from '@/components/ui/tooltip';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { EditorTopBanner } from './TopBanners';
 import HtmlSwitchModal from './HTMLEditorSwitchModal';
 import EmailSettingsPreviewBanner from './EditMetaData';
@@ -119,7 +117,6 @@ export default function EmailChannel({
   );
 
   const [htmlSwitchModalOpen, setHtmlSwitchModalOpen] = useState(false);
-  const [showVariables, setShowVariables] = useState(false);
 
   // --- One-time sync when API data arrives after mount (lazy loading) ---
   const initializedRef = useRef(!!apiBodyType);
@@ -331,18 +328,6 @@ export default function EmailChannel({
             </div>
           )}
 
-          {/* ---- Show variables toggle (live mode, designer tab only) ---- */}
-          {isLive && hasEditorTab && activeTab === 'editor' && editorMode === 'design' && (
-            <div className="suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-mt-[-10px]">
-              <Label className="suprsend-text-sm suprsend-text-muted-foreground">
-                Show variables
-              </Label>
-              <Switch
-                checked={showVariables}
-                onCheckedChange={setShowVariables}
-              />
-            </div>
-          )}
         </div>
 
         <EmailSettingsPreviewBanner
@@ -374,7 +359,6 @@ export default function EmailChannel({
           plainTextOnlyText={plainTextOnlyText}
           onPlainTextOnlyTextChange={setPlainTextOnlyText}
           disabled={isLive}
-          showVariables={showVariables}
         />
       </div>
 

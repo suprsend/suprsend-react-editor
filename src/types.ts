@@ -467,7 +467,6 @@ export interface EmailTemplatePlaygroundProps {
   plainTextOnlyText: string;
   onPlainTextOnlyTextChange: (v: string) => void;
   disabled?: boolean;
-  showVariables?: boolean;
 }
 
 export interface IEmailSettingsPreviewBannerProps {
