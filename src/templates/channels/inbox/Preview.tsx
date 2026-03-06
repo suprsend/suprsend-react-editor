@@ -88,8 +88,13 @@ export default function InboxPreview({
         </div>
 
         {/* Notification item */}
-        <div className="suprsend-px-5 suprsend-py-4">
-          <div className="suprsend-flex suprsend-gap-3">
+        <div className="suprsend-bg-primary/10 suprsend-px-5 suprsend-py-4">
+          <div className="suprsend-flex suprsend-items-start suprsend-gap-3">
+            {/* Unread dot */}
+            <div className="suprsend-flex suprsend-items-center suprsend-shrink-0 ">
+              <div className="suprsend-w-2 suprsend-h-2 suprsend-rounded-full suprsend-bg-primary" />
+            </div>
+
             {/* Avatar */}
             <img
               src={resolvedAvatar}
@@ -151,14 +156,11 @@ export default function InboxPreview({
               )}
             </div>
 
-            <div className="suprsend-flex suprsend-flex-col suprsend-items-center suprsend-space-y-1.5">
+            <div className="suprsend-flex suprsend-flex-col suprsend-items-center suprsend-space-y-1.5 suprsend-shrink-0">
               <span className="suprsend-text-xs suprsend-text-muted-foreground">
                 now
               </span>
               <MoreHorizontal className="suprsend-w-4 suprsend-h-4 suprsend-text-muted-foreground" />
-              <div className="suprsend-flex suprsend-items-center suprsend-shrink-0">
-                <div className="suprsend-w-2 suprsend-h-2 suprsend-rounded-full suprsend-bg-primary" />
-              </div>
             </div>
           </div>
         </div>
