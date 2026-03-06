@@ -15,7 +15,7 @@ export default function WebpushChannel({
   variantData,
   variables,
 }: WebpushChannelProps) {
-  const { templateSlug, variantId } = useTemplateEditorContext();
+  const { templateSlug, variantId, isLive } = useTemplateEditorContext();
 
   const { mutate } = useUpdateVariantContent({
     templateSlug,
@@ -74,6 +74,7 @@ export default function WebpushChannel({
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
+                  disabled={isLive}
                 />
               )}
             />
@@ -96,6 +97,7 @@ export default function WebpushChannel({
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
+                  disabled={isLive}
                 />
               )}
             />
@@ -116,6 +118,7 @@ export default function WebpushChannel({
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
+                  disabled={isLive}
                 />
               )}
             />
@@ -138,6 +141,7 @@ export default function WebpushChannel({
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
+                  disabled={isLive}
                 />
               )}
             />
@@ -166,6 +170,7 @@ export default function WebpushChannel({
                         enableHighlighting
                         enableSuggestions
                         variables={variables}
+                        disabled={isLive}
                       />
                     )}
                   />
@@ -182,18 +187,21 @@ export default function WebpushChannel({
                         enableHighlighting
                         enableSuggestions
                         variables={variables}
+                        disabled={isLive}
                       />
                     )}
                   />
                 </div>
-                <X
-                  className="suprsend-w-4 suprsend-h-4 suprsend-cursor-pointer suprsend-text-muted-foreground"
-                  onClick={() => remove(index)}
-                />
+                {!isLive && (
+                  <X
+                    className="suprsend-w-4 suprsend-h-4 suprsend-cursor-pointer suprsend-text-muted-foreground"
+                    onClick={() => remove(index)}
+                  />
+                )}
               </div>
             ))}
 
-            {fields.length < 2 && (
+            {fields.length < 2 && !isLive && (
               <Button
                 variant="outline"
                 size="sm"

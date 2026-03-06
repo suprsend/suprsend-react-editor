@@ -30,6 +30,7 @@ export default function SuggestionInputWithUpload({
   accept,
   onUploadSuccess,
   onUploadError,
+  disabled,
   ...rest
 }: SuggestionInputWithUploadProps) {
   const isTextarea = as === 'textarea';
@@ -80,34 +81,39 @@ export default function SuggestionInputWithUpload({
             as={as}
             label={undefined}
             mandatory={false}
+            disabled={disabled}
             {...rest}
           />
         </div>
 
-        <button
-          type="button"
-          aria-label="Upload file"
-          disabled={isPending}
-          onClick={handleUploadClick}
-          className={cn(
-            'suprsend-text-muted-foreground hover:suprsend-text-foreground suprsend-transition-colors suprsend-shrink-0 disabled:suprsend-opacity-50 disabled:suprsend-cursor-not-allowed',
-            isTextarea && 'suprsend-mt-2'
-          )}
-        >
-          {isPending ? (
-            <Loader2 className="suprsend-w-4 suprsend-h-4 suprsend-animate-spin" />
-          ) : (
-            <Upload className="suprsend-w-4 suprsend-h-4" />
-          )}
-        </button>
+        {!disabled && (
+          <>
+            <button
+              type="button"
+              aria-label="Upload file"
+              disabled={isPending}
+              onClick={handleUploadClick}
+              className={cn(
+                'suprsend-text-muted-foreground hover:suprsend-text-foreground suprsend-transition-colors suprsend-shrink-0 disabled:suprsend-opacity-50 disabled:suprsend-cursor-not-allowed',
+                isTextarea && 'suprsend-mt-2'
+              )}
+            >
+              {isPending ? (
+                <Loader2 className="suprsend-w-4 suprsend-h-4 suprsend-animate-spin" />
+              ) : (
+                <Upload className="suprsend-w-4 suprsend-h-4" />
+              )}
+            </button>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept={accept}
-          className="suprsend-hidden"
-          onChange={handleFileChange}
-        />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={accept}
+              className="suprsend-hidden"
+              onChange={handleFileChange}
+            />
+          </>
+        )}
       </div>
     </>
   );

@@ -2,4 +2,4 @@
 export * from '@/types';
 export { default as TemplateEditor } from '@/templates/TemplateEditor';
 export { default as CommitButton } from '@/templates/Commit';
-export { default as SuprSendTemplateEditorProvider } from '@/components/SuprSendEditorProvider';
+export { default as SuprSendEditorProvider } from '@/components/SuprSendEditorProvider';
