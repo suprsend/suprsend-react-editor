@@ -54,6 +54,23 @@ export interface CommitButtonProps {
 export interface CommitVariant {
   channel: string;
   id: string;
+  has_diff?: boolean;
+  is_deleted?: boolean;
+  errors?: Record<string, string[]>;
+  name?: string;
+}
+
+export interface PropertyDiff {
+  has_diff: boolean;
+  draft?: unknown;
+  live?: unknown;
+}
+
+export interface PreCommitValidateResponse {
+  is_new: boolean;
+  has_changes: boolean;
+  properties: Record<string, PropertyDiff>;
+  variants: CommitVariant[];
 }
 
 export interface CommitTemplateParams {
