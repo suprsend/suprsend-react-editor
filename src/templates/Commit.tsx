@@ -64,7 +64,7 @@ function VariantRow({
           disabled={hasErrors || isDeleted}
           className={
             isDeleted
-              ? 'suprsend-border-red-300 data-[state=checked]:suprsend-bg-red-400 data-[state=checked]:suprsend-border-red-400'
+              ? 'suprsend-border-destructive data-[state=checked]:suprsend-bg-destructive data-[state=checked]:suprsend-border-destructive'
               : ''
           }
         />
@@ -83,7 +83,7 @@ function VariantRow({
         {hasErrors && (
           <button
             type="button"
-            className="suprsend-flex suprsend-items-center suprsend-gap-1 suprsend-text-xs suprsend-text-red-500 suprsend-bg-transparent suprsend-border-none suprsend-cursor-pointer suprsend-p-0"
+            className="suprsend-flex suprsend-items-center suprsend-gap-1 suprsend-text-xs suprsend-text-destructive suprsend-bg-transparent suprsend-border-none suprsend-cursor-pointer suprsend-p-0"
             onClick={() => setShowErrors((v) => !v)}
           >
             <AlertCircle className="suprsend-h-3.5 suprsend-w-3.5" />
@@ -257,12 +257,12 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
                     </div>
                     <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
                       {editedCount > 0 && (
-                        <span className="suprsend-text-xs suprsend-font-medium suprsend-text-blue-700 suprsend-bg-blue-50 suprsend-px-2.5 suprsend-py-0.5 suprsend-rounded">
+                        <span className="suprsend-text-xs suprsend-font-medium suprsend-text-primary suprsend-bg-primary/10 suprsend-px-2.5 suprsend-py-0.5 suprsend-rounded">
                           {editedCount} edited
                         </span>
                       )}
                       {deletedCount > 0 && (
-                        <span className="suprsend-text-xs suprsend-font-medium suprsend-text-red-700 suprsend-bg-red-50 suprsend-px-2.5 suprsend-py-0.5 suprsend-rounded">
+                        <span className="suprsend-text-xs suprsend-font-medium suprsend-text-destructive suprsend-bg-destructive/10 suprsend-px-2.5 suprsend-py-0.5 suprsend-rounded">
                           {deletedCount} deleted
                         </span>
                       )}
@@ -301,7 +301,7 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
                       </span>
                     </div>
                     <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
-                      <span className="suprsend-text-xs suprsend-font-medium suprsend-text-blue-700 suprsend-bg-blue-50 suprsend-px-2.5 suprsend-py-0.5 suprsend-rounded">
+                      <span className="suprsend-text-xs suprsend-font-medium suprsend-text-primary suprsend-bg-primary/10 suprsend-px-2.5 suprsend-py-0.5 suprsend-rounded">
                         {changedProperties.length} edited
                       </span>
                     </div>
