@@ -1,4 +1,9 @@
-import { QueryClient, useQuery, useMutation } from '@tanstack/react-query';
+import {
+  QueryClient,
+  useQuery,
+  useMutation,
+  keepPreviousData,
+} from '@tanstack/react-query';
 import axios from 'axios';
 import type {
   GetVariantDetailsParams,
@@ -67,24 +72,27 @@ export const useVariantDetails = ({
   const { locale, tenantId, workspaceUid, conditions, isPrivate, mode } =
     useTemplateEditorContext();
 
-  return useQuery({
-    queryKey: [
-      `template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}`,
-      mode,
-    ],
-    queryFn: () =>
-      getVariantDetails({
-        templateSlug,
-        chanelSlug,
-        variantId,
-        locale,
-        tenantId,
-        conditions,
-        workspaceUid,
-        isPrivate,
+  return useQuery(
+    {
+      queryKey: [
+        `template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}`,
         mode,
-      }),
-  }, queryClient);
+      ],
+      queryFn: () =>
+        getVariantDetails({
+          templateSlug,
+          chanelSlug,
+          variantId,
+          locale,
+          tenantId,
+          conditions,
+          workspaceUid,
+          isPrivate,
+          mode,
+        }),
+    },
+    queryClient
+  );
 };
 
 const updateVariantContent = async ({
@@ -115,20 +123,23 @@ export const useUpdateVariantContent = ({
   const { locale, tenantId, workspaceUid, conditions, isPrivate } =
     useTemplateEditorContext();
 
-  return useMutation({
-    mutationFn: (payload: ChannelContentPayload) =>
-      updateVariantContent({
-        templateSlug,
-        chanelSlug,
-        variantId,
-        workspaceUid,
-        conditions,
-        locale,
-        tenantId,
-        payload,
-        isPrivate,
-      }),
-  }, queryClient);
+  return useMutation(
+    {
+      mutationFn: (payload: ChannelContentPayload) =>
+        updateVariantContent({
+          templateSlug,
+          chanelSlug,
+          variantId,
+          workspaceUid,
+          conditions,
+          locale,
+          tenantId,
+          payload,
+          isPrivate,
+        }),
+    },
+    queryClient
+  );
 };
 
 const uploadFile = async ({ workspaceUid, file }: UploadFileParams) => {
@@ -140,9 +151,12 @@ const uploadFile = async ({ workspaceUid, file }: UploadFileParams) => {
 };
 
 export const useUploadFile = (workspaceUid: string) => {
-  return useMutation({
-    mutationFn: (file: File) => uploadFile({ workspaceUid, file }),
-  }, queryClient);
+  return useMutation(
+    {
+      mutationFn: (file: File) => uploadFile({ workspaceUid, file }),
+    },
+    queryClient
+  );
 };
 
 const getMockData = async ({
@@ -198,12 +212,15 @@ export const usePreCommitValidate = ({
   enabled: boolean;
 }) => {
   const { workspaceUid, isPrivate } = useTemplateEditorContext();
-  return useQuery({
-    queryKey: [`template/${templateSlug}/pre_commit_validate`],
-    queryFn: () =>
-      getPreCommitValidate({ templateSlug, workspaceUid, isPrivate }),
-    enabled,
-  }, queryClient);
+  return useQuery(
+    {
+      queryKey: [`template/${templateSlug}/pre_commit_validate`],
+      queryFn: () =>
+        getPreCommitValidate({ templateSlug, workspaceUid, isPrivate }),
+      enabled,
+    },
+    queryClient
+  );
 };
 
 export const useMockData = ({ templateSlug }: UseMockDataParams) => {
@@ -215,19 +232,51 @@ export const useMockData = ({ templateSlug }: UseMockDataParams) => {
     actorDistinctId,
     mode,
   } = useTemplateEditorContext();
-  return useQuery({
-    queryKey: [`template/${templateSlug}/mock_data`, mode],
-    queryFn: () =>
-      getMockData({
-        templateSlug,
-        workspaceUid,
-        tenantId,
-        isPrivate,
-        recipientDistinctId,
-        actorDistinctId,
-        mode,
-      }),
-  }, queryClient);
+  return useQuery(
+    {
+      queryKey: [`template/${templateSlug}/mock_data`, mode],
+      queryFn: () =>
+        getMockData({
+          templateSlug,
+          workspaceUid,
+          tenantId,
+          isPrivate,
+          recipientDistinctId,
+          actorDistinctId,
+          mode,
+        }),
+    },
+    queryClient
+  );
+};
+
+const getSMSHeaders = async ({
+  workspaceUid,
+  notifCategory,
+}: {
+  workspaceUid: string;
+  notifCategory: string;
+}) => {
+  const url = `${API_BASE_URL}/v1/${workspaceUid}/tenant/default/vendor/sms_headers/?root_category=${notifCategory}`;
+  const resp = await axiosInst.get(url);
+  return resp.data;
+};
+
+export const useSMSHeaders = (notifCategory: string) => {
+  const { workspaceUid } = useTemplateEditorContext();
+
+  return useQuery(
+    {
+      queryKey: [
+        `${workspaceUid}/tenant/default/vendor/sms_headers`,
+        notifCategory,
+      ],
+      queryFn: () => getSMSHeaders({ workspaceUid, notifCategory }),
+      placeholderData: keepPreviousData,
+      enabled: !!notifCategory,
+    },
+    queryClient
+  );
 };
 
 const renderJsonnet = async (
@@ -238,9 +287,12 @@ const renderJsonnet = async (
 };
 
 export const useJsonnetRender = () => {
-  return useMutation({
-    mutationFn: (body: JsonnetRenderBody) => renderJsonnet(body),
-  }, queryClient);
+  return useMutation(
+    {
+      mutationFn: (body: JsonnetRenderBody) => renderJsonnet(body),
+    },
+    queryClient
+  );
 };
 
 const commitTemplate = async ({
@@ -263,14 +315,20 @@ export const useCommitTemplate = ({
   templateSlug,
 }: UseCommitTemplateParams) => {
   const { workspaceUid, isPrivate } = useTemplateEditorContext();
-  return useMutation({
-    mutationFn: ({ commitMessage, variants }: CommitTemplateMutationPayload) =>
-      commitTemplate({
-        templateSlug,
-        workspaceUid,
-        isPrivate,
+  return useMutation(
+    {
+      mutationFn: ({
         commitMessage,
         variants,
-      }),
-  }, queryClient);
+      }: CommitTemplateMutationPayload) =>
+        commitTemplate({
+          templateSlug,
+          workspaceUid,
+          isPrivate,
+          commitMessage,
+          variants,
+        }),
+    },
+    queryClient
+  );
 };
