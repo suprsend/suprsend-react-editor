@@ -37,7 +37,8 @@ export default function EmailTemplatePlayground({
 }: EmailTemplatePlaygroundProps) {
   const { isPrivate } = useTemplateEditorContext();
 
-  const userId = isPrivate ? variantData?.email_editor_userid : generateUUID();
+  const generatedIdRef = useRef(generateUUID());
+  const userId = isPrivate ? variantData?.email_editor_userid : generatedIdRef.current;
 
   const { workspaceUid } = useTemplateEditorContext();
   const { mutateAsync: uploadFile } = useUploadFile(workspaceUid);
