@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import cloneDeep from 'lodash.clonedeep';
 import isEmpty from 'lodash.isempty';
-import { Plus, X, Info } from 'lucide-react';
+import { Plus, X, Info } from '@/assets/icons';
 import {
   Dialog,
   DialogContent,

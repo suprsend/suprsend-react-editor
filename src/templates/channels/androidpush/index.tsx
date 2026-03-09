@@ -6,7 +6,7 @@ import SuggestionInputWithUpload from '@/components/custom-ui/SuggestionInputWit
 import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import { X, Plus, ChevronRight } from 'lucide-react';
+import { X, Plus, ChevronRight } from '@/assets/icons';
 import type { AndroidPushChannelProps, AndroidPushFormValues } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

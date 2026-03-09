@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { X, Plus, Brush, CodeXml, Clipboard } from 'lucide-react';
+import { X, Plus, Brush, CodeXml, Clipboard } from '@/assets/icons';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {

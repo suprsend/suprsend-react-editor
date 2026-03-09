@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Flashlight, Camera, Signal, Wifi, BatteryFull } from 'lucide-react';
+import { Flashlight, Camera, Signal, Wifi, BatteryFull } from '@/assets/icons';
 import { cn } from '@/lib/utils';
 import HandlebarsRenderer, {
   renderHandlebars,

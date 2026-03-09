@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { Smartphone, TvMinimal } from 'lucide-react';
+import { Smartphone, TvMinimal } from '@/assets/icons';
 import SuggestionCodeEditor from '@/components/custom-ui/SuggestionCodeEditor';
 import { cn } from '@/lib/utils';
 import {

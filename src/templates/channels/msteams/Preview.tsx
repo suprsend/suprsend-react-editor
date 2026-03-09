@@ -6,8 +6,7 @@ import MarkdownRenderer, {
 import { renderHandlebars } from '@/components/custom-ui/HandlebarsRenderer';
 import { useJsonnetRender } from '@/apis';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Loader2 } from 'lucide-react';
-import MSTeamsIcon from '@/assets/msteamPreview.svg?react';
+import { RefreshCw, Loader2, MSTeamsPreviewIcon as MSTeamsIcon } from '@/assets/icons';
 import type {
   MSTeamsPreviewProps,
   JsonnetPreviewState,
@@ -192,7 +191,10 @@ function JsonnetPreview({ bodyCard, variables }: JsonnetPreviewProps) {
           disabled={jsonnetRender.isPending || !bodyCard}
         >
           {jsonnetRender.isPending ? (
-            <Loader2 className="suprsend-w-4 suprsend-h-4 suprsend-animate-spin" />
+            <Loader2
+              className="suprsend-w-4 suprsend-h-4"
+              style={{ animation: 'spin 1s linear infinite' }}
+            />
           ) : (
             <RefreshCw className="suprsend-w-4 suprsend-h-4" />
           )}

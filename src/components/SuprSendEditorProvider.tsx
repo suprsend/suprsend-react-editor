@@ -21,8 +21,8 @@ export default function SuprSendEditorProvider({
   recipientDistinctId,
   actorDistinctId,
   mode,
+  isPrivate = false,
 }: FullSuprSendTemplateEditorProviderProps) {
-  const isPrivate = true; // TODO: Determine if the template is private based on your logic
   const isLive = mode === 'live';
 
   const value = useMemo<TemplateEditorContextValue>(

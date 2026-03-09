@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Info, X, RefreshCw } from 'lucide-react';
+import { Info, X, RefreshCw } from '@/assets/icons';
 import { Button } from '@/components/ui/button';
 
 const LS_DESIGN_BANNER = 'ss_email_banner_design_dismissed';

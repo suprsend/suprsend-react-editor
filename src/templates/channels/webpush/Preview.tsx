@@ -12,10 +12,10 @@ import {
   ChevronDown,
   Ellipsis,
   Search,
-} from 'lucide-react';
-import ChromeSvg from '@/assets/chromePreview.svg?react';
-import WindowsSvg from '@/assets/windowsPreview.svg?react';
-import AppleSvg from '@/assets/applePreview.svg?react';
+  ChromeSvg,
+  WindowsSvg,
+  AppleSvg,
+} from '@/assets/icons';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type {

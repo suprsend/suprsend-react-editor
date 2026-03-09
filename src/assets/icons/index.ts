@@ -1,0 +1,54 @@
+export { default as AlertCircle } from './alert-circle.svg?react';
+export { default as BatteryFull } from './battery-full.svg?react';
+export { default as Brush } from './brush.svg?react';
+export { default as Camera } from './camera.svg?react';
+export { default as Check } from './check.svg?react';
+export { default as ChevronDown } from './chevron-down.svg?react';
+export { default as ChevronRight } from './chevron-right.svg?react';
+export { default as ChevronUp } from './chevron-up.svg?react';
+export { default as Circle } from './circle.svg?react';
+export { default as Clipboard } from './clipboard.svg?react';
+export { default as CodeXml } from './code-xml.svg?react';
+export { default as Ellipsis } from './ellipsis.svg?react';
+export { default as ExternalLink } from './external-link.svg?react';
+export { default as FileText } from './file-text.svg?react';
+export { default as FileX } from './file-x.svg?react';
+export { default as Flashlight } from './flashlight.svg?react';
+export { default as GitCommitHorizontal } from './git-commit-horizontal.svg?react';
+export { default as GripVertical } from './grip-vertical.svg?react';
+export { default as HelpCircle } from './help-circle.svg?react';
+export { default as Info } from './info.svg?react';
+export { default as Loader2 } from './loader2.svg?react';
+export { default as Maximize2 } from './maximize2.svg?react';
+export { default as Pencil } from './pencil.svg?react';
+export { default as Phone } from './phone.svg?react';
+export { default as Plus } from './plus.svg?react';
+export { default as RefreshCw } from './refresh-cw.svg?react';
+export { default as Search } from './search.svg?react';
+export { default as Settings } from './settings.svg?react';
+export { default as Signal } from './signal.svg?react';
+export { default as Smartphone } from './smartphone.svg?react';
+export { default as Smile } from './smile.svg?react';
+export { default as TvMinimal } from './tv-minimal.svg?react';
+export { default as Upload } from './upload.svg?react';
+export { default as Video } from './video.svg?react';
+export { default as Volume2 } from './volume2.svg?react';
+export { default as Wifi } from './wifi.svg?react';
+export { default as X } from './x.svg?react';
+
+// Channel icons
+export { default as AndroidPushIcon } from './android-push-channel.svg?react';
+export { default as EmailIcon } from './email-channel.svg?react';
+export { default as InappIcon } from './inbox-channel.svg?react';
+export { default as IOSPushIcon } from './ios-push-channel.svg?react';
+export { default as MSTeamsIcon } from './ms-teams-channel.svg?react';
+export { default as SlackIcon } from './slack-channel.svg?react';
+export { default as SMSIcon } from './sms-channel.svg?react';
+export { default as WebpushIcon } from './web-push-channel.svg?react';
+export { default as WhatsappIcon } from './whatsapp-channel.svg?react';
+
+// Preview icons
+export { default as AppleSvg } from './apple-preview.svg?react';
+export { default as ChromeSvg } from './chrome-preview.svg?react';
+export { default as WindowsSvg } from './windows-preview.svg?react';
+export { default as MSTeamsPreviewIcon } from './msteam-preview.svg?react';
