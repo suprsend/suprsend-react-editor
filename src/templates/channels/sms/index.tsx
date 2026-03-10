@@ -17,15 +17,15 @@ import SMSPreview from './Preview';
 const CATEGORY_OPTIONS = [
   {
     label: 'Transactional',
-    value: 'SERVICE_IMPLICIT',
+    value: 'service_implicit',
     notifCategory: 'transactional',
   },
   {
     label: 'Engagement',
-    value: 'SERVICE_EXPLICIT',
+    value: 'service_explicit',
     notifCategory: 'transactional',
   },
-  { label: 'Promotional', value: 'PROMOTIONAL', notifCategory: 'promotional' },
+  { label: 'Promotional', value: 'promotional', notifCategory: 'promotional' },
 ];
 
 export default function SMSChannel({
