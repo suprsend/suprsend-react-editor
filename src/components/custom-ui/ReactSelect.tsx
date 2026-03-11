@@ -23,7 +23,7 @@ import Select, {
 import AsyncSelect from 'react-select/async';
 import CreatableSelect from 'react-select/creatable';
 import AsyncCreatableSelect from 'react-select/async-creatable';
-import { Check, ChevronDown, Loader2, X } from 'lucide-react';
+import { Check, ChevronDown, Loader2, X } from '@/assets/icons';
 
 import { cn } from '@/lib/utils';
 
@@ -66,7 +66,10 @@ export interface ReactSelectProps<
   /** Creatable: allow creating while async results load */
   allowCreateWhileLoading?: boolean;
   /** Creatable: return data shape for a newly created option */
-  getNewOptionData?: (inputValue: string, optionLabel: React.ReactNode) => Option;
+  getNewOptionData?: (
+    inputValue: string,
+    optionLabel: React.ReactNode
+  ) => Option;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -80,11 +83,19 @@ type SharedMenuProps = MenuProps<any, boolean, AnyGroup>;
 type SharedMenuListProps = MenuListProps<any, boolean, AnyGroup>;
 type SharedOptionProps = OptionProps<any, boolean, AnyGroup>;
 type SharedMultiValueProps = MultiValueProps<any, boolean, AnyGroup>;
-type SharedDropdownIndicatorProps = DropdownIndicatorProps<any, boolean, AnyGroup>;
+type SharedDropdownIndicatorProps = DropdownIndicatorProps<
+  any,
+  boolean,
+  AnyGroup
+>;
 type SharedClearIndicatorProps = ClearIndicatorProps<any, boolean, AnyGroup>;
 type SharedNoticeProps = NoticeProps<any, boolean, AnyGroup>;
 type SharedGroupHeadingProps = GroupHeadingProps<any, boolean, AnyGroup>;
-type SharedLoadingIndicatorProps = LoadingIndicatorProps<any, boolean, AnyGroup>;
+type SharedLoadingIndicatorProps = LoadingIndicatorProps<
+  any,
+  boolean,
+  AnyGroup
+>;
 type SharedPlaceholderProps = PlaceholderProps<any, boolean, AnyGroup>;
 type SharedValueContainerProps = ValueContainerProps<any, boolean, AnyGroup>;
 /* eslint-enable @typescript-eslint/no-explicit-any */
@@ -93,7 +104,12 @@ type SharedValueContainerProps = ValueContainerProps<any, boolean, AnyGroup>;
 /*                          Styled Component Overrides                        */
 /* -------------------------------------------------------------------------- */
 
-function StyledControl({ children, innerRef, innerProps, isFocused }: SharedControlProps) {
+function StyledControl({
+  children,
+  innerRef,
+  innerProps,
+  isFocused,
+}: SharedControlProps) {
   return (
     <div
       ref={innerRef}
@@ -120,7 +136,11 @@ function StyledMenu({ children, innerRef, innerProps }: SharedMenuProps) {
   );
 }
 
-function StyledMenuList({ children, innerRef, innerProps }: SharedMenuListProps) {
+function StyledMenuList({
+  children,
+  innerRef,
+  innerProps,
+}: SharedMenuListProps) {
   return (
     <div
       ref={innerRef}
@@ -132,7 +152,13 @@ function StyledMenuList({ children, innerRef, innerProps }: SharedMenuListProps)
   );
 }
 
-function StyledOption({ innerRef, innerProps, isFocused, isSelected, label }: SharedOptionProps) {
+function StyledOption({
+  innerRef,
+  innerProps,
+  isFocused,
+  isSelected,
+  label,
+}: SharedOptionProps) {
   return (
     <div
       ref={innerRef}
@@ -152,7 +178,10 @@ function StyledOption({ innerRef, innerProps, isFocused, isSelected, label }: Sh
   );
 }
 
-function StyledValueContainer({ children, innerProps }: SharedValueContainerProps) {
+function StyledValueContainer({
+  children,
+  innerProps,
+}: SharedValueContainerProps) {
   return (
     <div
       {...innerProps}
@@ -202,7 +231,10 @@ function StyledDropdownIndicator({ innerProps }: SharedDropdownIndicatorProps) {
 
 function StyledClearIndicator({ innerProps }: SharedClearIndicatorProps) {
   return (
-    <div {...innerProps} className="suprsend-flex suprsend-items-center suprsend-cursor-pointer">
+    <div
+      {...innerProps}
+      className="suprsend-flex suprsend-items-center suprsend-cursor-pointer"
+    >
       <X className="suprsend-h-4 suprsend-w-4 suprsend-opacity-50 hover:suprsend-opacity-100" />
     </div>
   );
@@ -210,7 +242,10 @@ function StyledClearIndicator({ innerProps }: SharedClearIndicatorProps) {
 
 function StyledNoOptionsMessage({ innerProps }: SharedNoticeProps) {
   return (
-    <div {...innerProps} className="suprsend-py-6 suprsend-text-center suprsend-text-sm suprsend-text-muted-foreground">
+    <div
+      {...innerProps}
+      className="suprsend-py-6 suprsend-text-center suprsend-text-sm suprsend-text-muted-foreground"
+    >
       No options found.
     </div>
   );
@@ -218,7 +253,10 @@ function StyledNoOptionsMessage({ innerProps }: SharedNoticeProps) {
 
 function StyledLoadingMessage({ innerProps }: SharedNoticeProps) {
   return (
-    <div {...innerProps} className="suprsend-py-6 suprsend-text-center suprsend-text-sm suprsend-text-muted-foreground">
+    <div
+      {...innerProps}
+      className="suprsend-py-6 suprsend-text-center suprsend-text-sm suprsend-text-muted-foreground"
+    >
       Loading...
     </div>
   );
@@ -235,7 +273,10 @@ function StyledGroupHeading({ children }: SharedGroupHeadingProps) {
 function StyledLoadingIndicator({ innerProps }: SharedLoadingIndicatorProps) {
   return (
     <div {...innerProps}>
-      <Loader2 className="suprsend-h-4 suprsend-w-4 suprsend-animate-spin suprsend-text-muted-foreground" />
+      <Loader2
+        className="suprsend-h-4 suprsend-w-4 suprsend-text-muted-foreground"
+        style={{ animation: 'spin 1s linear infinite' }}
+      />
     </div>
   );
 }

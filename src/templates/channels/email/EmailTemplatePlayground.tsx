@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from '@/assets/icons';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { usePostMessageBridge } from '@/lib/usePostMessageBridge';
 import { useUploadFile } from '@/apis';
@@ -37,7 +37,8 @@ export default function EmailTemplatePlayground({
 }: EmailTemplatePlaygroundProps) {
   const { isPrivate } = useTemplateEditorContext();
 
-  const userId = isPrivate ? variantData?.email_editor_userid : generateUUID();
+  const generatedIdRef = useRef(generateUUID());
+  const userId = isPrivate ? variantData?.email_editor_userid : generatedIdRef.current;
 
   const { workspaceUid } = useTemplateEditorContext();
   const { mutateAsync: uploadFile } = useUploadFile(workspaceUid);

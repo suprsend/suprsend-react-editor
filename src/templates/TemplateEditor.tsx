@@ -8,9 +8,8 @@ import SlackChannel from '@/templates/channels/slack';
 import AndroidPushChannel from '@/templates/channels/androidpush';
 import type { SuprSendTemplateEditorProps } from '@/types';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import { useMockData, useVariantDetails } from '@/apis';
-import axios from 'axios';
-import { FileX, Loader2 } from 'lucide-react';
+import { useMockData, useVariantDetails, isHttpError } from '@/apis';
+import { FileX, Loader2 } from '@/assets/icons';
 
 export default function SuprSendTemplateEditor({
   hideChannelsTab = false,
@@ -21,7 +20,7 @@ export default function SuprSendTemplateEditor({
   );
 
   const { data: variantData, error: variantError } = useVariantDetails({
-    chanelSlug: channels[0],
+    chanelSlug: selectedChannel as string,
     templateSlug,
     variantId,
   });
@@ -35,12 +34,11 @@ export default function SuprSendTemplateEditor({
     }
   }, [channels]);
 
-  const isNotFound =
-    axios.isAxiosError(variantError) && variantError.response?.status === 404;
+  const isNotFound = isHttpError(variantError) && variantError.status === 404;
 
   if (isNotFound) {
     return (
-      <div className="suprsend-flex suprsend-flex-col suprsend-items-center suprsend-mt-32 suprsend-h-full suprsend-min-h-[400px]">
+      <div className="suprsend-flex suprsend-flex-col suprsend-items-center suprsend-mt-32 suprsend-h-full suprsend-min-h-[400px] suprsend-text-sm">
         <div className="suprsend-flex suprsend-items-center suprsend-justify-center suprsend-w-16 suprsend-h-16 suprsend-rounded-full suprsend-bg-muted suprsend-mb-4">
           <FileX className="suprsend-w-8 suprsend-h-8 suprsend-text-muted-foreground" />
         </div>
@@ -56,7 +54,7 @@ export default function SuprSendTemplateEditor({
   }
   if (!selectedChannel || !variantData || !mockData) {
     return (
-      <div className="suprsend-flex suprsend-h-full suprsend-items-center suprsend-justify-center suprsend-bg-background suprsend-z-10">
+      <div className="suprsend-flex suprsend-h-full suprsend-items-center suprsend-justify-center suprsend-bg-background suprsend-z-10 suprsend-text-sm">
         <Loader2
           className="suprsend-h-6 suprsend-w-6 suprsend-text-muted-foreground"
           style={{ animation: 'spin 1s linear infinite' }}
@@ -65,7 +63,7 @@ export default function SuprSendTemplateEditor({
     );
   }
   return (
-    <div className="suprsend-h-full suprsend-flex suprsend-flex-col">
+    <div className="suprsend-h-full suprsend-flex suprsend-flex-col suprsend-text-sm">
       {!hideChannelsTab && (
         <TabBar
           channels={channels}

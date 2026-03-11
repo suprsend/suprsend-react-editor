@@ -28,7 +28,7 @@ import {
   FileText,
   AlertCircle,
   Settings,
-} from 'lucide-react';
+} from '@/assets/icons';
 import { usePreCommitValidate, useCommitTemplate } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 
@@ -212,7 +212,10 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
 
         {isLoading ? (
           <div className="suprsend-flex suprsend-items-center suprsend-justify-center suprsend-py-12">
-            <Loader2 className="suprsend-h-6 suprsend-w-6 suprsend-animate-spin suprsend-text-muted-foreground" />
+            <Loader2
+              className="suprsend-h-6 suprsend-w-6 suprsend-text-muted-foreground"
+              style={{ animation: 'spin 1s linear infinite' }}
+            />
             <span className="suprsend-ml-2 suprsend-text-sm suprsend-text-muted-foreground">
               Validating changes...
             </span>
@@ -345,7 +348,10 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
           >
             {commitMutation.isPending ? (
               <>
-                <Loader2 className="suprsend-h-3.5 suprsend-w-3.5 suprsend-animate-spin" />
+                <Loader2
+                  className="suprsend-h-3.5 suprsend-w-3.5"
+                  style={{ animation: 'spin 1s linear infinite' }}
+                />
                 Committing...
               </>
             ) : (
