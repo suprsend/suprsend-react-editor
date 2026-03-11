@@ -1,4 +1,5 @@
 import '../index.css';
+import initCustomHelpers from '@/lib/handlebarHelper';
 import { useMemo } from 'react';
 import type {
   FullSuprSendTemplateEditorProviderProps,
@@ -6,6 +7,8 @@ import type {
 } from '@/types';
 import { TemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { useAuthInterceptor } from '@/lib/useAuthInterceptor';
+
+initCustomHelpers();
 
 export default function SuprSendEditorProvider({
   workspaceUid,
