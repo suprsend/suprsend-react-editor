@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    --cell-size: 2.5rem;
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
