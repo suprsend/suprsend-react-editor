@@ -38,7 +38,7 @@ export default function SuprSendTemplateEditor({
 
   if (isNotFound) {
     return (
-      <div className="suprsend-flex suprsend-flex-col suprsend-items-center suprsend-mt-32 suprsend-h-full suprsend-min-h-[400px]">
+      <div className="suprsend-flex suprsend-flex-col suprsend-items-center suprsend-mt-32 suprsend-h-full suprsend-min-h-[400px] suprsend-text-sm">
         <div className="suprsend-flex suprsend-items-center suprsend-justify-center suprsend-w-16 suprsend-h-16 suprsend-rounded-full suprsend-bg-muted suprsend-mb-4">
           <FileX className="suprsend-w-8 suprsend-h-8 suprsend-text-muted-foreground" />
         </div>
@@ -54,7 +54,7 @@ export default function SuprSendTemplateEditor({
   }
   if (!selectedChannel || !variantData || !mockData) {
     return (
-      <div className="suprsend-flex suprsend-h-full suprsend-items-center suprsend-justify-center suprsend-bg-background suprsend-z-10">
+      <div className="suprsend-flex suprsend-h-full suprsend-items-center suprsend-justify-center suprsend-bg-background suprsend-z-10 suprsend-text-sm">
         <Loader2
           className="suprsend-h-6 suprsend-w-6 suprsend-text-muted-foreground"
           style={{ animation: 'spin 1s linear infinite' }}
@@ -63,7 +63,7 @@ export default function SuprSendTemplateEditor({
     );
   }
   return (
-    <div className="suprsend-h-full suprsend-flex suprsend-flex-col">
+    <div className="suprsend-h-full suprsend-flex suprsend-flex-col suprsend-text-sm">
       {!hideChannelsTab && (
         <TabBar
           channels={channels}
