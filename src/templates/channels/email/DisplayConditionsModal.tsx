@@ -32,6 +32,7 @@ import type {
   DisplayConditionData,
   DisplayConditionInfo,
 } from '@/types';
+import SuggestionInputDisplayConditions from '@/components/custom-ui/SuggestionInputDisplayConditions';
 
 const OPERATOR_OPTIONS = [
   { name: '==', value: '==' },
@@ -124,6 +125,7 @@ interface DisplayConditionsModalProps {
   displayConditionInfoRef: React.RefObject<DisplayConditionInfo | null>;
   displayConditionsList: DisplayConditionData[];
   setDisplayConditionsList: (list: DisplayConditionData[]) => void;
+  variables: Record<string, unknown>;
 }
 
 export default function DisplayConditionsModal({
@@ -132,6 +134,7 @@ export default function DisplayConditionsModal({
   displayConditionInfoRef,
   displayConditionsList,
   setDisplayConditionsList,
+  variables,
 }: DisplayConditionsModalProps) {
   const [conditions, setConditions] = useState<OuterCondition[]>(
     cloneDeep(defaultCondition)
@@ -168,6 +171,7 @@ export default function DisplayConditionsModal({
             setConditions={setConditions}
             errors={errors}
             setErrors={setErrors}
+            variables={variables}
           />
         </div>
         <DialogFooter>
@@ -229,6 +233,7 @@ interface ConditionsProps {
   setConditions: (conditions: OuterCondition[]) => void;
   errors: string[][];
   setErrors: (errors: string[][]) => void;
+  variables: Record<string, unknown>;
 }
 
 function Conditions({
@@ -236,6 +241,7 @@ function Conditions({
   setConditions,
   errors,
   setErrors,
+  variables,
 }: ConditionsProps) {
   return (
     <div>
@@ -262,6 +268,7 @@ function Conditions({
                     innerIndex={innerIndex}
                     errors={errors}
                     setErrors={setErrors}
+                    variables={variables}
                   />
                   {isLastInner ? (
                     <Button
@@ -327,6 +334,7 @@ interface ConditionRowProps {
   innerConditions: Condition[];
   errors: string[][];
   setErrors: (errors: string[][]) => void;
+  variables: Record<string, unknown>;
 }
 
 function ConditionRow({
@@ -338,6 +346,7 @@ function ConditionRow({
   innerConditions,
   errors,
   setErrors,
+  variables,
 }: ConditionRowProps) {
   const error = errors?.[outerIndex]?.[innerIndex];
 
@@ -350,11 +359,15 @@ function ConditionRow({
               Property
             </Label>
           )}
-          <Input
+          <SuggestionInputDisplayConditions
+            variables={variables}
             value={condition.variable}
             placeholder="key or {{handlebars_helper}}"
-            onChange={(e) => {
-              condition.variable = e.target.value;
+            insertWithoutBrackets={true}
+            mandatory={false}
+            validateOnBlur={false}
+            onChange={(val) => {
+              condition.variable = val;
               setConditions([...conditions]);
               if (error) {
                 errors[outerIndex][innerIndex] = '';
