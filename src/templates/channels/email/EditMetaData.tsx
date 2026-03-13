@@ -65,7 +65,7 @@ export default function EmailSettingsPreviewBanner({
             {previewMeta.from_address || '-'}
           </span>
         </p>
-        <p className="suprsend-text-muted-foreground suprsend-text-xs">
+        <p className="suprsend-text-muted-foreground suprsend-text-xs suprsend-truncate">
           Subject:{' '}
           <span className="suprsend-text-foreground">
             {previewMeta.subject || '-'}
@@ -75,9 +75,9 @@ export default function EmailSettingsPreviewBanner({
       <Dialog open={emailSettingsOpen} onOpenChange={setEmailSettingsOpen}>
         <DialogTrigger asChild>
           {isLive ? (
-            <Maximize2 className="suprsend-h-3.5 suprsend-w-3.5 suprsend-cursor-pointer suprsend-text-muted-foreground" />
+            <Maximize2 className="suprsend-h-3.5 suprsend-w-3.5 suprsend-shrink-0 suprsend-cursor-pointer suprsend-text-muted-foreground" />
           ) : (
-            <Pencil className="suprsend-h-3.5 suprsend-w-3.5 suprsend-cursor-pointer suprsend-text-muted-foreground" />
+            <Pencil className="suprsend-h-3.5 suprsend-w-3.5 suprsend-shrink-0 suprsend-cursor-pointer suprsend-text-muted-foreground" />
           )}
         </DialogTrigger>
         <EmailMetaDataModal
@@ -237,7 +237,10 @@ function EmailMetaDataModal({
             <X
               className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600 suprsend-cursor-pointer suprsend-shrink-0"
               onClick={() => {
-                localStorage.setItem('ss_email_banner_metadata_dismissed', 'true');
+                localStorage.setItem(
+                  'ss_email_banner_metadata_dismissed',
+                  'true'
+                );
                 setInfoBannerVisible(false);
               }}
             />
