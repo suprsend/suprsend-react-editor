@@ -38,7 +38,9 @@ export default function EmailTemplatePlayground({
   const { isPrivate } = useTemplateEditorContext();
 
   const generatedIdRef = useRef(generateUUID());
-  const userId = isPrivate ? variantData?.email_editor_userid : generatedIdRef.current;
+  const userId = isPrivate
+    ? variantData?.email_editor_userid
+    : generatedIdRef.current;
 
   const { workspaceUid } = useTemplateEditorContext();
   const { mutateAsync: uploadFile } = useUploadFile(workspaceUid);
@@ -137,7 +139,7 @@ export default function EmailTemplatePlayground({
   useEffect(() => {
     const unsubConfig = on('REQUEST_CONFIG', () => {
       post('BRAND_CONFIG', {
-        brandData: variables?.['$brand'],
+        brandData: variables,
       });
     });
 
@@ -293,6 +295,7 @@ export default function EmailTemplatePlayground({
         displayConditionInfoRef={displayConditionInfoRef}
         displayConditionsList={displayConditionsList}
         setDisplayConditionsList={handleSetDisplayConditionsList}
+        variables={variables}
       />
       <OldDisplayConditionsModal
         open={oldDisplayConditionOpen}
@@ -326,7 +329,7 @@ export default function EmailTemplatePlayground({
           )}
           <iframe
             ref={iframeRef}
-            src={`http://localhost:3000/dropin_email_editor?userId=${encodeURIComponent(userId ?? '')}`}
+            src={`https://suprsend-unlayer-editor.pages.dev?userId=${encodeURIComponent(userId ?? '')}`}
             className="suprsend-w-full suprsend-h-full"
           />
         </div>
