@@ -205,7 +205,7 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="suprsend-sm:suprsend-max-w-[800px]">
+      <DialogContent className="!suprsend-max-w-[700px]">
         <DialogHeader className="suprsend-pb-4">
           <DialogTitle>Commit changes</DialogTitle>
         </DialogHeader>
@@ -240,8 +240,8 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
             <div className="suprsend-space-y-3">
               <p className="suprsend-text-sm suprsend-text-muted-foreground">
                 Below {totalChanges} change
-                {totalChanges !== 1 ? 's have' : ' has'} been updated. Select
-                the ones you want to commit
+                {totalChanges !== 1 ? 's are' : ' is'} made. Deselect the
+                ones you don't want to commit
               </p>
 
               {variants.length > 0 && (

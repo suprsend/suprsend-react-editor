@@ -192,11 +192,15 @@ export default function EmailChannel({
     [editorMode, handleSwitchToHtml]
   );
 
+  const [htmlCopied, setHtmlCopied] = useState(false);
+
   const handleCopyHtml = useCallback(async () => {
     const html = exportHtmlRef.current
       ? await exportHtmlRef.current()
       : designerHtmlRef.current;
     navigator.clipboard.writeText(html);
+    setHtmlCopied(true);
+    setTimeout(() => setHtmlCopied(false), 2000);
   }, []);
 
   const editorTabLabel =
@@ -306,8 +310,8 @@ export default function EmailChannel({
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
-              <TooltipProvider>
-                <Tooltip>
+              <TooltipProvider delayDuration={0}>
+                <Tooltip open={htmlCopied || undefined}>
                   <TooltipTrigger asChild>
                     <Button
                       variant="ghost"
@@ -321,7 +325,7 @@ export default function EmailChannel({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Copy HTML</p>
+                    <p>{htmlCopied ? 'Copied!' : 'Copy HTML'}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
