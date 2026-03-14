@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
   Info,
@@ -13,11 +13,13 @@ import {
 import SuggestionCodeEditor from '@/components/custom-ui/SuggestionCodeEditor';
 import {
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   Dialog,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import SuggestionInput from '@/components/custom-ui/SuggestionInput';
 import {
@@ -26,7 +28,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useAutosave } from '@/lib/useAutosave';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import type {
   EmailMetaDataFormValues,
@@ -96,6 +97,7 @@ export default function EmailSettingsPreviewBanner({
           variantData={variantData}
           onSave={onSave}
           onFieldsChange={setPreviewMeta}
+          onClose={() => setEmailSettingsOpen(false)}
           variables={variables}
         />
       </Dialog>
@@ -115,6 +117,7 @@ interface EmailMetaDataModalProps {
   variantData: IEmailContentResponse;
   onSave: (payload: EmailContentPayload) => void;
   onFieldsChange: (meta: PreviewMeta) => void;
+  onClose: () => void;
   variables: Record<string, unknown>;
 }
 
@@ -124,6 +127,7 @@ function EmailMetaDataModal({
   variantData,
   onSave,
   onFieldsChange,
+  onClose,
   variables,
 }: EmailMetaDataModalProps) {
   const { isLive } = useTemplateEditorContext();
@@ -132,7 +136,7 @@ function EmailMetaDataModal({
     () => localStorage.getItem('ss_email_banner_metadata_dismissed') !== 'true'
   );
 
-  const { watch, control } = useForm<EmailMetaDataFormValues>({
+  const { getValues, control } = useForm<EmailMetaDataFormValues>({
     values: {
       subject: emailContent?.subject ?? '',
       from_name: emailContent?.from_name ?? '',
@@ -146,29 +150,19 @@ function EmailMetaDataModal({
     },
   });
 
-  const handleAutosave = useCallback(
-    (data: EmailMetaDataFormValues) => {
-      const { preheader, email_markup, ...rest } = data;
-      const content: EmailContentPayload['content'] = { ...rest };
-      content.body = { preheader, email_markup };
-      onSave({ content });
-    },
-    [onSave]
-  );
-
-  useAutosave({ watch, onSave: handleAutosave, debounceMs: 0 });
-
-  const subject = watch('subject');
-  const fromName = watch('from_name');
-  const fromAddress = watch('from_address');
-
-  useEffect(() => {
+  const handleSave = useCallback(() => {
+    const data = getValues();
+    const { preheader, email_markup, ...rest } = data;
+    const content: EmailContentPayload['content'] = { ...rest };
+    content.body = { preheader, email_markup };
+    onSave({ content });
     onFieldsChange({
-      subject,
-      from_name: fromName,
-      from_address: fromAddress,
+      subject: data.subject,
+      from_name: data.from_name,
+      from_address: data.from_address,
     });
-  }, [subject, fromName, fromAddress, onFieldsChange]);
+    onClose();
+  }, [getValues, onSave, onFieldsChange, onClose]);
 
   return (
     <DialogContent className="!suprsend-max-w-3xl suprsend-p-0 !suprsend-max-h-[90vh] !suprsend-overflow-y-auto !suprsend-border-0">
@@ -440,6 +434,12 @@ function EmailMetaDataModal({
           )}
         </div>
       </div>
+      <DialogFooter>
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        {!isLive && <Button onClick={handleSave}>Save</Button>}
+      </DialogFooter>
     </DialogContent>
   );
 }
