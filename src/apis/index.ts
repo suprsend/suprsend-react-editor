@@ -236,7 +236,7 @@ const getInboxTags = async ({
 }) => {
   const url = `${API_BASE_URL}/v1/${workspaceUid}/inbox_tag/?search=${encodeURIComponent(search)}&limit=50`;
 
-  const resp = await axiosInst.get(url);
+  const resp = await fetchClient.get(url);
   return resp.data;
 };
 

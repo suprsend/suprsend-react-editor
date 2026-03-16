@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Bell, MoreHorizontal } from 'lucide-react';
+import { Bell, MoreHorizontal } from '@/assets/icons';
 import HandlebarsRenderer, {
   renderHandlebars,
 } from '@/components/custom-ui/HandlebarsRenderer';
