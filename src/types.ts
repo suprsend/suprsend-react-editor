@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react';
 
 export type ChannelId =
-  | 'android'
+  | 'androidpush'
   | 'email'
   | 'inbox'
-  | 'ios'
-  | 'msteams'
+  | 'iospush'
+  | 'ms_teams'
   | 'slack'
   | 'sms'
   | 'webpush'
@@ -26,6 +26,7 @@ export interface SuprSendTemplateEditorProviderProps {
   refreshAccessToken?: (oldToken: string) => Promise<string>;
   recipientDistinctId?: string;
   actorDistinctId?: string;
+  isPrivate?: boolean;
 }
 
 export interface FullSuprSendTemplateEditorProviderProps extends SuprSendTemplateEditorProviderProps {
@@ -54,6 +55,23 @@ export interface CommitButtonProps {
 export interface CommitVariant {
   channel: string;
   id: string;
+  has_diff?: boolean;
+  is_deleted?: boolean;
+  errors?: Record<string, string[]>;
+  name?: string;
+}
+
+export interface PropertyDiff {
+  has_diff: boolean;
+  draft?: unknown;
+  live?: unknown;
+}
+
+export interface PreCommitValidateResponse {
+  is_new: boolean;
+  has_changes: boolean;
+  properties: Record<string, PropertyDiff>;
+  variants: CommitVariant[];
 }
 
 export interface CommitTemplateParams {
@@ -531,7 +549,6 @@ export interface EmailTemplatePlaygroundProps {
   plainTextOnlyText: string;
   onPlainTextOnlyTextChange: (v: string) => void;
   disabled?: boolean;
-  showVariables?: boolean;
 }
 
 export interface IEmailSettingsPreviewBannerProps {

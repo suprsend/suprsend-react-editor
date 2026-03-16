@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Phone, Camera, Signal, BatteryFull, ChevronUp } from 'lucide-react';
+import { Phone, Camera, Signal, BatteryFull, ChevronUp } from '@/assets/icons';
 import { cn } from '@/lib/utils';
 import HandlebarsRenderer, {
   renderHandlebars,

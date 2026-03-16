@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import 'emoji-picker-element';
 import type { EmojiClickEventDetail } from 'emoji-picker-element/shared';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Smile } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Smile } from '@/assets/icons';
 import { cn } from '@/lib/utils';
 
 export type { EmojiClickEventDetail };
@@ -74,6 +78,7 @@ interface UseEmojiInsertionOptions {
  * Shared hook for inserting emoji at the cursor position of a
  * controlled input or textarea.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useEmojiInsertion<
   T extends HTMLInputElement | HTMLTextAreaElement,
 >({ value, onChange }: UseEmojiInsertionOptions) {
@@ -108,7 +113,7 @@ export function useEmojiInsertion<
         el.setSelectionRange(nextCursor, nextCursor);
       });
     },
-    [value, onChange],
+    [value, onChange]
   );
 
   return { elementRef, open, setOpen, saveSelection, insertEmoji };
@@ -142,7 +147,7 @@ export function EmojiPickerTrigger({
           aria-label="Insert emoji"
           className={cn(
             'suprsend-text-muted-foreground hover:suprsend-text-foreground suprsend-transition-colors suprsend-shrink-0',
-            triggerClassName,
+            triggerClassName
           )}
         >
           <Smile className="suprsend-w-4 suprsend-h-4" />

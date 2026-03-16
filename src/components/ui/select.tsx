@@ -1,6 +1,6 @@
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
-import { Check, ChevronDown, ChevronUp } from "lucide-react"
+import { Check, ChevronDown, ChevronUp } from '@/assets/icons'
 
 import { cn } from "@/lib/utils"
 
@@ -73,7 +73,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "suprsend-relative suprsend-z-50 suprsend-max-h-[--radix-select-content-available-height] suprsend-min-w-[8rem] suprsend-overflow-y-auto suprsend-overflow-x-hidden suprsend-rounded-md suprsend-border suprsend-bg-popover suprsend-text-popover-foreground suprsend-shadow-md data-[state=open]:suprsend-animate-in data-[state=closed]:suprsend-animate-out data-[state=closed]:suprsend-fade-out-0 data-[state=open]:suprsend-fade-in-0 data-[state=closed]:suprsend-zoom-out-95 data-[state=open]:suprsend-zoom-in-95 data-[side=bottom]:suprsend-slide-in-from-top-2 data-[side=left]:suprsend-slide-in-from-right-2 data-[side=right]:suprsend-slide-in-from-left-2 data-[side=top]:suprsend-slide-in-from-bottom-2 suprsend-origin-[--radix-select-content-transform-origin]",
+        "suprsend-relative suprsend-z-50 suprsend-max-h-[--radix-select-content-available-height] suprsend-min-w-[8rem] suprsend-overflow-y-auto suprsend-overflow-x-hidden suprsend-rounded-md suprsend-border suprsend-bg-popover suprsend-text-sm suprsend-text-popover-foreground suprsend-shadow-md data-[state=open]:suprsend-animate-in data-[state=closed]:suprsend-animate-out data-[state=closed]:suprsend-fade-out-0 data-[state=open]:suprsend-fade-in-0 data-[state=closed]:suprsend-zoom-out-95 data-[state=open]:suprsend-zoom-in-95 data-[side=bottom]:suprsend-slide-in-from-top-2 data-[side=left]:suprsend-slide-in-from-right-2 data-[side=right]:suprsend-slide-in-from-left-2 data-[side=top]:suprsend-slide-in-from-bottom-2 suprsend-origin-[--radix-select-content-transform-origin]",
         position === "popper" &&
           "data-[side=bottom]:suprsend-translate-y-1 data-[side=left]:suprsend--translate-x-1 data-[side=right]:suprsend-translate-x-1 data-[side=top]:suprsend--translate-y-1",
         className

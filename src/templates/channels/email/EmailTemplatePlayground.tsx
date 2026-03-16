@@ -1,11 +1,10 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { Loader2 } from 'lucide-react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { Loader2 } from '@/assets/icons';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { usePostMessageBridge } from '@/lib/usePostMessageBridge';
 import { useUploadFile } from '@/apis';
 import { variablesToDesignerMergeTags } from '@/lib/suggestion-utils';
 import { generateUUID, htmlToText } from '@/lib/utils';
-import { renderHandlebars } from '@/components/custom-ui/HandlebarsRenderer';
 import type {
   MergeTagData,
   EmailTemplatePlaygroundProps,
@@ -17,7 +16,6 @@ import DisplayConditionsModal from './DisplayConditionsModal';
 import OldDisplayConditionsModal from './OldDisplayConditionsModal';
 import MergeTagsModal from './MergeTagsModal';
 import TextEditors from './TextEditors';
-import SuggestionCodeEditor from '@/components/custom-ui/SuggestionCodeEditor';
 
 export default function EmailTemplatePlayground({
   editorMode,
@@ -36,11 +34,13 @@ export default function EmailTemplatePlayground({
   onPlainTextOnlyTextChange,
   variables = {},
   disabled = false,
-  showVariables = false,
 }: EmailTemplatePlaygroundProps) {
   const { isPrivate } = useTemplateEditorContext();
 
-  const userId = isPrivate ? variantData?.email_editor_userid : generateUUID();
+  const generatedIdRef = useRef(generateUUID());
+  const userId = isPrivate
+    ? variantData?.email_editor_userid
+    : generatedIdRef.current;
 
   const { workspaceUid } = useTemplateEditorContext();
   const { mutateAsync: uploadFile } = useUploadFile(workspaceUid);
@@ -139,7 +139,7 @@ export default function EmailTemplatePlayground({
   useEffect(() => {
     const unsubConfig = on('REQUEST_CONFIG', () => {
       post('BRAND_CONFIG', {
-        brandData: variables?.['$brand'],
+        brandData: variables,
       });
     });
 
@@ -287,12 +287,6 @@ export default function EmailTemplatePlayground({
     pointerEvents: 'none' as const,
   };
 
-  const designerPreviewHtml = useMemo(() => {
-    if (!disabled || editorMode !== 'design') return '';
-    const html = apiBody?.designer?.html ?? '';
-    return showVariables ? renderHandlebars(html, variables) : html;
-  }, [disabled, editorMode, apiBody?.designer?.html, showVariables, variables]);
-
   return (
     <div className="suprsend-relative suprsend-w-full suprsend-h-full">
       <DisplayConditionsModal
@@ -301,6 +295,7 @@ export default function EmailTemplatePlayground({
         displayConditionInfoRef={displayConditionInfoRef}
         displayConditionsList={displayConditionsList}
         setDisplayConditionsList={handleSetDisplayConditionsList}
+        variables={variables}
       />
       <OldDisplayConditionsModal
         open={oldDisplayConditionOpen}
@@ -334,36 +329,23 @@ export default function EmailTemplatePlayground({
           )}
           <iframe
             ref={iframeRef}
-            src={`http://localhost:3000/dropin_email_editor?userId=${encodeURIComponent(userId ?? '')}`}
+            src={`https://suprsend-unlayer-editor.pages.dev?userId=${encodeURIComponent(userId ?? '')}`}
             className="suprsend-w-full suprsend-h-full"
           />
         </div>
       )}
 
-      {/* Designer live mode: HTML preview or template code editor */}
+      {/* Designer live mode: HTML preview */}
       {editorMode === 'design' && disabled && (
         <div
           className="suprsend-absolute suprsend-inset-0"
           style={showDesignerIframe ? undefined : hiddenStyle}
         >
-          {showVariables ? (
-            <SuggestionCodeEditor
-              value={apiBody?.designer?.html ?? ''}
-              onChange={() => {}}
-              variables={variables}
-              language="html"
-              disabled
-              height=""
-              containerClassName="suprsend-h-full !suprsend-mt-0"
-              className="suprsend-h-full suprsend-border-0 suprsend-rounded-none"
-            />
-          ) : (
-            <iframe
-              srcDoc={designerPreviewHtml}
-              title="Email preview"
-              className="suprsend-w-full suprsend-h-full suprsend-border-0"
-            />
-          )}
+          <iframe
+            srcDoc={apiBody?.designer?.html ?? ''}
+            title="Email preview"
+            className="suprsend-w-full suprsend-h-full suprsend-border-0"
+          />
         </div>
       )}
 

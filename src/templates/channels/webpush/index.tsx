@@ -6,7 +6,7 @@ import SuggestionInputWithUpload from '@/components/custom-ui/SuggestionInputWit
 import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import { X, Plus } from 'lucide-react';
+import { X, Plus } from '@/assets/icons';
 import type { WebpushChannelProps, WebpushFormValues } from '@/types';
 import { Button } from '@/components/ui/button';
 import WebpushPreview from './Preview';

@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import SuggestionInput, { type SuggestionInputProps } from './SuggestionInput';
-import { Upload, Loader2 } from 'lucide-react';
+import { Upload, Loader2 } from '@/assets/icons';
 import { useUploadFile } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 
@@ -99,7 +99,10 @@ export default function SuggestionInputWithUpload({
               )}
             >
               {isPending ? (
-                <Loader2 className="suprsend-w-4 suprsend-h-4 suprsend-animate-spin" />
+                <Loader2
+                  className="suprsend-w-4 suprsend-h-4"
+                  style={{ animation: 'spin 1s linear infinite' }}
+                />
               ) : (
                 <Upload className="suprsend-w-4 suprsend-h-4" />
               )}
