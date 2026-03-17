@@ -410,6 +410,86 @@ export interface AndroidPushPreviewProps {
   variables: Record<string, unknown>;
 }
 
+// --- WhatsApp ---
+
+export type WhatsappCategory = 'UTILITY' | 'MARKETING';
+export type WhatsappTemplateType = 'TEXT' | 'MEDIA';
+export type WhatsappHeaderFormat = 'TEXT' | 'IMAGE' | 'VIDEO' | 'DOCUMENT';
+export type WhatsappButtonType = 'NONE' | 'QUICK_REPLY' | 'CALL_TO_ACTION';
+
+export interface IWhatsappURLButton {
+  type: 'URL';
+  text: string;
+  url_type: 'static' | 'dynamic';
+  url_static_part: string;
+  url_dynamic_part?: string;
+}
+
+export interface IWhatsappPhoneButton {
+  type: 'PHONE_NUMBER';
+  text: string;
+  phone_number: string;
+}
+
+export interface IWhatsappQuickReplyButton {
+  type: 'QUICK_REPLY';
+  text: string;
+}
+
+export type IWhatsappButton =
+  | IWhatsappURLButton
+  | IWhatsappPhoneButton
+  | IWhatsappQuickReplyButton;
+export type IWhatsappCTAButton = IWhatsappURLButton | IWhatsappPhoneButton;
+
+export interface IWhatsappHeader {
+  format: WhatsappHeaderFormat;
+  text?: string;
+  media_url?: string;
+  filename?: string;
+}
+
+export interface IWhatsappContent {
+  category?: WhatsappCategory;
+  body?: { text: string };
+  footer?: { text: string };
+  header?: IWhatsappHeader;
+  button_type?: WhatsappButtonType;
+  buttons?: IWhatsappButton[];
+}
+
+export interface IWhatsappContentResponse {
+  content: IWhatsappContent;
+}
+
+export interface WhatsappFormValues {
+  category: string;
+  template_type: WhatsappTemplateType;
+  header_text: string;
+  header_media_format: 'IMAGE' | 'VIDEO' | 'DOCUMENT';
+  header_media_url: string;
+  header_document_filename: string;
+  body_text: string;
+  footer_text: string;
+  button_type: WhatsappButtonType;
+  cta_buttons: IWhatsappCTAButton[];
+  quick_reply_buttons: IWhatsappQuickReplyButton[];
+}
+
+export type WhatsappContentPayload = {
+  content: Partial<IWhatsappContent>;
+};
+
+export interface WhatsappChannelProps {
+  variantData: IWhatsappContentResponse;
+  variables: Record<string, unknown>;
+}
+
+export interface WhatsappPreviewProps {
+  formValues: WhatsappFormValues;
+  variables: Record<string, unknown>;
+}
+
 // --- Generic payload union for API ---
 
 export type ChannelContentPayload =
@@ -418,7 +498,8 @@ export type ChannelContentPayload =
   | WebpushContentPayload
   | MSTeamsContentPayload
   | SlackContentPayload
-  | AndroidPushContentPayload;
+  | AndroidPushContentPayload
+  | WhatsappContentPayload;
 
 export interface UpdateVariantContentParams extends GetVariantDetailsParams {
   payload: ChannelContentPayload;
