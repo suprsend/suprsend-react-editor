@@ -78,7 +78,6 @@ export default function SMSChannel({
       {/* Form */}
       <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto">
         <div className="suprsend-max-w-2xl suprsend-space-y-6">
-          {/* Category - DLT only */}
           {isDlt && (
             <div className="suprsend-space-y-1">
               <Controller
@@ -123,7 +122,6 @@ export default function SMSChannel({
             </div>
           )}
 
-          {/* Header - DLT only */}
           {isDlt && (
             <div className="suprsend-space-y-1">
               <Controller
@@ -171,7 +169,6 @@ export default function SMSChannel({
             </div>
           )}
 
-          {/* Body */}
           <div className="suprsend-space-y-1">
             <Controller
               name="body"
