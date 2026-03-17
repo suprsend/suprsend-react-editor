@@ -5,7 +5,7 @@ import SuggestionInputWithEmoji from '@/components/custom-ui/SuggestionInputWith
 import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent, useInboxTags } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import { X, Plus, ChevronRight } from 'lucide-react';
+import { X, Plus, ChevronRight } from '@/assets/icons';
 import type { InboxChannelProps, InboxFormValues } from '@/types';
 import InboxPreview from './Preview';
 import {
@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/collapsible';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import DurationInput from '@/components/custom-ui/DurationInput';
+import { DateTimePicker } from '@/components/ui/date-time-picker';
 import { cn } from '@/lib/utils';
 
 const IMPORTANCE_OPTIONS = [
@@ -537,7 +538,21 @@ export default function InboxChannel({
                           )}
                         />
                       ) : (
-                        <div />
+                        <Controller
+                          name="expiry.value"
+                          control={control}
+                          render={({ field }) => (
+                            <DateTimePicker
+                              value={
+                                field.value ? new Date(field.value) : undefined
+                              }
+                              onChange={(date) =>
+                                field.onChange(date ? date.toISOString() : '')
+                              }
+                              disabled={isLive}
+                            />
+                          )}
+                        />
                       )}
 
                       <div className="suprsend-flex suprsend-items-center suprsend-gap-3">
