@@ -231,7 +231,7 @@ export default function WhatsappPreview({
 
             {/* Message Bubble */}
             <div className="suprsend-ml-1 suprsend-max-w-[85%]">
-              <div className="suprsend-bg-white suprsend-rounded-r-lg suprsend-rounded-bl-lg suprsend-shadow-sm suprsend-overflow-hidden">
+              <div className="suprsend-bg-white suprsend-rounded-lg suprsend-shadow-sm suprsend-overflow-hidden">
                 {/* Header - Media */}
                 {formValues.template_type === 'MEDIA' && (
                   <div>

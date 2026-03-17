@@ -4,6 +4,7 @@ export { default as BatteryFull } from './battery-full.svg?react';
 export { default as Brush } from './brush.svg?react';
 export { default as Camera } from './camera.svg?react';
 export { default as Check } from './check.svg?react';
+export { default as CircleCheck } from './circle-check.svg?react';
 export { default as ChevronDown } from './chevron-down.svg?react';
 export { default as ChevronLeft } from './chevron-left.svg?react';
 export { default as ChevronRight } from './chevron-right.svg?react';
