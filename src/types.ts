@@ -342,6 +342,40 @@ export interface JsonnetRenderResponse {
   error?: string;
 }
 
+// --- SMS ---
+
+export interface ISMSContent {
+  body: string;
+  type: string;
+  header: string;
+  category: string;
+  templating_language: string;
+}
+
+export interface ISMSContentResponse {
+  content: ISMSContent;
+}
+
+export type SMSFormValues = {
+  body: string;
+  header: string;
+  category: string;
+};
+
+export type SMSContentPayload = {
+  content: Partial<ISMSContent>;
+};
+
+export interface SMSChannelProps {
+  variantData: ISMSContentResponse;
+  variables: Record<string, unknown>;
+}
+
+export interface SMSPreviewProps {
+  formValues: SMSFormValues;
+  variables: Record<string, unknown>;
+}
+
 // --- Android Push ---
 
 export interface IAndroidPushButton {
@@ -482,6 +516,7 @@ export type ChannelContentPayload =
   | MSTeamsContentPayload
   | SlackContentPayload
   | AndroidPushContentPayload
+  | SMSContentPayload
   | InboxContentPayload;
 
 export interface UpdateVariantContentParams extends GetVariantDetailsParams {

@@ -22,6 +22,7 @@ export { default as HelpCircle } from './help-circle.svg?react';
 export { default as Info } from './info.svg?react';
 export { default as Loader2 } from './loader2.svg?react';
 export { default as Maximize2 } from './maximize2.svg?react';
+export { default as Mic } from './mic.svg?react';
 export { default as MoreHorizontal } from './more-horizontal.svg?react';
 export { default as Pencil } from './pencil.svg?react';
 export { default as Phone } from './phone.svg?react';

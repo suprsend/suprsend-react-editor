@@ -227,6 +227,31 @@ export const useMockData = ({ templateSlug }: UseMockDataParams) => {
   });
 };
 
+const getSMSHeaders = async ({
+  workspaceUid,
+  notifCategory,
+}: {
+  workspaceUid: string;
+  notifCategory: string;
+}) => {
+  const url = `${API_BASE_URL}/v1/${workspaceUid}/tenant/default/vendor/sms_headers/?root_category=${notifCategory}`;
+  const resp = await fetchClient.get(url);
+  return resp.data;
+};
+
+export const useSMSHeaders = (notifCategory: string) => {
+  const { workspaceUid } = useTemplateEditorContext();
+
+  return useQuery({
+    queryKey: [
+      `${workspaceUid}/tenant/default/vendor/sms_headers`,
+      notifCategory,
+    ],
+    queryFn: () => getSMSHeaders({ workspaceUid, notifCategory }),
+    enabled: !!notifCategory,
+  });
+};
+
 const getInboxTags = async ({
   workspaceUid,
   search,
@@ -235,7 +260,6 @@ const getInboxTags = async ({
   search: string;
 }) => {
   const url = `${API_BASE_URL}/v1/${workspaceUid}/inbox_tag/?search=${encodeURIComponent(search)}&limit=50`;
-
   const resp = await fetchClient.get(url);
   return resp.data;
 };
@@ -283,7 +307,10 @@ export const useCommitTemplate = ({
 }: UseCommitTemplateParams) => {
   const { workspaceUid, isPrivate } = useTemplateEditorContext();
   return useMutation({
-    mutationFn: ({ commitMessage, variants }: CommitTemplateMutationPayload) =>
+    mutationFn: ({
+      commitMessage,
+      variants,
+    }: CommitTemplateMutationPayload) =>
       commitTemplate({
         templateSlug,
         workspaceUid,

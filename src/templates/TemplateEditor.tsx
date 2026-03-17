@@ -6,6 +6,7 @@ import WebpushChannel from '@/templates/channels/webpush';
 import MSTeamsChannel from '@/templates/channels/msteams';
 import SlackChannel from '@/templates/channels/slack';
 import AndroidPushChannel from '@/templates/channels/androidpush';
+import SMSChannel from '@/templates/channels/sms';
 import InboxChannel from '@/templates/channels/inbox';
 import type { SuprSendTemplateEditorProps } from '@/types';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
@@ -79,7 +80,12 @@ export default function SuprSendTemplateEditor({
             variables={mockData?.transformed_data ?? {}}
           />
         )}
-        {selectedChannel === 'sms' && <p>SMS Channel Editor Coming Soon...</p>}
+        {selectedChannel === 'sms' && (
+          <SMSChannel
+            variantData={variantData}
+            variables={mockData?.transformed_data ?? {}}
+          />
+        )}
         {selectedChannel === 'inbox' && (
           <InboxChannel
             variantData={variantData}
