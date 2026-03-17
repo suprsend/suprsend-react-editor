@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from '@/assets/icons';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { usePostMessageBridge } from '@/lib/usePostMessageBridge';
 import { useUploadFile } from '@/apis';
@@ -37,7 +37,10 @@ export default function EmailTemplatePlayground({
 }: EmailTemplatePlaygroundProps) {
   const { isPrivate } = useTemplateEditorContext();
 
-  const userId = isPrivate ? variantData?.email_editor_userid : generateUUID();
+  const generatedIdRef = useRef(generateUUID());
+  const userId = isPrivate
+    ? variantData?.email_editor_userid
+    : generatedIdRef.current;
 
   const { workspaceUid } = useTemplateEditorContext();
   const { mutateAsync: uploadFile } = useUploadFile(workspaceUid);
@@ -136,7 +139,7 @@ export default function EmailTemplatePlayground({
   useEffect(() => {
     const unsubConfig = on('REQUEST_CONFIG', () => {
       post('BRAND_CONFIG', {
-        brandData: variables?.['$brand'],
+        brandData: variables,
       });
     });
 
@@ -292,6 +295,7 @@ export default function EmailTemplatePlayground({
         displayConditionInfoRef={displayConditionInfoRef}
         displayConditionsList={displayConditionsList}
         setDisplayConditionsList={handleSetDisplayConditionsList}
+        variables={variables}
       />
       <OldDisplayConditionsModal
         open={oldDisplayConditionOpen}
@@ -325,7 +329,7 @@ export default function EmailTemplatePlayground({
           )}
           <iframe
             ref={iframeRef}
-            src={`http://localhost:3000/dropin_email_editor?userId=${encodeURIComponent(userId ?? '')}`}
+            src={`https://suprsend-unlayer-editor.pages.dev?userId=${encodeURIComponent(userId ?? '')}`}
             className="suprsend-w-full suprsend-h-full"
           />
         </div>

@@ -1,10 +1,3 @@
-import {
-  QueryClient,
-  useQuery,
-  useMutation,
-  keepPreviousData,
-} from '@tanstack/react-query';
-import axios from 'axios';
 import type {
   GetVariantDetailsParams,
   ChannelContentPayload,
@@ -22,27 +15,21 @@ import type {
 } from '@/types';
 import { createQueryParams } from '@/lib/utils';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
+import { useQuery } from '@/lib/useQuery';
+import { useMutation } from '@/lib/useMutation';
+import { FetchClient } from '@/lib/fetchClient';
+export { invalidateQueries } from '@/lib/queryCache';
+export { isHttpError } from '@/lib/fetchClient';
 
 const API_BASE_URL = 'https://stagingapi2.suprsend.com';
 const JSONNET_API_BASE_URL = 'https://stagingapi.suprsend.com/jsonnet';
 
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: (failureCount, error) => {
-        if (axios.isAxiosError(error) && error.response?.status === 404)
-          return false;
-        return failureCount < 4;
-      },
-      refetchOnWindowFocus: false,
-    },
-  },
+export const fetchClient = new FetchClient({
+  baseURL: API_BASE_URL,
+  credentials: 'include',
 });
 
-export const axiosInst = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true,
-});
+// ---------- API functions ----------
 
 const getVariantDetails = async ({
   templateSlug,
@@ -55,12 +42,17 @@ const getVariantDetails = async ({
   isPrivate,
   mode,
 }: GetVariantDetailsParams) => {
-  const qp = createQueryParams({ conditions, locale, tenantId, mode });
+  const qp = createQueryParams({
+    conditions,
+    locale,
+    tenant_id: tenantId,
+    mode,
+  });
   const url = isPrivate
     ? `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}/${qp}`
     : `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/embedded/channel/${chanelSlug}/variant/${variantId}/${qp}`;
 
-  const resp = await axiosInst.get(url);
+  const resp = await fetchClient.get(url);
   return resp.data;
 };
 
@@ -72,27 +64,24 @@ export const useVariantDetails = ({
   const { locale, tenantId, workspaceUid, conditions, isPrivate, mode } =
     useTemplateEditorContext();
 
-  return useQuery(
-    {
-      queryKey: [
-        `template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}`,
+  return useQuery({
+    queryKey: [
+      `template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}`,
+      mode,
+    ],
+    queryFn: () =>
+      getVariantDetails({
+        templateSlug,
+        chanelSlug,
+        variantId,
+        locale,
+        tenantId,
+        conditions,
+        workspaceUid,
+        isPrivate,
         mode,
-      ],
-      queryFn: () =>
-        getVariantDetails({
-          templateSlug,
-          chanelSlug,
-          variantId,
-          locale,
-          tenantId,
-          conditions,
-          workspaceUid,
-          isPrivate,
-          mode,
-        }),
-    },
-    queryClient
-  );
+      }),
+  });
 };
 
 const updateVariantContent = async ({
@@ -106,12 +95,12 @@ const updateVariantContent = async ({
   payload,
   isPrivate,
 }: UpdateVariantContentParams) => {
-  const qp = createQueryParams({ conditions, locale, tenantId });
+  const qp = createQueryParams({ conditions, locale, tenant_id: tenantId });
   const url = isPrivate
     ? `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/channel/${chanelSlug}/variant/${variantId}/content/`
     : `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/embedded/channel/${chanelSlug}/variant/${variantId}/content/${qp}`;
 
-  const resp = await axiosInst.patch(url, payload);
+  const resp = await fetchClient.patch(url, payload);
   return resp.data;
 };
 
@@ -123,40 +112,34 @@ export const useUpdateVariantContent = ({
   const { locale, tenantId, workspaceUid, conditions, isPrivate } =
     useTemplateEditorContext();
 
-  return useMutation(
-    {
-      mutationFn: (payload: ChannelContentPayload) =>
-        updateVariantContent({
-          templateSlug,
-          chanelSlug,
-          variantId,
-          workspaceUid,
-          conditions,
-          locale,
-          tenantId,
-          payload,
-          isPrivate,
-        }),
-    },
-    queryClient
-  );
+  return useMutation({
+    mutationFn: (payload: ChannelContentPayload) =>
+      updateVariantContent({
+        templateSlug,
+        chanelSlug,
+        variantId,
+        workspaceUid,
+        conditions,
+        locale,
+        tenantId,
+        payload,
+        isPrivate,
+      }),
+  });
 };
 
 const uploadFile = async ({ workspaceUid, file }: UploadFileParams) => {
   const formData = new FormData();
   formData.append('file', file);
   const url = `${API_BASE_URL}/v1/${workspaceUid}/public/upload_file/`;
-  const resp = await axiosInst.put(url, formData);
+  const resp = await fetchClient.put(url, formData);
   return resp.data;
 };
 
 export const useUploadFile = (workspaceUid: string) => {
-  return useMutation(
-    {
-      mutationFn: (file: File) => uploadFile({ workspaceUid, file }),
-    },
-    queryClient
-  );
+  return useMutation({
+    mutationFn: (file: File) => uploadFile({ workspaceUid, file }),
+  });
 };
 
 const getMockData = async ({
@@ -182,9 +165,9 @@ const getMockData = async ({
 
   const url = isPrivate
     ? `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/mock_data/${qp}`
-    : `${API_BASE_URL}/v2/${workspaceUid}/template/embedded/${templateSlug}/mock_data/${qp}`;
+    : `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/embedded/mock_data/${qp}`;
 
-  const resp = await axiosInst.get(url);
+  const resp = await fetchClient.get(url);
   return resp.data;
 };
 
@@ -200,7 +183,7 @@ const getPreCommitValidate = async ({
   const url = isPrivate
     ? `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/pre_commit_validate/`
     : `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/embedded/pre_commit_validate/`;
-  const resp = await axiosInst.post(url);
+  const resp = await fetchClient.post(url);
   return resp.data;
 };
 
@@ -212,15 +195,12 @@ export const usePreCommitValidate = ({
   enabled: boolean;
 }) => {
   const { workspaceUid, isPrivate } = useTemplateEditorContext();
-  return useQuery(
-    {
-      queryKey: [`template/${templateSlug}/pre_commit_validate`],
-      queryFn: () =>
-        getPreCommitValidate({ templateSlug, workspaceUid, isPrivate }),
-      enabled,
-    },
-    queryClient
-  );
+  return useQuery({
+    queryKey: [`template/${templateSlug}/pre_commit_validate`],
+    queryFn: () =>
+      getPreCommitValidate({ templateSlug, workspaceUid, isPrivate }),
+    enabled,
+  });
 };
 
 export const useMockData = ({ templateSlug }: UseMockDataParams) => {
@@ -232,22 +212,19 @@ export const useMockData = ({ templateSlug }: UseMockDataParams) => {
     actorDistinctId,
     mode,
   } = useTemplateEditorContext();
-  return useQuery(
-    {
-      queryKey: [`template/${templateSlug}/mock_data`, mode],
-      queryFn: () =>
-        getMockData({
-          templateSlug,
-          workspaceUid,
-          tenantId,
-          isPrivate,
-          recipientDistinctId,
-          actorDistinctId,
-          mode,
-        }),
-    },
-    queryClient
-  );
+  return useQuery({
+    queryKey: [`template/${templateSlug}/mock_data`, mode],
+    queryFn: () =>
+      getMockData({
+        templateSlug,
+        workspaceUid,
+        tenantId,
+        isPrivate,
+        recipientDistinctId,
+        actorDistinctId,
+        mode,
+      }),
+  });
 };
 
 const getSMSHeaders = async ({
@@ -258,41 +235,34 @@ const getSMSHeaders = async ({
   notifCategory: string;
 }) => {
   const url = `${API_BASE_URL}/v1/${workspaceUid}/tenant/default/vendor/sms_headers/?root_category=${notifCategory}`;
-  const resp = await axiosInst.get(url);
+  const resp = await fetchClient.get(url);
   return resp.data;
 };
 
 export const useSMSHeaders = (notifCategory: string) => {
   const { workspaceUid } = useTemplateEditorContext();
 
-  return useQuery(
-    {
-      queryKey: [
-        `${workspaceUid}/tenant/default/vendor/sms_headers`,
-        notifCategory,
-      ],
-      queryFn: () => getSMSHeaders({ workspaceUid, notifCategory }),
-      placeholderData: keepPreviousData,
-      enabled: !!notifCategory,
-    },
-    queryClient
-  );
+  return useQuery({
+    queryKey: [
+      `${workspaceUid}/tenant/default/vendor/sms_headers`,
+      notifCategory,
+    ],
+    queryFn: () => getSMSHeaders({ workspaceUid, notifCategory }),
+    enabled: !!notifCategory,
+  });
 };
 
 const renderJsonnet = async (
   body: JsonnetRenderBody
 ): Promise<JsonnetRenderResponse> => {
-  const resp = await axiosInst.post(`${JSONNET_API_BASE_URL}/render/`, body);
-  return resp.data;
+  const resp = await fetchClient.post(`${JSONNET_API_BASE_URL}/render/`, body);
+  return resp.data as JsonnetRenderResponse;
 };
 
 export const useJsonnetRender = () => {
-  return useMutation(
-    {
-      mutationFn: (body: JsonnetRenderBody) => renderJsonnet(body),
-    },
-    queryClient
-  );
+  return useMutation({
+    mutationFn: (body: JsonnetRenderBody) => renderJsonnet(body),
+  });
 };
 
 const commitTemplate = async ({
@@ -307,7 +277,7 @@ const commitTemplate = async ({
     ? `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/commit/${qp}`
     : `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/embedded/commit/${qp}`;
 
-  const resp = await axiosInst.patch(url, { variants });
+  const resp = await fetchClient.patch(url, { variants });
   return resp.data;
 };
 
@@ -315,20 +285,17 @@ export const useCommitTemplate = ({
   templateSlug,
 }: UseCommitTemplateParams) => {
   const { workspaceUid, isPrivate } = useTemplateEditorContext();
-  return useMutation(
-    {
-      mutationFn: ({
+  return useMutation({
+    mutationFn: ({
+      commitMessage,
+      variants,
+    }: CommitTemplateMutationPayload) =>
+      commitTemplate({
+        templateSlug,
+        workspaceUid,
+        isPrivate,
         commitMessage,
         variants,
-      }: CommitTemplateMutationPayload) =>
-        commitTemplate({
-          templateSlug,
-          workspaceUid,
-          isPrivate,
-          commitMessage,
-          variants,
-        }),
-    },
-    queryClient
-  );
+      }),
+  });
 };

@@ -6,7 +6,7 @@ import {
   ChevronLeft,
   Camera,
   Mic,
-} from 'lucide-react';
+} from '@/assets/icons';
 import HandlebarsRenderer from '@/components/custom-ui/HandlebarsRenderer';
 import type { SMSPreviewProps } from '@/types';
 

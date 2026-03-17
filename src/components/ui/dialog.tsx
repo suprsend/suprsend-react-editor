@@ -1,6 +1,6 @@
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { X } from "lucide-react"
+import { X } from '@/assets/icons'
 
 import { cn } from "@/lib/utils"
 
@@ -36,7 +36,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "suprsend-fixed suprsend-left-[50%] suprsend-top-[50%] suprsend-z-50 suprsend-grid suprsend-w-full suprsend-max-w-lg suprsend-translate-x-[-50%] suprsend-translate-y-[-50%] suprsend-gap-4 suprsend-border suprsend-bg-background suprsend-p-6 suprsend-shadow-lg suprsend-duration-200 data-[state=open]:suprsend-animate-in data-[state=closed]:suprsend-animate-out data-[state=closed]:suprsend-fade-out-0 data-[state=open]:suprsend-fade-in-0 data-[state=closed]:suprsend-zoom-out-95 data-[state=open]:suprsend-zoom-in-95 data-[state=closed]:suprsend-slide-out-to-left-1/2 data-[state=closed]:suprsend-slide-out-to-top-[48%] data-[state=open]:suprsend-slide-in-from-left-1/2 data-[state=open]:suprsend-slide-in-from-top-[48%] sm:suprsend-rounded-lg",
+        "suprsend-fixed suprsend-left-[50%] suprsend-top-[50%] suprsend-z-50 suprsend-grid suprsend-w-full suprsend-max-w-lg suprsend-translate-x-[-50%] suprsend-translate-y-[-50%] suprsend-gap-4 suprsend-border suprsend-bg-background suprsend-p-6 suprsend-shadow-lg suprsend-duration-200 suprsend-text-sm data-[state=open]:suprsend-animate-in data-[state=closed]:suprsend-animate-out data-[state=closed]:suprsend-fade-out-0 data-[state=open]:suprsend-fade-in-0 data-[state=closed]:suprsend-zoom-out-95 data-[state=open]:suprsend-zoom-in-95 data-[state=closed]:suprsend-slide-out-to-left-1/2 data-[state=closed]:suprsend-slide-out-to-top-[48%] data-[state=open]:suprsend-slide-in-from-left-1/2 data-[state=open]:suprsend-slide-in-from-top-[48%] sm:suprsend-rounded-lg",
         className
       )}
       {...props}

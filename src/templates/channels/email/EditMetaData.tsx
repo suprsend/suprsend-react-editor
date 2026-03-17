@@ -9,7 +9,7 @@ import {
   HelpCircle,
   Pencil,
   Maximize2,
-} from 'lucide-react';
+} from '@/assets/icons';
 import SuggestionCodeEditor from '@/components/custom-ui/SuggestionCodeEditor';
 import {
   DialogContent,

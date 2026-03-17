@@ -9,11 +9,9 @@ export function createQueryParams(params: Record<string, unknown>): string {
   const searchParams = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined) continue;
-    const encoded =
-      typeof value === 'object'
-        ? encodeURIComponent(JSON.stringify(value))
-        : String(value);
-    searchParams.append(key, encoded);
+    const stringified =
+      typeof value === 'object' ? JSON.stringify(value) : String(value);
+    searchParams.append(key, stringified);
   }
   const qs = searchParams.toString();
   return qs ? `?${qs}` : '';

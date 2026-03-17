@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import Handlebars from 'handlebars';
-import { Info } from 'lucide-react';
+import { Info } from '@/assets/icons';
 import {
   Dialog,
   DialogContent,

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { renderHandlebars } from '@/components/custom-ui/HandlebarsRenderer';
 import { Button } from '@/components/ui/button';
-import SlackIcon from '@/assets/slackChannel.svg?react';
+import { SlackIcon } from '@/assets/icons';
 import type {
   SlackPreviewProps,
   SlackTextPreviewProps,

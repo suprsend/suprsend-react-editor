@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react';
 
 export type ChannelId =
-  | 'android'
+  | 'androidpush'
   | 'email'
   | 'inbox'
-  | 'ios'
-  | 'msteams'
+  | 'iospush'
+  | 'ms_teams'
   | 'slack'
   | 'sms'
   | 'webpush'
@@ -26,6 +26,7 @@ export interface SuprSendTemplateEditorProviderProps {
   refreshAccessToken?: (oldToken: string) => Promise<string>;
   recipientDistinctId?: string;
   actorDistinctId?: string;
+  isPrivate?: boolean;
 }
 
 export interface FullSuprSendTemplateEditorProviderProps extends SuprSendTemplateEditorProviderProps {
