@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Info, X, RefreshCw } from '@/assets/icons';
 import { Button } from '@/components/ui/button';
 
-const LS_DESIGN_BANNER = 'ss_email_banner_design_dismissed';
 const LS_HTML_BANNER = 'ss_email_banner_html_dismissed';
 
 interface TopBannerProps {
@@ -10,31 +9,6 @@ interface TopBannerProps {
   designEditorType: string;
 }
 
-function DesignEditorBanner() {
-  const [visible, setVisible] = useState(
-    () => localStorage.getItem(LS_DESIGN_BANNER) !== 'true'
-  );
-
-  if (!visible) return null;
-  return (
-    <div className="suprsend-px-3 suprsend-bg-blue-50 suprsend-text-gray-700 suprsend-text-xs suprsend-py-1.5 suprsend-flex suprsend-items-center suprsend-justify-between suprsend-my-1 suprsend-rounded">
-      <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
-        <Info className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600" />
-        <span>
-          For devices that block HTML emails, we'll automatically create and
-          send a plain text version using your email content.
-        </span>
-      </div>
-      <X
-        className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600 suprsend-cursor-pointer suprsend-shrink-0"
-        onClick={() => {
-          localStorage.setItem(LS_DESIGN_BANNER, 'true');
-          setVisible(false);
-        }}
-      />
-    </div>
-  );
-}
 
 function HTMLEditorBanner() {
   const [visible, setVisible] = useState(
@@ -96,12 +70,8 @@ export function EditorTopBanner({
   editorType,
   designEditorType,
 }: TopBannerProps) {
-  if (editorType === 'design_editor') {
-    if (designEditorType === 'design') {
-      return <DesignEditorBanner />;
-    } else if (designEditorType === 'html') {
-      return <HTMLEditorBanner />;
-    }
+  if (editorType === 'design_editor' && designEditorType === 'html') {
+    return <HTMLEditorBanner />;
   }
   return null;
 }

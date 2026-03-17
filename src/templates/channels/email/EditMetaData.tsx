@@ -165,7 +165,7 @@ function EmailMetaDataModal({
   }, [getValues, onSave, onFieldsChange, onClose]);
 
   return (
-    <DialogContent className="!suprsend-max-w-3xl suprsend-p-0 !suprsend-max-h-[90vh] !suprsend-overflow-y-auto !suprsend-border-0">
+    <DialogContent className="!suprsend-max-w-3xl !suprsend-max-h-[90vh] !suprsend-overflow-y-auto !suprsend-border-0">
       <DialogHeader className="suprsend-pb-2">
         <DialogTitle className="suprsend-pb-2">Email Settings</DialogTitle>
       </DialogHeader>
