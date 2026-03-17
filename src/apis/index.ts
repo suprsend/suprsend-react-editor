@@ -227,6 +227,28 @@ export const useMockData = ({ templateSlug }: UseMockDataParams) => {
   });
 };
 
+const getInboxTags = async ({
+  workspaceUid,
+  search,
+}: {
+  workspaceUid: string;
+  search: string;
+}) => {
+  const url = `${API_BASE_URL}/v1/${workspaceUid}/inbox_tag/?search=${encodeURIComponent(search)}&limit=50`;
+
+  const resp = await fetchClient.get(url);
+  return resp.data;
+};
+
+export const useInboxTags = (search: string) => {
+  const { workspaceUid } = useTemplateEditorContext();
+
+  return useQuery({
+    queryKey: ['inbox_tags', search],
+    queryFn: () => getInboxTags({ workspaceUid, search }),
+  });
+};
+
 const renderJsonnet = async (
   body: JsonnetRenderBody
 ): Promise<JsonnetRenderResponse> => {
