@@ -342,6 +342,40 @@ export interface JsonnetRenderResponse {
   error?: string;
 }
 
+// --- SMS ---
+
+export interface ISMSContent {
+  body: string;
+  type: string;
+  header: string;
+  category: string;
+  templating_language: string;
+}
+
+export interface ISMSContentResponse {
+  content: ISMSContent;
+}
+
+export type SMSFormValues = {
+  body: string;
+  header: string;
+  category: string;
+};
+
+export type SMSContentPayload = {
+  content: Partial<ISMSContent>;
+};
+
+export interface SMSChannelProps {
+  variantData: ISMSContentResponse;
+  variables: Record<string, unknown>;
+}
+
+export interface SMSPreviewProps {
+  formValues: SMSFormValues;
+  variables: Record<string, unknown>;
+}
+
 // --- Android Push ---
 
 export interface IAndroidPushButton {
@@ -490,6 +524,69 @@ export interface WhatsappPreviewProps {
   variables: Record<string, unknown>;
 }
 
+// --- Inbox ---
+
+export interface IInboxButton {
+  url: string;
+  text: string;
+  open_in_new_tab: boolean;
+}
+
+export interface IInboxAvatar {
+  image_url: string;
+  url: string;
+}
+
+export interface IInboxSubtext {
+  text: string;
+  url: string;
+}
+
+export interface IInboxExpiry {
+  expiry_type: string;
+  format: string;
+  value: string;
+  is_expiry_visible: boolean;
+}
+
+export interface IInboxContent {
+  header: string;
+  body: string;
+  action_url: string;
+  open_in_new_tab: boolean;
+  avatar: IInboxAvatar;
+  subtext: IInboxSubtext;
+  buttons: IInboxButton[];
+  is_pinned: boolean;
+  is_expiry_enabled: boolean;
+  expiry: IInboxExpiry;
+  importance: string;
+  tags: string[];
+  extra_data: string;
+}
+
+export interface IInboxContentResponse {
+  content: IInboxContent;
+}
+
+export type InboxFormValues = Omit<IInboxContent, 'tags'> & {
+  tags: { label: string; value: string }[];
+};
+
+export type InboxContentPayload = {
+  content: Partial<IInboxContent>;
+};
+
+export interface InboxChannelProps {
+  variantData: IInboxContentResponse;
+  variables: Record<string, unknown>;
+}
+
+export interface InboxPreviewProps {
+  formValues: InboxFormValues;
+  variables: Record<string, unknown>;
+}
+
 // --- Generic payload union for API ---
 
 export type ChannelContentPayload =
@@ -499,7 +596,9 @@ export type ChannelContentPayload =
   | MSTeamsContentPayload
   | SlackContentPayload
   | AndroidPushContentPayload
-  | WhatsappContentPayload;
+  | WhatsappContentPayload
+  | SMSContentPayload
+  | InboxContentPayload;
 
 export interface UpdateVariantContentParams extends GetVariantDetailsParams {
   payload: ChannelContentPayload;

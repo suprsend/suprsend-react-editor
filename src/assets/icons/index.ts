@@ -1,4 +1,5 @@
 export { default as AlertCircle } from './alert-circle.svg?react';
+export { default as Bell } from './bell.svg?react';
 export { default as BatteryFull } from './battery-full.svg?react';
 export { default as Brush } from './brush.svg?react';
 export { default as Camera } from './camera.svg?react';
@@ -23,6 +24,7 @@ export { default as List } from './list.svg?react';
 export { default as Loader2 } from './loader2.svg?react';
 export { default as Maximize2 } from './maximize2.svg?react';
 export { default as Mic } from './mic.svg?react';
+export { default as MoreHorizontal } from './more-horizontal.svg?react';
 export { default as Pencil } from './pencil.svg?react';
 export { default as Phone } from './phone.svg?react';
 export { default as Plus } from './plus.svg?react';
