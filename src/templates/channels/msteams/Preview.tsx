@@ -52,7 +52,7 @@ function TeamsFrame({ children }: { children: React.ReactNode }) {
       {/* Purple header bar */}
       <div className="suprsend-bg-[#464EB8] suprsend-h-8 suprsend-rounded-t-lg" />
       {/* Content area */}
-      <div className="suprsend-bg-[#F5F5F5] suprsend-rounded-b-lg suprsend-p-5 suprsend-min-h-[300px] suprsend-border suprsend-border-t-0 suprsend-border-border">
+      <div className="suprsend-bg-[#F5F5F5] suprsend-rounded-b-lg suprsend-p-5 suprsend-min-h-[300px] suprsend-max-h-[500px] suprsend-overflow-y-auto suprsend-border suprsend-border-t-0 suprsend-border-border">
         {children}
       </div>
     </div>
@@ -161,47 +161,52 @@ function JsonnetPreview({ bodyCard, variables }: JsonnetPreviewProps) {
   };
 
   return (
-    <TeamsFrame>
-      {/* Preview content */}
-      {!previewState ? (
-        <div className="suprsend-flex suprsend-items-center suprsend-justify-center suprsend-min-h-[200px]">
-          <p className="suprsend-text-sm suprsend-text-muted-foreground suprsend-text-center suprsend-px-4">
-            Preview of Adaptive card is not auto-generated. Click on Load
-            Preview button to fetch the preview.
-          </p>
-        </div>
-      ) : !previewState.success ? (
-        <div className="suprsend-flex suprsend-items-center suprsend-justify-center suprsend-min-h-[200px]">
-          <p className="suprsend-text-sm suprsend-text-destructive suprsend-text-center suprsend-px-4">
-            {previewState.error}
-          </p>
-        </div>
-      ) : (
-        <MessageBubble>
-          <div dangerouslySetInnerHTML={{ __html: previewState.html ?? '' }} />
-        </MessageBubble>
-      )}
-
-      {/* Always show Load preview button */}
-      <div className="suprsend-flex suprsend-justify-center suprsend-mt-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleLoadPreview}
-          disabled={jsonnetRender.isPending || !bodyCard}
-        >
-          {jsonnetRender.isPending ? (
-            <Loader2
-              className="suprsend-w-4 suprsend-h-4"
-              style={{ animation: 'spin 1s linear infinite' }}
-            />
-          ) : (
-            <RefreshCw className="suprsend-w-4 suprsend-h-4" />
-          )}
-          Load preview
-        </Button>
+    <div className="suprsend-w-full suprsend-max-w-lg">
+      {/* Purple header bar */}
+      <div className="suprsend-bg-[#464EB8] suprsend-h-8 suprsend-rounded-t-lg" />
+      {/* Scrollable content area */}
+      <div className="suprsend-bg-[#F5F5F5] suprsend-p-5 suprsend-min-h-[200px] suprsend-max-h-[400px] suprsend-overflow-y-auto suprsend-border suprsend-border-t-0 suprsend-border-b-0 suprsend-border-border">
+        {!previewState ? (
+          <div className="suprsend-flex suprsend-items-center suprsend-justify-center suprsend-min-h-[200px]">
+            <p className="suprsend-text-sm suprsend-text-muted-foreground suprsend-text-center suprsend-px-4">
+              Preview of Adaptive card is not auto-generated. Click on Load
+              Preview button to fetch the preview.
+            </p>
+          </div>
+        ) : !previewState.success ? (
+          <div className="suprsend-flex suprsend-items-center suprsend-justify-center suprsend-min-h-[200px]">
+            <p className="suprsend-text-sm suprsend-text-destructive suprsend-text-center suprsend-px-4">
+              {previewState.error}
+            </p>
+          </div>
+        ) : (
+          <MessageBubble>
+            <div dangerouslySetInnerHTML={{ __html: previewState.html ?? '' }} />
+          </MessageBubble>
+        )}
       </div>
-    </TeamsFrame>
+      {/* Fixed button area */}
+      <div className="suprsend-bg-[#F5F5F5] suprsend-rounded-b-lg suprsend-px-5 suprsend-pb-5 suprsend-pt-4 suprsend-border suprsend-border-t-0 suprsend-border-border">
+        <div className="suprsend-flex suprsend-justify-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLoadPreview}
+            disabled={jsonnetRender.isPending || !bodyCard}
+          >
+            {jsonnetRender.isPending ? (
+              <Loader2
+                className="suprsend-w-4 suprsend-h-4"
+                style={{ animation: 'spin 1s linear infinite' }}
+              />
+            ) : (
+              <RefreshCw className="suprsend-w-4 suprsend-h-4" />
+            )}
+            Load preview
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 
