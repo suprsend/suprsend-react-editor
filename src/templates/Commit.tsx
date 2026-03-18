@@ -280,7 +280,7 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <div className="suprsend-ml-10 suprsend-mt-1 suprsend-space-y-1 suprsend-max-h-40 suprsend-overflow-y-auto">
+                    <div className="suprsend-ml-10 suprsend-mt-1 suprsend-space-y-1 suprsend-max-h-40 suprsend-always-show-scrollbar">
                       {variants.map((variant) => {
                         const key = getVariantKey(variant);
                         return (
