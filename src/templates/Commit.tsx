@@ -160,18 +160,21 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
     (v) => selectedVariants[getVariantKey(v)]
   );
 
-  // Count edited and deleted variants
-  const { editedCount, deletedCount } = useMemo(() => {
+  // Count edited, deleted, and error variants
+  const { editedCount, deletedCount, errorCount } = useMemo(() => {
     let edited = 0;
     let deleted = 0;
+    let errors = 0;
     for (const v of variants) {
-      if (v.is_deleted) {
+      if (getErrorCount(v.errors) > 0) {
+        errors++;
+      } else if (v.is_deleted) {
         deleted++;
       } else {
         edited++;
       }
     }
-    return { editedCount: edited, deletedCount: deleted };
+    return { editedCount: edited, deletedCount: deleted, errorCount: errors };
   }, [variants]);
 
   // Count total changes (properties with has_diff + variants)
@@ -205,7 +208,7 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="suprsend-sm:suprsend-max-w-[800px]">
+      <DialogContent className="!suprsend-max-w-[700px]">
         <DialogHeader className="suprsend-pb-4">
           <DialogTitle>Commit changes</DialogTitle>
         </DialogHeader>
@@ -240,8 +243,8 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
             <div className="suprsend-space-y-3">
               <p className="suprsend-text-sm suprsend-text-muted-foreground">
                 Below {totalChanges} change
-                {totalChanges !== 1 ? 's have' : ' has'} been updated. Select
-                the ones you want to commit
+                {totalChanges !== 1 ? 's are' : ' is'} made. Deselect the ones
+                you don't want to commit
               </p>
 
               {variants.length > 0 && (
@@ -261,18 +264,23 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
                     <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
                       {editedCount > 0 && (
                         <span className="suprsend-text-xs suprsend-font-medium suprsend-text-primary suprsend-bg-primary/10 suprsend-px-2.5 suprsend-py-0.5 suprsend-rounded">
-                          {editedCount} edited
+                          edited: {editedCount}
                         </span>
                       )}
                       {deletedCount > 0 && (
                         <span className="suprsend-text-xs suprsend-font-medium suprsend-text-destructive suprsend-bg-destructive/10 suprsend-px-2.5 suprsend-py-0.5 suprsend-rounded">
-                          {deletedCount} deleted
+                          deleted: {deletedCount}
+                        </span>
+                      )}
+                      {errorCount > 0 && (
+                        <span className="suprsend-text-xs suprsend-font-medium suprsend-text-destructive suprsend-bg-destructive/10 suprsend-px-2.5 suprsend-py-0.5 suprsend-rounded">
+                          error: {errorCount}
                         </span>
                       )}
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <div className="suprsend-ml-10 suprsend-mt-1 suprsend-space-y-1 suprsend-max-h-40 suprsend-overflow-y-auto">
+                    <div className="suprsend-ml-10 suprsend-mt-1 suprsend-space-y-1 suprsend-max-h-40 suprsend-always-show-scrollbar">
                       {variants.map((variant) => {
                         const key = getVariantKey(variant);
                         return (
@@ -305,7 +313,7 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
                     </div>
                     <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
                       <span className="suprsend-text-xs suprsend-font-medium suprsend-text-primary suprsend-bg-primary/10 suprsend-px-2.5 suprsend-py-0.5 suprsend-rounded">
-                        {changedProperties.length} edited
+                        edited: {changedProperties.length}
                       </span>
                     </div>
                   </CollapsibleTrigger>
@@ -372,7 +380,7 @@ export default function CommitButton({ onCommit }: CommitButtonProps) {
     <>
       <Button
         type="button"
-        className="suprsend-h-7 suprsend-rounded suprsend-flex suprsend-items-center suprsend-gap-1.5"
+        className="suprsend-h-7 suprsend-p-3 suprsend-rounded suprsend-flex suprsend-items-center suprsend-gap-1.5"
         disabled={isLive}
         onClick={() => {
           setIsModalOpen(true);
