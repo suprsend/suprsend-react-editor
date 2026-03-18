@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
   Info,
@@ -13,11 +13,13 @@ import {
 import SuggestionCodeEditor from '@/components/custom-ui/SuggestionCodeEditor';
 import {
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   Dialog,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import SuggestionInput from '@/components/custom-ui/SuggestionInput';
 import {
@@ -26,7 +28,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useAutosave } from '@/lib/useAutosave';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import type {
   EmailMetaDataFormValues,
@@ -43,7 +44,17 @@ export default function EmailSettingsPreviewBanner({
   const { isLive } = useTemplateEditorContext();
   const emailContent = variantData?.content;
   const [emailSettingsOpen, setEmailSettingsOpen] = useState(false);
-  const [otherSettingsOpen, setOtherSettingsOpen] = useState(false);
+  const [otherSettingsOpen, setOtherSettingsOpen] = useState(() => {
+    const body = emailContent?.body;
+    return !!(
+      body?.preheader ||
+      emailContent?.cc ||
+      emailContent?.bcc ||
+      emailContent?.reply_to ||
+      emailContent?.extra_to ||
+      body?.email_markup
+    );
+  });
   const [previewMeta, setPreviewMeta] = useState({
     from_name: emailContent?.from_name ?? '',
     from_address: emailContent?.from_address ?? '',
@@ -52,20 +63,20 @@ export default function EmailSettingsPreviewBanner({
 
   return (
     <div className="suprsend-flex suprsend-px-3 suprsend-py-2.5 suprsend-items-center suprsend-text-sm suprsend-border">
-      <div className="suprsend-grid suprsend-grid-cols-3 suprsend-gap-6 suprsend-flex-grow">
-        <p className="suprsend-text-muted-foreground suprsend-text-xs">
+      <div className="suprsend-flex suprsend-gap-6 suprsend-flex-grow suprsend-min-w-0">
+        <p className="suprsend-text-muted-foreground suprsend-text-xs suprsend-truncate suprsend-basis-[20%] suprsend-shrink-0">
           From Name:{' '}
           <span className="suprsend-text-foreground">
             {previewMeta.from_name || '-'}
           </span>
         </p>
-        <p className="suprsend-text-muted-foreground suprsend-text-xs">
+        <p className="suprsend-text-muted-foreground suprsend-text-xs suprsend-truncate suprsend-basis-[20%] suprsend-shrink-0">
           From Email:{' '}
           <span className="suprsend-text-foreground">
             {previewMeta.from_address || '-'}
           </span>
         </p>
-        <p className="suprsend-text-muted-foreground suprsend-text-xs">
+        <p className="suprsend-text-muted-foreground suprsend-text-xs suprsend-truncate suprsend-flex-1 suprsend-min-w-0">
           Subject:{' '}
           <span className="suprsend-text-foreground">
             {previewMeta.subject || '-'}
@@ -75,9 +86,9 @@ export default function EmailSettingsPreviewBanner({
       <Dialog open={emailSettingsOpen} onOpenChange={setEmailSettingsOpen}>
         <DialogTrigger asChild>
           {isLive ? (
-            <Maximize2 className="suprsend-h-3.5 suprsend-w-3.5 suprsend-cursor-pointer suprsend-text-muted-foreground" />
+            <Maximize2 className="suprsend-h-3.5 suprsend-w-3.5 suprsend-shrink-0 suprsend-cursor-pointer suprsend-text-muted-foreground" />
           ) : (
-            <Pencil className="suprsend-h-3.5 suprsend-w-3.5 suprsend-cursor-pointer suprsend-text-muted-foreground" />
+            <Pencil className="suprsend-h-3.5 suprsend-w-3.5 suprsend-shrink-0 suprsend-cursor-pointer suprsend-text-muted-foreground" />
           )}
         </DialogTrigger>
         <EmailMetaDataModal
@@ -86,6 +97,7 @@ export default function EmailSettingsPreviewBanner({
           variantData={variantData}
           onSave={onSave}
           onFieldsChange={setPreviewMeta}
+          onClose={() => setEmailSettingsOpen(false)}
           variables={variables}
         />
       </Dialog>
@@ -105,6 +117,7 @@ interface EmailMetaDataModalProps {
   variantData: IEmailContentResponse;
   onSave: (payload: EmailContentPayload) => void;
   onFieldsChange: (meta: PreviewMeta) => void;
+  onClose: () => void;
   variables: Record<string, unknown>;
 }
 
@@ -114,6 +127,7 @@ function EmailMetaDataModal({
   variantData,
   onSave,
   onFieldsChange,
+  onClose,
   variables,
 }: EmailMetaDataModalProps) {
   const { isLive } = useTemplateEditorContext();
@@ -122,7 +136,7 @@ function EmailMetaDataModal({
     () => localStorage.getItem('ss_email_banner_metadata_dismissed') !== 'true'
   );
 
-  const { watch, control } = useForm<EmailMetaDataFormValues>({
+  const { getValues, control } = useForm<EmailMetaDataFormValues>({
     values: {
       subject: emailContent?.subject ?? '',
       from_name: emailContent?.from_name ?? '',
@@ -136,32 +150,22 @@ function EmailMetaDataModal({
     },
   });
 
-  const handleAutosave = useCallback(
-    (data: EmailMetaDataFormValues) => {
-      const { preheader, email_markup, ...rest } = data;
-      const content: EmailContentPayload['content'] = { ...rest };
-      content.body = { preheader, email_markup };
-      onSave({ content });
-    },
-    [onSave]
-  );
-
-  useAutosave({ watch, onSave: handleAutosave, debounceMs: 0 });
-
-  const subject = watch('subject');
-  const fromName = watch('from_name');
-  const fromAddress = watch('from_address');
-
-  useEffect(() => {
+  const handleSave = useCallback(() => {
+    const data = getValues();
+    const { preheader, email_markup, ...rest } = data;
+    const content: EmailContentPayload['content'] = { ...rest };
+    content.body = { preheader, email_markup };
+    onSave({ content });
     onFieldsChange({
-      subject,
-      from_name: fromName,
-      from_address: fromAddress,
+      subject: data.subject,
+      from_name: data.from_name,
+      from_address: data.from_address,
     });
-  }, [subject, fromName, fromAddress, onFieldsChange]);
+    onClose();
+  }, [getValues, onSave, onFieldsChange, onClose]);
 
   return (
-    <DialogContent className="!suprsend-max-w-3xl suprsend-p-0 !suprsend-max-h-[90vh] !suprsend-overflow-y-auto !suprsend-border-0">
+    <DialogContent className="!suprsend-max-w-3xl !suprsend-max-h-[90vh] !suprsend-overflow-y-auto !suprsend-border-0">
       <DialogHeader className="suprsend-pb-2">
         <DialogTitle className="suprsend-pb-2">Email Settings</DialogTitle>
       </DialogHeader>
@@ -237,7 +241,10 @@ function EmailMetaDataModal({
             <X
               className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-gray-600 suprsend-cursor-pointer suprsend-shrink-0"
               onClick={() => {
-                localStorage.setItem('ss_email_banner_metadata_dismissed', 'true');
+                localStorage.setItem(
+                  'ss_email_banner_metadata_dismissed',
+                  'true'
+                );
                 setInfoBannerVisible(false);
               }}
             />
@@ -427,6 +434,12 @@ function EmailMetaDataModal({
           )}
         </div>
       </div>
+      <DialogFooter>
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        {!isLive && <Button onClick={handleSave}>Save</Button>}
+      </DialogFooter>
     </DialogContent>
   );
 }
