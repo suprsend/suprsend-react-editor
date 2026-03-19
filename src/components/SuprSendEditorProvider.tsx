@@ -28,12 +28,17 @@ export default function SuprSendEditorProvider({
 }: FullSuprSendTemplateEditorProviderProps) {
   const isLive = mode === 'live';
 
+  const PRIVATE_ONLY_CHANNELS = ['sms', 'whatsapp'];
+  const filteredChannels = isPrivate
+    ? channels
+    : channels.filter((ch) => !PRIVATE_ONLY_CHANNELS.includes(ch));
+
   const value = useMemo<TemplateEditorContextValue>(
     () => ({
       workspaceUid,
       templateSlug,
       variantId,
-      channels,
+      channels: filteredChannels,
       tenantId,
       locale,
       conditions,
