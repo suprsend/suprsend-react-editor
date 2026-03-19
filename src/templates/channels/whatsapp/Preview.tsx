@@ -37,6 +37,7 @@ function isAlphanumeric(char: string): boolean {
   return /[a-zA-Z0-9]/.test(char);
 }
 
+// Converts WhatsApp formatting wildcards (*, _, ~, `) to corresponding HTML tags.
 function whatsappTextFormat(
   format: string,
   wildcard: string,

@@ -20,12 +20,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  ReactSelect,
+  type DefaultOption,
+} from '@/components/custom-ui/ReactSelect';
 // --- Validation helpers ---
 
 const EMOJI_REGEX = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u;
@@ -269,22 +266,17 @@ export default function WhatsappChannel({
                     Template Category
                     <span className="suprsend-text-destructive">*</span>
                   </Label>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={isLive}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TEMPLATE_CATEGORIES.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <ReactSelect<DefaultOption>
+                    options={TEMPLATE_CATEGORIES}
+                    value={TEMPLATE_CATEGORIES.find(
+                      (option) => option.value === field.value
+                    )}
+                    onChange={(opt) =>
+                      field.onChange((opt as DefaultOption)?.value ?? '')
+                    }
+                    placeholder="Select category"
+                    isDisabled={isLive}
+                  />
                   {fieldState.error?.message && (
                     <p className="suprsend-text-xs suprsend-text-destructive">
                       {fieldState.error.message}
@@ -304,9 +296,13 @@ export default function WhatsappChannel({
                   <Label>
                     Type<span className="suprsend-text-destructive">*</span>
                   </Label>
-                  <Select
-                    value={field.value}
-                    onValueChange={(val: string) => {
+                  <ReactSelect<DefaultOption>
+                    options={TYPE_OPTIONS}
+                    value={TYPE_OPTIONS.find(
+                      (option) => option.value === field.value
+                    )}
+                    onChange={(opt) => {
+                      const val = (opt as DefaultOption)?.value ?? '';
                       field.onChange(val);
                       if (val === 'TEXT') {
                         setValue('header_media_url', '');
@@ -315,19 +311,9 @@ export default function WhatsappChannel({
                         setValue('header_text', '');
                       }
                     }}
-                    disabled={isLive}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TYPE_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Select type"
+                    isDisabled={isLive}
+                  />
                 </div>
               )}
             />
@@ -374,27 +360,20 @@ export default function WhatsappChannel({
                       render={({ field }) => (
                         <div className="suprsend-space-y-1">
                           <Label>Media Type</Label>
-                          <Select
-                            value={field.value}
-                            onValueChange={(val: string) => {
+                          <ReactSelect<DefaultOption>
+                            options={MEDIA_FORMAT_OPTIONS}
+                            value={MEDIA_FORMAT_OPTIONS.find(
+                              (option) => option.value === field.value
+                            )}
+                            onChange={(opt) => {
+                              const val = (opt as DefaultOption)?.value ?? '';
                               field.onChange(val);
                               if (val !== 'DOCUMENT') {
                                 setValue('header_document_filename', '');
                               }
                             }}
-                            disabled={isLive}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {MEDIA_FORMAT_OPTIONS.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>
-                                  {opt.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            isDisabled={isLive}
+                          />
                         </div>
                       )}
                     />
@@ -536,9 +515,13 @@ export default function WhatsappChannel({
               render={({ field, fieldState }) => (
                 <div className="suprsend-space-y-1">
                   <Label>Button Type</Label>
-                  <Select
-                    value={field.value}
-                    onValueChange={(val: string) => {
+                  <ReactSelect<DefaultOption>
+                    options={BUTTON_TYPE_OPTIONS}
+                    value={BUTTON_TYPE_OPTIONS.find(
+                      (option) => option.value === field.value
+                    )}
+                    onChange={(opt) => {
+                      const val = (opt as DefaultOption)?.value ?? '';
                       field.onChange(val);
                       if (val !== 'CALL_TO_ACTION') {
                         setValue('cta_buttons', []);
@@ -547,19 +530,9 @@ export default function WhatsappChannel({
                         setValue('quick_reply_buttons', []);
                       }
                     }}
-                    disabled={isLive}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select button type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BUTTON_TYPE_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Select button type"
+                    isDisabled={isLive}
+                  />
                   {fieldState.error?.message && (
                     <p className="suprsend-text-xs suprsend-text-destructive">
                       {fieldState.error.message}
@@ -687,25 +660,20 @@ export default function WhatsappChannel({
                               }
                               control={control}
                               render={({ field: f }) => (
-                                <Select
-                                  value={(f.value as string) ?? 'static'}
-                                  onValueChange={f.onChange}
-                                  disabled={isLive}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {URL_TYPE_OPTIONS.map((opt) => (
-                                      <SelectItem
-                                        key={opt.value}
-                                        value={opt.value}
-                                      >
-                                        {opt.label}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <ReactSelect<DefaultOption>
+                                  options={URL_TYPE_OPTIONS}
+                                  value={URL_TYPE_OPTIONS.find(
+                                    (o) =>
+                                      o.value ===
+                                      ((f.value as string) ?? 'static')
+                                  )}
+                                  onChange={(opt) =>
+                                    f.onChange(
+                                      (opt as DefaultOption)?.value ?? 'static'
+                                    )
+                                  }
+                                  isDisabled={isLive}
+                                />
                               )}
                             />
                           </div>
