@@ -174,7 +174,7 @@ export default function SuggestionCodeEditor({
           const docText = update.state.doc.toString();
           if (hasInvalidHandlebarsSyntax(docText)) {
             setWarning(
-              "Invalid Handlebars syntax. Not sure what's wrong? Ask Copilot for the correct format."
+              "Invalid Handlebars syntax. Not sure what's wrong? Ask AI for the correct format."
             );
           }
         }

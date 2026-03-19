@@ -245,7 +245,7 @@ export default function SuggestionInput({
     setTimeout(() => {
       if (hasInvalidHandlebarsSyntax(inputValue)) {
         setWarning(
-          "Invalid Handlebars syntax. Not sure what's wrong? Ask Copilot for the correct format."
+          "Invalid Handlebars syntax. Not sure what's wrong? Ask AI for the correct format."
         );
       } else if (validateOnBlur && !suggestionRef.current && validate) {
         const validationError = validate(inputValue);

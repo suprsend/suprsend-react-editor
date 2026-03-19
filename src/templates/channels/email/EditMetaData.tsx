@@ -137,6 +137,7 @@ function EmailMetaDataModal({
   );
 
   const { getValues, control } = useForm<EmailMetaDataFormValues>({
+    mode: 'onChange',
     values: {
       subject: emailContent?.subject ?? '',
       from_name: emailContent?.from_name ?? '',
@@ -147,6 +148,9 @@ function EmailMetaDataModal({
       reply_to: emailContent?.reply_to ?? '',
       extra_to: emailContent?.extra_to ?? '',
       email_markup: emailContent?.body?.email_markup ?? '',
+    },
+    resetOptions: {
+      keepDirtyValues: true,
     },
   });
 
@@ -175,13 +179,15 @@ function EmailMetaDataModal({
           <Controller
             name="subject"
             control={control}
-            rules={{ required: true }}
-            render={({ field }) => (
+            rules={{ required: 'Subject is required' }}
+            render={({ field, fieldState }) => (
               <SuggestionInput
                 label="Subject"
+                mandatory
                 variables={variables}
                 value={field.value}
                 onChange={field.onChange}
+                error={fieldState.error?.message}
                 enableHighlighting
                 enableSuggestions
                 disabled={isLive}
