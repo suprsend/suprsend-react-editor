@@ -4,6 +4,7 @@ import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import SaveIndicator from '@/components/custom-ui/SaveIndicator';
 import type { MSTeamsChannelProps, MSTeamsFormValues } from '@/types';
 import SuggestionInputWithEmoji from '@/components/custom-ui/SuggestionInputWithEmoji';
 import CodeEditorWithEmoji from '@/components/custom-ui/CodeEditorWithEmoji';
@@ -15,7 +16,11 @@ export default function MSTeamsChannel({
 }: MSTeamsChannelProps) {
   const { templateSlug, variantId, isLive } = useTemplateEditorContext();
 
-  const { mutate } = useUpdateVariantContent({
+  const {
+    mutate,
+    isPending: isSaving,
+    isSuccess: isSaved,
+  } = useUpdateVariantContent({
     templateSlug,
     chanelSlug: 'ms_teams',
     variantId,
@@ -24,10 +29,14 @@ export default function MSTeamsChannel({
   const content = variantData?.content;
 
   const { watch, control, setValue } = useForm<MSTeamsFormValues>({
+    mode: 'onChange',
     values: {
       body_type: content?.body_type ?? 'text',
       body_card: content?.body_card ?? '',
       body_text: content?.body_text ?? '',
+    },
+    resetOptions: {
+      keepDirtyValues: true,
     },
   });
 
@@ -56,7 +65,8 @@ export default function MSTeamsChannel({
 
   return (
     <div className="suprsend-h-full suprsend-flex">
-      <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto">
+      <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto suprsend-relative">
+        <SaveIndicator isSaving={isSaving} isSaved={isSaved} />
         <div className="suprsend-max-w-3xl suprsend-space-y-4">
           {/* Body Type Toggle */}
           <Tabs

@@ -129,7 +129,7 @@ function StyledMenu({ children, innerRef, innerProps }: SharedMenuProps) {
     <div
       ref={innerRef}
       {...innerProps}
-      className="suprsend-relative suprsend-z-50 suprsend-mt-1 suprsend-min-w-[8rem] suprsend-overflow-hidden suprsend-rounded-md suprsend-border suprsend-bg-popover suprsend-text-popover-foreground suprsend-shadow-md"
+      className="suprsend-absolute suprsend-z-50 suprsend-mt-1 suprsend-w-full suprsend-min-w-[8rem] suprsend-overflow-hidden suprsend-rounded-md suprsend-border suprsend-bg-popover suprsend-text-popover-foreground suprsend-shadow-md"
     >
       {children}
     </div>

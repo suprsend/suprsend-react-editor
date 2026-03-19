@@ -93,8 +93,8 @@ export default function TextEditors({
               : undefined
           }
           height=""
-          containerClassName="suprsend-flex-1 suprsend-min-h-0 !suprsend-mt-0"
-          className="suprsend-h-full suprsend-border-0 suprsend-rounded-none"
+          containerClassName="suprsend-flex-1 suprsend-min-h-0 !suprsend-mt-0 suprsend-flex suprsend-flex-col"
+          className="suprsend-flex-1 suprsend-min-h-0 suprsend-border-0 suprsend-rounded-none"
           disabled={disabled}
         />
       </ResizablePanel>

@@ -11,6 +11,7 @@ import {
 import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent, useSMSHeaders } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
+import SaveIndicator from '@/components/custom-ui/SaveIndicator';
 import type { SMSChannelProps, SMSFormValues } from '@/types';
 import SMSPreview from './Preview';
 
@@ -34,7 +35,11 @@ export default function SMSChannel({
 }: SMSChannelProps) {
   const { templateSlug, variantId, isLive } = useTemplateEditorContext();
 
-  const { mutate } = useUpdateVariantContent({
+  const {
+    mutate,
+    isPending: isSaving,
+    isSuccess: isSaved,
+  } = useUpdateVariantContent({
     templateSlug,
     chanelSlug: 'sms',
     variantId,
@@ -44,10 +49,14 @@ export default function SMSChannel({
   const isDlt = content?.type === 'dlt';
 
   const { watch, control, setValue } = useForm<SMSFormValues>({
+    mode: 'onChange',
     values: {
       category: content?.category ?? '',
       header: content?.header ?? '',
       body: content?.body ?? '',
+    },
+    resetOptions: {
+      keepDirtyValues: true,
     },
   });
 
@@ -76,7 +85,8 @@ export default function SMSChannel({
   return (
     <div className="suprsend-h-full suprsend-flex">
       {/* Form */}
-      <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto">
+      <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto suprsend-relative">
+        <SaveIndicator isSaving={isSaving} isSaved={isSaved} />
         <div className="suprsend-max-w-2xl suprsend-space-y-6">
           {isDlt && (
             <div className="suprsend-space-y-1">
@@ -177,6 +187,7 @@ export default function SMSChannel({
               render={({ field, fieldState }) => (
                 <SuggestionInputWithEmoji
                   label="Body"
+                  mandatory
                   as="textarea"
                   rows={6}
                   value={field.value}

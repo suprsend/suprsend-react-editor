@@ -20,11 +20,11 @@ function formatTime() {
 
 function SlackFrame({ children }: { children: React.ReactNode }) {
   return (
-    <div className="suprsend-w-full suprsend-max-w-lg suprsend-rounded-lg suprsend-border suprsend-border-border suprsend-overflow-hidden suprsend-shadow-lg suprsend-flex">
+    <div className="suprsend-w-full suprsend-max-w-lg suprsend-max-h-[500px] suprsend-rounded-lg suprsend-border suprsend-border-border suprsend-overflow-hidden suprsend-shadow-lg suprsend-flex">
       {/* Purple sidebar */}
       <div className="suprsend-w-[10%] suprsend-min-w-[40px] suprsend-bg-[#411246]" />
       {/* Content area */}
-      <div className="suprsend-flex-1 suprsend-bg-white suprsend-p-5">
+      <div className="suprsend-flex-1 suprsend-bg-white suprsend-p-5 suprsend-overflow-y-auto">
         <div className="suprsend-flex suprsend-gap-2.5">
           <div className="suprsend-flex-shrink-0 suprsend-mt-0.5">
             <SlackIcon className="suprsend-w-5 suprsend-h-5" />

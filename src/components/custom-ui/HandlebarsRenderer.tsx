@@ -14,7 +14,8 @@ export function renderHandlebars(
   data: Record<string, unknown>,
   options?: RenderHandlebarsOptions
 ): string {
-  const { compileOptions, runtimeOptions, onCompileError, onRenderError } = options ?? {};
+  const { compileOptions, runtimeOptions, onCompileError, onRenderError } =
+    options ?? {};
   let compiled: Handlebars.TemplateDelegate;
   try {
     compiled = Handlebars.compile(template, compileOptions);
@@ -27,6 +28,17 @@ export function renderHandlebars(
   } catch (error) {
     onRenderError?.(error);
     return template;
+  }
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function hasInvalidHandlebarsSyntax(text: string): boolean {
+  if (!text) return false;
+  try {
+    Handlebars.precompile(text);
+    return false;
+  } catch {
+    return true;
   }
 }
 

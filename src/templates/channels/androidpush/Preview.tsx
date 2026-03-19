@@ -78,7 +78,7 @@ export function AndroidFrame({ children, className }: PhoneFrameProps) {
           </div>
 
           {/* Notification area */}
-          <div className="suprsend-flex-1 suprsend-px-3 suprsend-mt-6">
+          <div className="suprsend-flex-1 suprsend-px-3 suprsend-mt-6 suprsend-overflow-y-auto suprsend-min-h-0">
             {children}
           </div>
 
@@ -117,22 +117,9 @@ export default function AndroidPushPreview({
 
   return (
     <AndroidFrame>
-      <div className="suprsend-bg-white suprsend-rounded-lg suprsend-shadow-lg suprsend-overflow-hidden">
-        {/* Header: app icon + name + time + chevron */}
-        {/* <div className="suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-px-3.5 suprsend-pt-3 suprsend-pb-1">
-          <div className="suprsend-w-5 suprsend-h-5 suprsend-rounded-full suprsend-bg-primary/15 suprsend-flex suprsend-items-center suprsend-justify-center suprsend-shrink-0">
-            <span className="suprsend-text-[10px] suprsend-font-bold suprsend-text-primary">
-              {String(brandName).charAt(0).toUpperCase()}
-            </span>
-          </div>
-          <span className="suprsend-text-xs suprsend-text-muted-foreground">
-            {String(brandName)}
-          </span>
-          <span className="suprsend-text-xs suprsend-text-muted-foreground">
-            &middot;
-          </span> */}
-        {/* </div> */}
-
+      <div className="suprsend-bg-white suprsend-rounded-lg suprsend-shadow-lg suprsend-max-h-[320px] suprsend-flex suprsend-flex-col suprsend-overflow-hidden">
+        {/* Scrollable content */}
+        <div className="suprsend-overflow-y-auto suprsend-flex-1 suprsend-min-h-0">
         {/* Content */}
         <div className="suprsend-px-3.5 suprsend-pt-3 suprsend-pb-2">
           {/* Title row */}
@@ -183,6 +170,7 @@ export default function AndroidPushPreview({
             )}
           </div>
         )}
+        </div>
       </div>
     </AndroidFrame>
   );

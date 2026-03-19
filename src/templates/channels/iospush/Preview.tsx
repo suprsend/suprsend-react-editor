@@ -81,7 +81,7 @@ export function IPhoneFrame({ children, className }: PhoneFrameProps) {
           </div>
 
           {/* Notification area */}
-          <div className="suprsend-flex-1 suprsend-px-3 suprsend-mt-4 suprsend-overflow-hidden">
+          <div className="suprsend-flex-1 suprsend-px-3 suprsend-mt-4 suprsend-overflow-y-auto suprsend-min-h-0">
             {children}
           </div>
 
@@ -121,36 +121,38 @@ export default function IOSPushPreview({
   return (
     <IPhoneFrame>
       {/* Notification card */}
-      <div className="suprsend-bg-white suprsend-opacity-70 suprsend-rounded-[14px] suprsend-px-3 suprsend-py-2.5 suprsend-backdrop-blur-[20px] suprsend-overflow-hidden">
-        {/* Header row */}
-        <div className="suprsend-flex suprsend-items-start suprsend-justify-between suprsend-gap-2 suprsend-mb-1">
-          <div className="suprsend-flex-1 suprsend-min-w-0">
-            <HandlebarsRenderer
-              template={formValues.header || 'Notification Title'}
-              data={variables}
-              className="suprsend-m-0 suprsend-text-[13px] suprsend-font-semibold suprsend-text-foreground suprsend-break-all"
-            />
+      <div className="suprsend-bg-white suprsend-opacity-70 suprsend-rounded-[14px] suprsend-backdrop-blur-[20px] suprsend-max-h-[320px] suprsend-flex suprsend-flex-col suprsend-overflow-hidden">
+        <div className="suprsend-overflow-y-auto suprsend-flex-1 suprsend-min-h-0 suprsend-px-3 suprsend-py-2.5">
+          {/* Header row */}
+          <div className="suprsend-flex suprsend-items-start suprsend-justify-between suprsend-gap-2 suprsend-mb-1">
+            <div className="suprsend-flex-1 suprsend-min-w-0">
+              <HandlebarsRenderer
+                template={formValues.header || 'Notification Title'}
+                data={variables}
+                className="suprsend-m-0 suprsend-text-[13px] suprsend-font-semibold suprsend-text-foreground suprsend-break-all"
+              />
+            </div>
+            <span className="suprsend-text-[10px] suprsend-text-muted-foreground suprsend-shrink-0">
+              now
+            </span>
           </div>
-          <span className="suprsend-text-[10px] suprsend-text-muted-foreground suprsend-shrink-0">
-            now
-          </span>
-        </div>
 
-        {/* Body */}
-        <HandlebarsRenderer
-          template={formValues.body || 'Notification body text'}
-          data={variables}
-          className="suprsend-m-0 suprsend-text-[12px] suprsend-text-muted-foreground suprsend-break-all"
-        />
-
-        {/* Image */}
-        {resolvedImageUrl && (
-          <img
-            src={resolvedImageUrl}
-            alt="notification"
-            className="suprsend-w-full suprsend-max-h-[150px] suprsend-object-cover suprsend-rounded-lg suprsend-mt-1.5"
+          {/* Body */}
+          <HandlebarsRenderer
+            template={formValues.body || 'Notification body text'}
+            data={variables}
+            className="suprsend-m-0 suprsend-text-[12px] suprsend-text-muted-foreground suprsend-break-all"
           />
-        )}
+
+          {/* Image */}
+          {resolvedImageUrl && (
+            <img
+              src={resolvedImageUrl}
+              alt="notification"
+              className="suprsend-w-full suprsend-max-h-[150px] suprsend-object-cover suprsend-rounded-lg suprsend-mt-1.5"
+            />
+          )}
+        </div>
       </div>
     </IPhoneFrame>
   );

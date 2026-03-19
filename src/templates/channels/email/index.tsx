@@ -14,6 +14,7 @@ import HtmlSwitchModal from './HTMLEditorSwitchModal';
 import EmailSettingsPreviewBanner from './EditMetaData';
 import { useUpdateVariantContent } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
+import SaveIndicator from '@/components/custom-ui/SaveIndicator';
 import type {
   EmailContentPayload,
   EditorMode,
@@ -39,7 +40,7 @@ export default function EmailChannel({
   variables = {},
 }: EmailChannelProps) {
   const { templateSlug, variantId, isLive } = useTemplateEditorContext();
-  const { mutate } = useUpdateVariantContent({
+  const { mutate, isPending: isSaving, isSuccess: isSaved } = useUpdateVariantContent({
     templateSlug,
     chanelSlug: 'email',
     variantId,
@@ -207,7 +208,8 @@ export default function EmailChannel({
     editorMode === 'design' ? 'Design Editor' : 'HTML Editor';
 
   return (
-    <div className="suprsend-h-full suprsend-flex suprsend-flex-col suprsend-m-1.5">
+    <div className="suprsend-h-full suprsend-flex suprsend-flex-col suprsend-m-1.5 suprsend-relative">
+      <SaveIndicator isSaving={isSaving} isSaved={isSaved} />
       <div>
         <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-mt-2">
           {/* ---- Tab bar ---- */}

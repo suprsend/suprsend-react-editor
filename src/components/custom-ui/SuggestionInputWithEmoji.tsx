@@ -85,7 +85,7 @@ export default function SuggestionInputWithEmoji({
       <div
         className={cn(
           'suprsend-flex suprsend-gap-1 suprsend-mt-1',
-          isTextarea ? 'suprsend-items-start' : 'suprsend-items-center'
+          'suprsend-items-start'
         )}
         onBlur={handleContainerBlur}
       >
@@ -109,7 +109,7 @@ export default function SuggestionInputWithEmoji({
             onOpenChange={setEmojiOpen}
             onEmojiClick={insertEmoji}
             align="end"
-            triggerClassName={isTextarea ? 'suprsend-mt-2' : undefined}
+            triggerClassName={isTextarea ? 'suprsend-mt-2' : 'suprsend-mt-1'}
           />
         )}
       </div>

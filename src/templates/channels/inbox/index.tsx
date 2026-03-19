@@ -6,6 +6,7 @@ import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent, useInboxTags } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { X, Plus, ChevronRight } from '@/assets/icons';
+import SaveIndicator from '@/components/custom-ui/SaveIndicator';
 import type { InboxChannelProps, InboxFormValues } from '@/types';
 import InboxPreview from './Preview';
 import {
@@ -49,7 +50,11 @@ export default function InboxChannel({
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [tagSearch, setTagSearch] = useState('');
 
-  const { mutate } = useUpdateVariantContent({
+  const {
+    mutate,
+    isPending: isSaving,
+    isSuccess: isSaved,
+  } = useUpdateVariantContent({
     templateSlug,
     chanelSlug: 'inbox',
     variantId,
@@ -62,7 +67,8 @@ export default function InboxChannel({
   const initialTags =
     content?.tags?.map((tag) => ({ label: tag, value: tag })) || [];
 
-  const { watch, control, setValue } = useForm<InboxFormValues>({
+  const { watch, control, setValue, getValues, trigger } = useForm<InboxFormValues>({
+    mode: 'onChange',
     values: {
       header: content?.header ?? '',
       body: content?.body ?? '',
@@ -136,7 +142,8 @@ export default function InboxChannel({
   return (
     <div className="suprsend-h-full suprsend-flex">
       {/* Form */}
-      <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto">
+      <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto suprsend-relative">
+        <SaveIndicator isSaving={isSaving} isSaved={isSaved} />
         <div className="suprsend-max-w-2xl suprsend-space-y-6">
           <div className="suprsend-space-y-1">
             <Controller
@@ -166,6 +173,7 @@ export default function InboxChannel({
               render={({ field, fieldState }) => (
                 <SuggestionInputWithEmoji
                   label="Text"
+                  mandatory
                   as="textarea"
                   rows={4}
                   value={field.value}
@@ -194,17 +202,28 @@ export default function InboxChannel({
 
           <div className="suprsend-space-y-1">
             <Label>Avatar</Label>
-            <div className="suprsend-flex suprsend-gap-2">
+            <div className="suprsend-flex suprsend-items-start suprsend-gap-2">
               <div className="suprsend-flex-1">
                 <Controller
                   name="avatar.image_url"
                   control={control}
-                  render={({ field }) => (
+                  rules={{
+                    validate: (value) => {
+                      const url = getValues('avatar.url');
+                      if (url && !value) return 'Image URL is required';
+                      return true;
+                    },
+                  }}
+                  render={({ field, fieldState }) => (
                     <SuggestionInput
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={(val) => {
+                        field.onChange(val);
+                        trigger('avatar.url');
+                      }}
                       placeholder="Image URL"
                       mandatory={false}
+                      error={fieldState.error?.message}
                       enableHighlighting
                       enableSuggestions
                       variables={variables}
@@ -217,12 +236,23 @@ export default function InboxChannel({
                 <Controller
                   name="avatar.url"
                   control={control}
-                  render={({ field }) => (
+                  rules={{
+                    validate: (value) => {
+                      const imageUrl = getValues('avatar.image_url');
+                      if (imageUrl && !value) return 'Action URL is required';
+                      return true;
+                    },
+                  }}
+                  render={({ field, fieldState }) => (
                     <SuggestionInput
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={(val) => {
+                        field.onChange(val);
+                        trigger('avatar.image_url');
+                      }}
                       placeholder="Click Action URL"
                       mandatory={false}
+                      error={fieldState.error?.message}
                       enableHighlighting
                       enableSuggestions
                       variables={variables}
@@ -236,17 +266,28 @@ export default function InboxChannel({
 
           <div className="suprsend-space-y-1">
             <Label>Subtext</Label>
-            <div className="suprsend-flex suprsend-gap-2">
+            <div className="suprsend-flex suprsend-items-start suprsend-gap-2">
               <div className="suprsend-flex-1">
                 <Controller
                   name="subtext.text"
                   control={control}
-                  render={({ field }) => (
+                  rules={{
+                    validate: (value) => {
+                      const url = getValues('subtext.url');
+                      if (url && !value) return 'Subtext is required';
+                      return true;
+                    },
+                  }}
+                  render={({ field, fieldState }) => (
                     <SuggestionInput
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={(val) => {
+                        field.onChange(val);
+                        trigger('subtext.url');
+                      }}
                       placeholder="Subtext"
                       mandatory={false}
+                      error={fieldState.error?.message}
                       enableHighlighting
                       enableSuggestions
                       variables={variables}
@@ -259,12 +300,23 @@ export default function InboxChannel({
                 <Controller
                   name="subtext.url"
                   control={control}
-                  render={({ field }) => (
+                  rules={{
+                    validate: (value) => {
+                      const text = getValues('subtext.text');
+                      if (text && !value) return 'Action URL is required';
+                      return true;
+                    },
+                  }}
+                  render={({ field, fieldState }) => (
                     <SuggestionInput
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={(val) => {
+                        field.onChange(val);
+                        trigger('subtext.text');
+                      }}
                       placeholder="Click Action URL"
                       mandatory={false}
+                      error={fieldState.error?.message}
                       enableHighlighting
                       enableSuggestions
                       variables={variables}
@@ -319,16 +371,27 @@ export default function InboxChannel({
             <div className="suprsend-space-y-2">
               {buttonFields.map((field, index) => (
                 <div key={field.id} className="suprsend-space-y-1">
-                  <div className="suprsend-flex suprsend-items-center suprsend-gap-1">
+                  <div className="suprsend-flex suprsend-items-start suprsend-gap-1">
                     <div className="suprsend-flex-1 suprsend-min-w-0">
                       <Controller
                         name={`buttons.${index}.text`}
                         control={control}
-                        render={({ field: f }) => (
+                        rules={{
+                          validate: (value) => {
+                            const url = getValues(`buttons.${index}.url`);
+                            if (url && !value) return 'Title is required';
+                            return true;
+                          },
+                        }}
+                        render={({ field: f, fieldState }) => (
                           <SuggestionInput
                             value={f.value}
-                            onChange={f.onChange}
+                            onChange={(val) => {
+                              f.onChange(val);
+                              trigger(`buttons.${index}.url`);
+                            }}
                             placeholder={`Button ${index + 1} Title`}
+                            error={fieldState.error?.message}
                             enableHighlighting
                             enableSuggestions
                             variables={variables}
@@ -341,11 +404,22 @@ export default function InboxChannel({
                       <Controller
                         name={`buttons.${index}.url`}
                         control={control}
-                        render={({ field: f }) => (
+                        rules={{
+                          validate: (value) => {
+                            const text = getValues(`buttons.${index}.text`);
+                            if (text && !value) return 'Link is required';
+                            return true;
+                          },
+                        }}
+                        render={({ field: f, fieldState }) => (
                           <SuggestionInput
                             value={f.value}
-                            onChange={f.onChange}
+                            onChange={(val) => {
+                              f.onChange(val);
+                              trigger(`buttons.${index}.text`);
+                            }}
                             placeholder={`Button ${index + 1} Link`}
+                            error={fieldState.error?.message}
                             enableHighlighting
                             enableSuggestions
                             variables={variables}
@@ -356,7 +430,7 @@ export default function InboxChannel({
                     </div>
                     <X
                       className={cn(
-                        'suprsend-w-4 suprsend-h-4 suprsend-text-muted-foreground',
+                        'suprsend-w-4 suprsend-h-4 suprsend-text-muted-foreground suprsend-mt-2.5',
                         isLive
                           ? 'suprsend-opacity-50 suprsend-cursor-not-allowed'
                           : 'suprsend-cursor-pointer'

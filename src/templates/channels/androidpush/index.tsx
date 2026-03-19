@@ -7,6 +7,7 @@ import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { X, Plus, ChevronRight } from '@/assets/icons';
+import SaveIndicator from '@/components/custom-ui/SaveIndicator';
 import type { AndroidPushChannelProps, AndroidPushFormValues } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,7 +28,11 @@ export default function AndroidPushChannel({
   const { templateSlug, variantId, isLive } = useTemplateEditorContext();
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
-  const { mutate } = useUpdateVariantContent({
+  const {
+    mutate,
+    isPending: isSaving,
+    isSuccess: isSaved,
+  } = useUpdateVariantContent({
     templateSlug,
     chanelSlug: 'androidpush',
     variantId,
@@ -42,7 +47,8 @@ export default function AndroidPushChannel({
       }))
     : [];
 
-  const { watch, control } = useForm<AndroidPushFormValues>({
+  const { watch, control, getValues, trigger } = useForm<AndroidPushFormValues>({
+    mode: 'onChange',
     values: {
       header: content?.header ?? '',
       body: content?.body ?? '',
@@ -111,7 +117,8 @@ export default function AndroidPushChannel({
   return (
     <div className="suprsend-h-full suprsend-flex">
       {/* Form */}
-      <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto">
+      <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto suprsend-relative">
+        <SaveIndicator isSaving={isSaving} isSaved={isSaved} />
         <div className="suprsend-max-w-2xl suprsend-space-y-6">
           <div className="suprsend-space-y-1">
             <Controller
@@ -121,6 +128,7 @@ export default function AndroidPushChannel({
               render={({ field, fieldState }) => (
                 <SuggestionInputWithEmoji
                   label="Title"
+                  mandatory
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Notification Title"
@@ -142,6 +150,7 @@ export default function AndroidPushChannel({
               render={({ field, fieldState }) => (
                 <SuggestionInputWithEmoji
                   label="Message"
+                  mandatory
                   as="textarea"
                   rows={4}
                   value={field.value}
@@ -226,17 +235,28 @@ export default function AndroidPushChannel({
             {buttonFields.map((field, index) => (
               <div
                 key={field.id}
-                className="suprsend-flex suprsend-items-center suprsend-gap-1"
+                className="suprsend-flex suprsend-items-start suprsend-gap-1"
               >
                 <div className="suprsend-flex-1 suprsend-min-w-0">
                   <Controller
                     name={`buttons.${index}.text`}
                     control={control}
-                    render={({ field: f }) => (
+                    rules={{
+                      validate: (value) => {
+                        const url = getValues(`buttons.${index}.url`);
+                        if (url && !value) return 'Title is required';
+                        return true;
+                      },
+                    }}
+                    render={({ field: f, fieldState }) => (
                       <SuggestionInput
                         value={f.value}
-                        onChange={f.onChange}
+                        onChange={(val) => {
+                          f.onChange(val);
+                          trigger(`buttons.${index}.url`);
+                        }}
                         placeholder={`Button ${index + 1} Title`}
+                        error={fieldState.error?.message}
                         enableHighlighting
                         enableSuggestions
                         variables={variables}
@@ -249,11 +269,22 @@ export default function AndroidPushChannel({
                   <Controller
                     name={`buttons.${index}.url`}
                     control={control}
-                    render={({ field: f }) => (
+                    rules={{
+                      validate: (value) => {
+                        const text = getValues(`buttons.${index}.text`);
+                        if (text && !value) return 'Link is required';
+                        return true;
+                      },
+                    }}
+                    render={({ field: f, fieldState }) => (
                       <SuggestionInput
                         value={f.value}
-                        onChange={f.onChange}
+                        onChange={(val) => {
+                          f.onChange(val);
+                          trigger(`buttons.${index}.text`);
+                        }}
                         placeholder={`Button ${index + 1} Link`}
+                        error={fieldState.error?.message}
                         enableHighlighting
                         enableSuggestions
                         variables={variables}
@@ -264,7 +295,7 @@ export default function AndroidPushChannel({
                 </div>
                 {!isLive && (
                   <X
-                    className="suprsend-w-4 suprsend-h-4 suprsend-cursor-pointer suprsend-text-muted-foreground"
+                    className="suprsend-w-4 suprsend-h-4 suprsend-cursor-pointer suprsend-text-muted-foreground suprsend-mt-2.5"
                     onClick={() => removeButton(index)}
                   />
                 )}

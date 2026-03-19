@@ -10,6 +10,7 @@ import {
   replaceBetween,
   isValidVariable,
 } from '@/lib/suggestion-utils';
+import { hasInvalidHandlebarsSyntax } from './HandlebarsRenderer';
 import type { CaretCoordinates } from '@/lib/suggestion-utils';
 import Suggestions from './Suggestions';
 
@@ -183,7 +184,7 @@ export default function SuggestionInput({
     setInputValue(val);
     setCurrentCaretPos(caretIndex);
 
-    if (!enableSuggestions) return;
+    if (!enableSuggestions || disabled) return;
 
     // Determine suggestion visibility synchronously.
     const strippedValue = val.slice(0, caretIndex);
@@ -242,8 +243,11 @@ export default function SuggestionInput({
 
   const handleBlur = () => {
     setTimeout(() => {
-      if (!validateOnBlur || suggestionRef.current) return;
-      if (validate) {
+      if (hasInvalidHandlebarsSyntax(inputValue)) {
+        setWarning(
+          "Invalid Handlebars syntax. Not sure what's wrong? Ask AI for the correct format."
+        );
+      } else if (validateOnBlur && !suggestionRef.current && validate) {
         const validationError = validate(inputValue);
         if (validationError) setWarning(validationError);
       }
@@ -431,6 +435,7 @@ export default function SuggestionInput({
         )}
 
         {enableSuggestions &&
+          !disabled &&
           showSuggestions &&
           createPortal(
             <Suggestions

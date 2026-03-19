@@ -17,6 +17,7 @@ import {
   isValidVariable,
   shouldShowSuggestions,
 } from '@/lib/suggestion-utils';
+import { hasInvalidHandlebarsSyntax } from './HandlebarsRenderer';
 import type { CaretCoordinates } from '@/lib/suggestion-utils';
 import Suggestions from './Suggestions';
 import CodeMirrorEditor, {
@@ -129,6 +130,7 @@ export default function SuggestionCodeEditor({
     top: 0,
     left: 0,
   });
+  const [warning, setWarning] = useState('');
 
   // Variables without __translations for suggestions
   const modifiedVariables = useMemo(() => {
@@ -160,10 +162,25 @@ export default function SuggestionCodeEditor({
     [flattenedVars, enableHighlighting]
   );
 
-  // Handle CodeMirror updates for suggestion tracking
+  // Handle CodeMirror updates for suggestion tracking and blur validation
   const handleUpdate = useCallback(
     (update: ViewUpdate) => {
-      if (!enableSuggestions) return;
+      if (update.focusChanged) {
+        if (update.view.hasFocus) {
+          setWarning('');
+        } else {
+          // Editor lost focus — validate handlebars syntax
+          setShowSuggestions(false);
+          const docText = update.state.doc.toString();
+          if (hasInvalidHandlebarsSyntax(docText)) {
+            setWarning(
+              "Invalid Handlebars syntax. Not sure what's wrong? Ask AI for the correct format."
+            );
+          }
+        }
+      }
+
+      if (!enableSuggestions || disabled) return;
       if (!update.selectionSet && !update.docChanged) return;
 
       const pos = update.state.selection.main.head;
@@ -184,7 +201,7 @@ export default function SuggestionCodeEditor({
         setShowSuggestions(false);
       }
     },
-    [enableSuggestions]
+    [enableSuggestions, disabled]
   );
 
   // Close suggestions when clicking outside the editor and suggestions portal
@@ -288,18 +305,21 @@ export default function SuggestionCodeEditor({
             disabled
               ? 'suprsend-bg-muted suprsend-opacity-50'
               : 'suprsend-bg-background',
-            error ? 'suprsend-border-destructive' : 'suprsend-border-input',
+            error || warning
+              ? 'suprsend-border-destructive'
+              : 'suprsend-border-input',
             className
           )}
         />
 
-        {error && (
-          <p className="suprsend-text-sm suprsend-mt-1 suprsend-text-destructive">
-            {error}
+        {(error || warning) && (
+          <p className="suprsend-text-sm suprsend-mt-1 suprsend-text-destructive suprsend-shrink-0">
+            {error || warning}
           </p>
         )}
 
         {enableSuggestions &&
+          !disabled &&
           showSuggestions &&
           createPortal(
             <Suggestions
