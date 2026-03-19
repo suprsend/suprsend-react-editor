@@ -5,6 +5,7 @@ import SuggestionInputWithEmoji from '@/components/custom-ui/SuggestionInputWith
 import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
+import SaveIndicator from '@/components/custom-ui/SaveIndicator';
 import type { IOSPushChannelProps, IOSPushFormValues } from '@/types';
 import IOSPushPreview from './Preview';
 
@@ -14,7 +15,11 @@ export default function IOSPushChannel({
 }: IOSPushChannelProps) {
   const { templateSlug, variantId, isLive } = useTemplateEditorContext();
 
-  const { mutate } = useUpdateVariantContent({
+  const {
+    mutate,
+    isPending: isSaving,
+    isSuccess: isSaved,
+  } = useUpdateVariantContent({
     templateSlug,
     chanelSlug: 'iospush',
     variantId,
@@ -23,11 +28,15 @@ export default function IOSPushChannel({
   const content = variantData?.content;
 
   const { watch, control } = useForm<IOSPushFormValues>({
+    mode: 'onChange',
     values: {
       header: content?.header ?? '',
       body: content?.body ?? '',
       image_url: content?.image_url ?? '',
       action_url: content?.action_url ?? '',
+    },
+    resetOptions: {
+      keepDirtyValues: true,
     },
   });
 
@@ -45,7 +54,8 @@ export default function IOSPushChannel({
   return (
     <div className="suprsend-h-full suprsend-flex">
       {/* Form */}
-      <div className="suprsend-flex-1 suprsend-p-6">
+      <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto suprsend-relative">
+        <SaveIndicator isSaving={isSaving} isSaved={isSaved} />
         <div className="suprsend-max-w-2xl suprsend-space-y-6">
           <div className="suprsend-space-y-1">
             <Controller
@@ -55,6 +65,7 @@ export default function IOSPushChannel({
               render={({ field, fieldState }) => (
                 <SuggestionInputWithEmoji
                   label="Title"
+                  mandatory
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Notification Title"
@@ -76,6 +87,7 @@ export default function IOSPushChannel({
               render={({ field, fieldState }) => (
                 <SuggestionInputWithEmoji
                   label="Body"
+                  mandatory
                   as="textarea"
                   rows={4}
                   value={field.value}

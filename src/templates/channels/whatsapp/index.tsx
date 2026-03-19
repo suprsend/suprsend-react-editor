@@ -5,7 +5,8 @@ import SuggestionInputWithEmoji from '@/components/custom-ui/SuggestionInputWith
 import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import { X, Plus, RefreshCw, CircleCheck } from '@/assets/icons';
+import { X, Plus } from '@/assets/icons';
+import SaveIndicator from '@/components/custom-ui/SaveIndicator';
 import WhatsappPreview from './Preview';
 import type {
   WhatsappChannelProps,
@@ -237,23 +238,7 @@ export default function WhatsappChannel({
     <div className="suprsend-h-full suprsend-flex">
       {/* Form */}
       <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto suprsend-relative">
-        {(isSaving || isSaved) && (
-          <div className="suprsend-absolute suprsend-top-2 suprsend-right-6 suprsend-z-10">
-            {isSaving ? (
-              <div className="suprsend-flex suprsend-items-center suprsend-text-muted-foreground suprsend-gap-1">
-                <RefreshCw className="suprsend-h-3.5 suprsend-w-3.5 suprsend-animate-spin" />
-                <p className="suprsend-text-xs suprsend-font-medium">Saving</p>
-              </div>
-            ) : (
-              <div className="suprsend-flex suprsend-items-center suprsend-gap-1">
-                <CircleCheck className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-emerald-500" />
-                <p className="suprsend-text-xs suprsend-font-medium suprsend-text-muted-foreground">
-                  Saved
-                </p>
-              </div>
-            )}
-          </div>
-        )}
+        <SaveIndicator isSaving={isSaving} isSaved={isSaved} />
         <div className="suprsend-max-w-2xl suprsend-space-y-6">
           <div>
             <Controller
