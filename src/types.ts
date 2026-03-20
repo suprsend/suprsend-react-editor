@@ -587,6 +587,11 @@ export interface InboxPreviewProps {
   variables: Record<string, unknown>;
 }
 
+export interface EmailPreviewProps {
+  html: string;
+  variables: Record<string, unknown>;
+}
+
 // --- Generic payload union for API ---
 
 export type ChannelContentPayload =
