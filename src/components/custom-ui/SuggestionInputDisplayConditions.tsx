@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash.clonedeep';
 import initCustomHelpers from '@/lib/handlebarHelper';
 import {
   DATA_TYPE_SECTIONS,
@@ -201,7 +201,11 @@ export default function SuggestionInputDisplayConditions({
     setCurrentCaretPos(caretIndex);
     updateCoordinates(target, caretIndex);
 
-    const context = parseInputContext(newValue, caretIndex, insertWithoutBrackets);
+    const context = parseInputContext(
+      newValue,
+      caretIndex,
+      insertWithoutBrackets
+    );
     setShowSuggestions(shouldShowSuggestions(context, insertWithoutBrackets));
   };
 
@@ -227,9 +231,14 @@ export default function SuggestionInputDisplayConditions({
       const target = event.target as HTMLElement;
       const isClickingDropdown =
         dropdownRef.current &&
-        (dropdownRef.current === target || dropdownRef.current.contains(target));
+        (dropdownRef.current === target ||
+          dropdownRef.current.contains(target));
 
-      if (isClickingDropdown && isClickingDropdownRef.current && inputRef.current) {
+      if (
+        isClickingDropdown &&
+        isClickingDropdownRef.current &&
+        inputRef.current
+      ) {
         requestAnimationFrame(() => {
           if (
             suggestionRef.current &&
@@ -263,7 +272,8 @@ export default function SuggestionInputDisplayConditions({
         (inputRef.current === target || inputRef.current.contains(target));
       const isClickOnDropdown =
         dropdownRef.current &&
-        (dropdownRef.current === target || dropdownRef.current.contains(target));
+        (dropdownRef.current === target ||
+          dropdownRef.current.contains(target));
 
       if (!isClickOnInput && !isClickOnDropdown) {
         isClickingDropdownRef.current = false;
@@ -453,7 +463,9 @@ interface SuggestionsDropdownProps {
   caretCoordinates: { left: number; top: number } | undefined;
   viewportCoordinates: { left: number; top: number } | null;
   setShowSuggestions: (v: boolean) => void;
-  inputRef: React.MutableRefObject<HTMLInputElement | HTMLTextAreaElement | null>;
+  inputRef: React.MutableRefObject<
+    HTMLInputElement | HTMLTextAreaElement | null
+  >;
   onChange: (v: string) => void;
   insertWithoutBrackets: boolean;
   dropdownRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -474,10 +486,12 @@ function SuggestionsDropdown({
   dropdownRef,
   isClickingDropdownRef,
 }: SuggestionsDropdownProps) {
-  const [selectedSection, setSelectedSection] = useState(DATA_TYPE_SECTIONS[0].id);
-  const [optionsList, setOptionsList] = useState<Record<string, unknown> | undefined>(
-    undefined
+  const [selectedSection, setSelectedSection] = useState(
+    DATA_TYPE_SECTIONS[0].id
   );
+  const [optionsList, setOptionsList] = useState<
+    Record<string, unknown> | undefined
+  >(undefined);
 
   useEffect(() => {
     const context = parseInputContext(
@@ -541,7 +555,13 @@ function SuggestionsDropdown({
       }
     });
     return clonedOptions;
-  }, [optionsList, inputValue, currentCaretPos, selectedSection, insertWithoutBrackets]);
+  }, [
+    optionsList,
+    inputValue,
+    currentCaretPos,
+    selectedSection,
+    insertWithoutBrackets,
+  ]);
 
   const noOptions = isEmpty(filteredOptionsList);
 
@@ -676,7 +696,9 @@ function SuggestionsDropdown({
                 }}
               >
                 <p className="text-sm">{label}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{subLabel}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {subLabel}
+                </p>
               </div>
             );
           })
@@ -702,7 +724,9 @@ function handleSelectOption({
   selectedValue: string;
   setInputValue: (v: string) => void;
   setShowSuggestions: (v: boolean) => void;
-  inputRef: React.MutableRefObject<HTMLInputElement | HTMLTextAreaElement | null>;
+  inputRef: React.MutableRefObject<
+    HTMLInputElement | HTMLTextAreaElement | null
+  >;
   onChange: (v: string) => void;
 }) {
   setInputValue(selectedValue);
