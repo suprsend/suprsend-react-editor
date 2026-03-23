@@ -44,7 +44,7 @@ export default defineConfig(({ mode }) => {
         tsconfigPath: './tsconfig.app.json',
       }),
       visualizer({
-        open: true, // auto-open in browser
+        open: false,
         filename: 'stats.html',
         gzipSize: true,
         brotliSize: true,
