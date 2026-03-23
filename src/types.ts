@@ -27,6 +27,7 @@ export interface SuprSendTemplateEditorProviderProps {
   recipientDistinctId?: string;
   actorDistinctId?: string;
   isPrivate?: boolean;
+  version?: string;
 }
 
 export interface FullSuprSendTemplateEditorProviderProps extends SuprSendTemplateEditorProviderProps {
@@ -80,6 +81,7 @@ export interface CommitTemplateParams {
   isPrivate: boolean;
   commitMessage: string;
   variants: CommitVariant[];
+  version?: string;
 }
 
 export interface UseCommitTemplateParams {
@@ -104,6 +106,7 @@ export interface GetVariantDetailsParams extends UseVariantDetailsParams {
   workspaceUid: string;
   isPrivate: boolean;
   mode?: TemplateMode;
+  version?: string;
 }
 
 export interface EmailMetaDataFormValues {
@@ -587,6 +590,11 @@ export interface InboxPreviewProps {
   variables: Record<string, unknown>;
 }
 
+export interface EmailPreviewProps {
+  html: string;
+  variables: Record<string, unknown>;
+}
+
 // --- Generic payload union for API ---
 
 export type ChannelContentPayload =
@@ -603,6 +611,7 @@ export type ChannelContentPayload =
 export interface UpdateVariantContentParams extends GetVariantDetailsParams {
   payload: ChannelContentPayload;
   isPrivate: boolean;
+  version?: string;
 }
 
 export interface UploadFileParams {
@@ -621,6 +630,7 @@ export interface GetMockDataParams extends UseMockDataParams {
   recipientDistinctId?: string;
   actorDistinctId?: string;
   mode?: TemplateMode;
+  version?: string;
 }
 
 export interface TextEditorsProps {

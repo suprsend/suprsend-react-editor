@@ -25,8 +25,9 @@ export default function SuprSendEditorProvider({
   actorDistinctId,
   mode,
   isPrivate = false,
+  version,
 }: FullSuprSendTemplateEditorProviderProps) {
-  const isLive = mode === 'live';
+  const isLive = mode === 'live' || !!version;
 
   const PRIVATE_ONLY_CHANNELS = ['sms', 'whatsapp'];
   const filteredChannels = isPrivate
@@ -49,6 +50,7 @@ export default function SuprSendEditorProvider({
       recipientDistinctId,
       actorDistinctId,
       mode,
+      version,
     }),
     [
       workspaceUid,
@@ -65,6 +67,7 @@ export default function SuprSendEditorProvider({
       recipientDistinctId,
       actorDistinctId,
       mode,
+      version,
     ]
   );
 
