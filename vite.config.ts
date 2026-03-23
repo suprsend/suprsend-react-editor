@@ -5,6 +5,20 @@ import dts from 'vite-plugin-dts';
 import pkg from './package.json';
 import path from 'path';
 import type { PreRenderedAsset } from 'rollup';
+import { visualizer } from 'rollup-plugin-visualizer';
+
+const deps: string[] = [
+  ...Object.keys(pkg.dependencies || {}),
+  ...Object.keys(pkg.peerDependencies || {}),
+];
+
+const patterns: RegExp[] = [/^@codemirror\//, /^@lezer\//, /^@babel\/runtime/];
+
+function isExternal(id: string): boolean {
+  if (deps.some((dep) => id === dep || id.startsWith(`${dep}/`))) return true;
+  if (patterns.some((re) => re.test(id))) return true;
+  return false;
+}
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -29,6 +43,12 @@ export default defineConfig(({ mode }) => {
         outDir: 'dist/types',
         tsconfigPath: './tsconfig.app.json',
       }),
+      visualizer({
+        open: true, // auto-open in browser
+        filename: 'stats.html',
+        gzipSize: true,
+        brotliSize: true,
+      }),
     ],
     build: {
       outDir: CJSBuild ? 'dist/cjs' : 'dist/es',
@@ -41,7 +61,7 @@ export default defineConfig(({ mode }) => {
         formats,
       },
       rollupOptions: {
-        external: [...Object.keys(pkg.dependencies || {}), 'react', /^@codemirror\//],
+        external: isExternal,
         output: {
           globals: {
             react: 'React',
