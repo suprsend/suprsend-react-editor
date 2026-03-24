@@ -591,7 +591,7 @@ export interface InboxPreviewProps {
 }
 
 export interface EmailPreviewProps {
-  html: string;
+  variantData: IEmailContentResponse;
   variables: Record<string, unknown>;
 }
 
