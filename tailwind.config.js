@@ -3,6 +3,10 @@ export default {
   prefix: 'suprsend-',
   darkMode: ['class'],
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  important: '.suprsend-root',
+  corePlugins: {
+    preflight: false,
+  },
   theme: {
     extend: {
       borderRadius: {
