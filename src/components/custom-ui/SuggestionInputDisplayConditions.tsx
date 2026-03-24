@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { usePortalContainer } from '@/lib/PortalContext';
 import getCaretCoordinates from 'textarea-caret';
 import Handlebars from 'handlebars';
 import { Input } from '@/components/ui/input';
@@ -486,6 +487,7 @@ function SuggestionsDropdown({
   dropdownRef,
   isClickingDropdownRef,
 }: SuggestionsDropdownProps) {
+  const portalContainer = usePortalContainer();
   const [selectedSection, setSelectedSection] = useState(
     DATA_TYPE_SECTIONS[0].id
   );
@@ -708,7 +710,7 @@ function SuggestionsDropdown({
   );
 
   if (viewportCoordinates) {
-    return createPortal(dropdownContent, document.body);
+    return createPortal(dropdownContent, portalContainer ?? document.body);
   }
 
   return dropdownContent;

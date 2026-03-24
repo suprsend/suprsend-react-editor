@@ -3,6 +3,7 @@ import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import { Check, ChevronRight, Circle } from '@/assets/icons'
 
 import { cn } from "@/lib/utils"
+import { usePortalContainer } from "@/lib/PortalContext"
 
 const DropdownMenu = DropdownMenuPrimitive.Root
 
@@ -57,20 +58,23 @@ DropdownMenuSubContent.displayName =
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
-  <DropdownMenuPrimitive.Portal>
-    <DropdownMenuPrimitive.Content
-      ref={ref}
-      sideOffset={sideOffset}
-      className={cn(
-        "suprsend-z-50 suprsend-max-h-[var(--radix-dropdown-menu-content-available-height)] suprsend-min-w-[8rem] suprsend-overflow-y-auto suprsend-overflow-x-hidden suprsend-rounded-md suprsend-border suprsend-bg-popover suprsend-p-1 suprsend-text-sm suprsend-text-popover-foreground suprsend-shadow-md",
-        "data-[state=open]:suprsend-animate-in data-[state=closed]:suprsend-animate-out data-[state=closed]:suprsend-fade-out-0 data-[state=open]:suprsend-fade-in-0 data-[state=closed]:suprsend-zoom-out-95 data-[state=open]:suprsend-zoom-in-95 data-[side=bottom]:suprsend-slide-in-from-top-2 data-[side=left]:suprsend-slide-in-from-right-2 data-[side=right]:suprsend-slide-in-from-left-2 data-[side=top]:suprsend-slide-in-from-bottom-2 suprsend-origin-[--radix-dropdown-menu-content-transform-origin]",
-        className
-      )}
-      {...props}
-    />
-  </DropdownMenuPrimitive.Portal>
-))
+>(({ className, sideOffset = 4, ...props }, ref) => {
+  const container = usePortalContainer();
+  return (
+    <DropdownMenuPrimitive.Portal container={container}>
+      <DropdownMenuPrimitive.Content
+        ref={ref}
+        sideOffset={sideOffset}
+        className={cn(
+          "suprsend-z-50 suprsend-max-h-[var(--radix-dropdown-menu-content-available-height)] suprsend-min-w-[8rem] suprsend-overflow-y-auto suprsend-overflow-x-hidden suprsend-rounded-md suprsend-border suprsend-bg-popover suprsend-p-1 suprsend-text-sm suprsend-text-popover-foreground suprsend-shadow-md",
+          "data-[state=open]:suprsend-animate-in data-[state=closed]:suprsend-animate-out data-[state=closed]:suprsend-fade-out-0 data-[state=open]:suprsend-fade-in-0 data-[state=closed]:suprsend-zoom-out-95 data-[state=open]:suprsend-zoom-in-95 data-[side=bottom]:suprsend-slide-in-from-top-2 data-[side=left]:suprsend-slide-in-from-right-2 data-[side=right]:suprsend-slide-in-from-left-2 data-[side=top]:suprsend-slide-in-from-bottom-2 suprsend-origin-[--radix-dropdown-menu-content-transform-origin]",
+          className
+        )}
+        {...props}
+      />
+    </DropdownMenuPrimitive.Portal>
+  );
+})
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName
 
 const DropdownMenuItem = React.forwardRef<

@@ -150,7 +150,7 @@ export default function IOSPushChannel({
         className="suprsend-flex-1 suprsend-flex suprsend-items-center suprsend-justify-center suprsend-border-l suprsend-overflow-hidden"
         style={{
           backgroundImage:
-            'radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)',
+            'radial-gradient(circle, var(--border) 1px, transparent 1px)',
           backgroundSize: '16px 16px',
         }}
       >

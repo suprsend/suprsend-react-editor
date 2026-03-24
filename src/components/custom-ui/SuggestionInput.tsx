@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { usePortalContainer } from '@/lib/PortalContext';
 import getCaretCoordinates from 'textarea-caret';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -57,8 +58,8 @@ function highlightHandlebars(
       if (/^\{\{.*\}\}$/.test(part)) {
         const isValid = isValidVariable(part, flattenedVars);
         const color = isValid
-          ? 'hsl(var(--primary))'
-          : 'hsl(var(--destructive))';
+          ? 'var(--primary))'
+          : 'var(--destructive))';
         return `<mark style="background:transparent;color:${color}">${escapeHtml(part)}</mark>`;
       }
       return escapeHtml(part);
@@ -95,6 +96,7 @@ export default function SuggestionInput({
   enableSuggestions = true,
   ...rest
 }: SuggestionInputProps) {
+  const portalContainer = usePortalContainer();
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const highlightRef = useRef<HTMLDivElement | null>(null);
   const suggestionRef = useRef(false);
@@ -358,7 +360,7 @@ export default function SuggestionInput({
                 right: 1,
                 bottom: 1,
                 zIndex: 2,
-                color: 'hsl(var(--foreground))',
+                color: 'var(--foreground))',
               }}
             >
               <span
@@ -397,7 +399,7 @@ export default function SuggestionInput({
               )}
               style={{
                 color: 'transparent',
-                caretColor: 'hsl(var(--foreground))',
+                caretColor: 'var(--foreground))',
                 position: 'relative',
                 zIndex: 3,
               }}
@@ -448,7 +450,7 @@ export default function SuggestionInput({
                 suggestionsMouseDownRef.current = true;
               }}
             />,
-            document.body
+            portalContainer ?? document.body
           )}
       </div>
     </>

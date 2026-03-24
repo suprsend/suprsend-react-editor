@@ -2,7 +2,7 @@ export { default as SuprSendEditorProvider } from '@/components/SuprSendEditorPr
 // eslint-disable-next-line react-refresh/only-export-components
 export * from '@/types';
 
-import type { ComponentType } from 'react';
+import withSuprSendRoot from '@/lib/withSuprSendRoot';
 import _TemplateEditor from '@/templates/TemplateEditor';
 import _CommitButton from '@/templates/Commit';
 import _EmailPreview from '@/templates/channels/email/Preview';
@@ -14,19 +14,6 @@ import _AndroidPushPreview from '@/templates/channels/androidpush/Preview';
 import _SlackPreview from '@/templates/channels/slack/Preview';
 import _MSTeamsPreview from '@/templates/channels/msteams/Preview';
 import _WhatsappPreview from '@/templates/channels/whatsapp/Preview';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function withSuprSendRoot<P extends Record<string, any>>(
-  Component: ComponentType<P>
-) {
-  const Wrapped = (props: P) => (
-    <div className="suprsend-root" style={{ height: '100%', width: '100%' }}>
-      <Component {...props} />
-    </div>
-  );
-  Wrapped.displayName = `withSuprSendRoot(${Component.displayName || Component.name || 'Component'})`;
-  return Wrapped;
-}
 
 export const TemplateEditor = withSuprSendRoot(_TemplateEditor);
 export const CommitButton = withSuprSendRoot(_CommitButton);

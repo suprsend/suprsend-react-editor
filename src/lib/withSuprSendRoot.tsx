@@ -1,0 +1,33 @@
+import { useRef, useState, useEffect, type ComponentType } from 'react';
+import { PortalContext } from '@/lib/PortalContext';
+import { useResolvedTheme, useThemeOverrides } from '@/lib/ThemeContext';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function withSuprSendRoot<P extends Record<string, any>>(
+  Component: ComponentType<P>
+) {
+  const Wrapped = (props: P) => {
+    const rootRef = useRef<HTMLDivElement>(null);
+    const [container, setContainer] = useState<HTMLElement | null>(null);
+    const resolvedTheme = useResolvedTheme();
+    const themeOverrides = useThemeOverrides();
+
+    useEffect(() => {
+      setContainer(rootRef.current);
+    }, []);
+
+    return (
+      <div
+        ref={rootRef}
+        className={`suprsend-root${resolvedTheme === 'dark' ? ' dark' : ''}`}
+        style={{ height: '100%', ...themeOverrides }}
+      >
+        <PortalContext.Provider value={container}>
+          <Component {...props} />
+        </PortalContext.Provider>
+      </div>
+    );
+  };
+  Wrapped.displayName = `withSuprSendRoot(${Component.displayName || Component.name || 'Component'})`;
+  return Wrapped;
+}

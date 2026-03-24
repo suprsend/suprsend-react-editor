@@ -1,5 +1,6 @@
 import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { usePortalContainer } from '@/lib/PortalContext';
 import { RangeSetBuilder } from '@codemirror/state';
 import { syntaxHighlighting, HighlightStyle } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
@@ -87,10 +88,10 @@ function createHighlightPlugin(flattenedVars: Record<string, unknown>) {
 
 const highlightTheme = EditorView.baseTheme({
   '.cm-hbs-valid, .cm-hbs-valid span': {
-    color: 'hsl(var(--primary)) !important',
+    color: 'var(--primary)) !important',
   },
   '.cm-hbs-invalid, .cm-hbs-invalid span': {
-    color: 'hsl(var(--destructive)) !important',
+    color: 'var(--destructive)) !important',
   },
 });
 
@@ -121,6 +122,7 @@ export default function SuggestionCodeEditor({
   label,
   mandatory = true,
 }: SuggestionCodeEditorProps) {
+  const portalContainer = usePortalContainer();
   const editorRef = useRef<CodeMirrorEditorHandle>(null);
   const suggestionsMouseDownRef = useRef(false);
 
@@ -334,7 +336,7 @@ export default function SuggestionCodeEditor({
                 suggestionsMouseDownRef.current = true;
               }}
             />,
-            document.body
+            portalContainer ?? document.body
           )}
       </div>
     </>
