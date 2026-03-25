@@ -4,15 +4,18 @@ import type { ThemeOverrides } from '@/types';
 export type Theme = 'light' | 'dark' | 'system';
 export type ResolvedTheme = 'light' | 'dark';
 
-export const ThemeContext = createContext<ResolvedTheme>('light');
-export const ThemeOverridesContext = createContext<React.CSSProperties>({});
-
-export function useResolvedTheme() {
-  return useContext(ThemeContext);
+interface ThemeContextValue {
+  resolvedTheme: ResolvedTheme;
+  overridesStyle: React.CSSProperties;
 }
 
-export function useThemeOverrides() {
-  return useContext(ThemeOverridesContext);
+export const ThemeContext = createContext<ThemeContextValue>({
+  resolvedTheme: 'light',
+  overridesStyle: {},
+});
+
+export function useTheme() {
+  return useContext(ThemeContext);
 }
 
 export function useThemeOverridesStyle(
