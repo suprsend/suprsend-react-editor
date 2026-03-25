@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, type ComponentType } from 'react';
 import { PortalContext } from '@/lib/PortalContext';
-import { useResolvedTheme, useThemeOverrides } from '@/lib/ThemeContext';
+import { useTheme } from '@/lib/ThemeContext';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function withSuprSendRoot<P extends Record<string, any>>(
@@ -9,8 +9,7 @@ export default function withSuprSendRoot<P extends Record<string, any>>(
   const Wrapped = (props: P) => {
     const rootRef = useRef<HTMLDivElement>(null);
     const [container, setContainer] = useState<HTMLElement | null>(null);
-    const resolvedTheme = useResolvedTheme();
-    const themeOverrides = useThemeOverrides();
+    const { resolvedTheme, overridesStyle } = useTheme();
 
     useEffect(() => {
       setContainer(rootRef.current);
@@ -20,7 +19,7 @@ export default function withSuprSendRoot<P extends Record<string, any>>(
       <div
         ref={rootRef}
         className={`suprsend-root${resolvedTheme === 'dark' ? ' dark' : ''}`}
-        style={{ height: '100%', ...themeOverrides }}
+        style={{ height: '100%', ...overridesStyle }}
       >
         <PortalContext.Provider value={container}>
           <Component {...props} />
