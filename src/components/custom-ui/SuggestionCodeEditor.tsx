@@ -88,10 +88,10 @@ function createHighlightPlugin(flattenedVars: Record<string, unknown>) {
 
 const highlightTheme = EditorView.baseTheme({
   '.cm-hbs-valid, .cm-hbs-valid span': {
-    color: 'var(--primary)) !important',
+    color: 'var(--primary) !important',
   },
   '.cm-hbs-invalid, .cm-hbs-invalid span': {
-    color: 'var(--destructive)) !important',
+    color: 'var(--destructive) !important',
   },
 });
 

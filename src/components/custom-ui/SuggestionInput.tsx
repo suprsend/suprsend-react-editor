@@ -58,8 +58,8 @@ function highlightHandlebars(
       if (/^\{\{.*\}\}$/.test(part)) {
         const isValid = isValidVariable(part, flattenedVars);
         const color = isValid
-          ? 'var(--primary))'
-          : 'var(--destructive))';
+          ? 'var(--primary)'
+          : 'var(--destructive)';
         return `<mark style="background:transparent;color:${color}">${escapeHtml(part)}</mark>`;
       }
       return escapeHtml(part);
@@ -360,7 +360,7 @@ export default function SuggestionInput({
                 right: 1,
                 bottom: 1,
                 zIndex: 2,
-                color: 'var(--foreground))',
+                color: 'var(--foreground)',
               }}
             >
               <span
@@ -399,7 +399,7 @@ export default function SuggestionInput({
               )}
               style={{
                 color: 'transparent',
-                caretColor: 'var(--foreground))',
+                caretColor: 'var(--foreground)',
                 position: 'relative',
                 zIndex: 3,
               }}

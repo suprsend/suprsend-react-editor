@@ -49,8 +49,8 @@
   --accent-foreground: hsl(214 16% 67%);
   --destructive: hsl(4 91% 69%);
   --destructive-foreground: hsl(5 31% 15%);
-  --border: hsla(215, 51%, 70%, 0.12);
-  --input: hsla(215, 51%, 70%, 0.24);
+  --border: hsl(215 51% 70% / 0.12);
+  --input: hsl(215 51% 70% / 0.24);
   --ring: hsl(214 90% 68%);
   --chart-1: hsl(220 70% 50%);
   --chart-2: hsl(160 60% 45%);
