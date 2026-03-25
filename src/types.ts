@@ -13,6 +13,29 @@ export type ChannelId =
 
 export type TemplateMode = 'live' | 'draft';
 
+export interface ThemeOverrides {
+  background?: string;
+  foreground?: string;
+  card?: string;
+  cardForeground?: string;
+  popover?: string;
+  popoverForeground?: string;
+  primary?: string;
+  primaryForeground?: string;
+  secondary?: string;
+  secondaryForeground?: string;
+  muted?: string;
+  mutedForeground?: string;
+  accent?: string;
+  accentForeground?: string;
+  destructive?: string;
+  destructiveForeground?: string;
+  border?: string;
+  input?: string;
+  ring?: string;
+  radius?: string;
+}
+
 export interface SuprSendTemplateEditorProviderProps {
   workspaceUid: string;
   templateSlug: string;
@@ -20,6 +43,8 @@ export interface SuprSendTemplateEditorProviderProps {
   channels: ChannelId[];
   tenantId: string | null;
   locale: string;
+  theme?: 'light' | 'dark' | 'system';
+  themeOverrides?: ThemeOverrides;
   mode?: TemplateMode;
   conditions?: unknown;
   accessToken?: string;

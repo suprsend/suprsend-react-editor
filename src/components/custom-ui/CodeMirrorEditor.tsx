@@ -43,15 +43,15 @@ const editorTheme = EditorView.theme({
   '&.cm-focused': { outline: 'none' },
   '.cm-content': {
     padding: '8px 12px',
-    caretColor: 'hsl(var(--foreground))',
+    caretColor: 'var(--foreground)',
   },
   '.cm-line': { padding: '0' },
   '.cm-scroller': { overflow: 'auto' },
-  '.cm-placeholder': { color: 'hsl(var(--muted-foreground))' },
+  '.cm-placeholder': { color: 'var(--muted-foreground)' },
   '.cm-gutters': {
-    backgroundColor: 'hsl(var(--background))',
-    color: 'hsl(var(--muted-foreground))',
-    borderRight: '1px solid hsl(var(--border))',
+    backgroundColor: 'var(--background)',
+    color: 'var(--muted-foreground)',
+    borderRight: '1px solid var(--border)',
   },
 });
 

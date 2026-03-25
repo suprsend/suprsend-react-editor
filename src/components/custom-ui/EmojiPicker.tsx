@@ -15,14 +15,14 @@ export type { EmojiClickEventDetail };
 
 // Maps the app's CSS variables into emoji-picker-element's CSS custom properties.
 const THEME_CSS_VARS: [string, string][] = [
-  ['--background', 'hsl(var(--popover))'],
-  ['--border-color', 'hsl(var(--border))'],
-  ['--indicator-color', 'hsl(var(--primary))'],
-  ['--input-font-color', 'hsl(var(--foreground))'],
-  ['--input-placeholder-color', 'hsl(var(--muted-foreground))'],
-  ['--input-border-color', 'hsl(var(--border))'],
+  ['--background', 'var(--popover)'],
+  ['--border-color', 'var(--border)'],
+  ['--indicator-color', 'var(--primary)'],
+  ['--input-font-color', 'var(--foreground)'],
+  ['--input-placeholder-color', 'var(--muted-foreground)'],
+  ['--input-border-color', 'var(--border)'],
   ['--input-border-radius', 'calc(var(--radius) - 2px)'],
-  ['--category-font-color', 'hsl(var(--muted-foreground))'],
+  ['--category-font-color', 'var(--muted-foreground)'],
   ['--emoji-padding', '0.28rem'],
 ];
 

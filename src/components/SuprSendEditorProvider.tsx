@@ -7,6 +7,12 @@ import type {
 } from '@/types';
 import { TemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { useAuthInterceptor } from '@/lib/useAuthInterceptor';
+import {
+  ThemeContext,
+  ThemeOverridesContext,
+  useThemeResolver,
+  useThemeOverridesStyle,
+} from '@/lib/ThemeContext';
 
 initCustomHelpers();
 
@@ -17,6 +23,8 @@ export default function SuprSendEditorProvider({
   channels,
   tenantId,
   locale,
+  theme = 'light',
+  themeOverrides,
   conditions,
   children,
   accessToken,
@@ -28,6 +36,8 @@ export default function SuprSendEditorProvider({
   version,
 }: FullSuprSendTemplateEditorProviderProps) {
   const isLive = mode === 'live' || !!version;
+  const resolvedTheme = useThemeResolver(theme);
+  const themeOverridesStyle = useThemeOverridesStyle(themeOverrides);
 
   const PRIVATE_ONLY_CHANNELS = ['sms', 'whatsapp'];
   const filteredChannels = isPrivate
@@ -74,8 +84,12 @@ export default function SuprSendEditorProvider({
   useAuthInterceptor({ accessToken, refreshAccessToken, isPrivate });
 
   return (
-    <TemplateEditorContext.Provider value={value}>
-      {children}
-    </TemplateEditorContext.Provider>
+    <ThemeContext.Provider value={resolvedTheme}>
+      <ThemeOverridesContext.Provider value={themeOverridesStyle}>
+        <TemplateEditorContext.Provider value={value}>
+          {children}
+        </TemplateEditorContext.Provider>
+      </ThemeOverridesContext.Provider>
+    </ThemeContext.Provider>
   );
 }
