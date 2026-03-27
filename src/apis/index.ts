@@ -12,6 +12,8 @@ import type {
   CommitTemplateParams,
   CommitTemplateMutationPayload,
   UseCommitTemplateParams,
+  MockTestPayload,
+  TemplateMode,
 } from '@/types';
 import { createQueryParams } from '@/lib/utils';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
@@ -337,6 +339,54 @@ export const useCommitTemplate = ({
         commitMessage,
         variants,
         version,
+      }),
+  });
+};
+
+// ---------- Channel Variant Mock Test ----------
+
+const channelVariantMockTest = async ({
+  workspaceUid,
+  templateSlug,
+  channel,
+  variantId,
+  payload,
+  mode,
+}: {
+  workspaceUid: string;
+  templateSlug: string;
+  channel: string;
+  variantId: string;
+  payload: MockTestPayload;
+  mode?: TemplateMode;
+}) => {
+  const qp = createQueryParams({ mode });
+  const url = `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/channel/${channel}/variant/${variantId}/mock_test/${qp}`;
+  const resp = await fetchClient.post(url, payload);
+  return resp.data;
+};
+
+export const useChannelVariantMockTest = () => {
+  const { workspaceUid, mode } = useTemplateEditorContext();
+  return useMutation({
+    mutationFn: ({
+      templateSlug,
+      channel,
+      variantId,
+      payload,
+    }: {
+      templateSlug: string;
+      channel: string;
+      variantId: string;
+      payload: MockTestPayload;
+    }) =>
+      channelVariantMockTest({
+        workspaceUid,
+        templateSlug,
+        channel,
+        variantId,
+        payload,
+        mode,
       }),
   });
 };

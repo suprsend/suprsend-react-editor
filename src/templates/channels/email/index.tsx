@@ -40,7 +40,11 @@ export default function EmailChannel({
   variables = {},
 }: EmailChannelProps) {
   const { templateSlug, variantId, isLive } = useTemplateEditorContext();
-  const { mutate, isPending: isSaving, isSuccess: isSaved } = useUpdateVariantContent({
+  const {
+    mutate,
+    isPending: isSaving,
+    isSuccess: isSaved,
+  } = useUpdateVariantContent({
     templateSlug,
     chanelSlug: 'email',
     variantId,
@@ -213,7 +217,7 @@ export default function EmailChannel({
       <div>
         <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-mt-2">
           {/* ---- Tab bar ---- */}
-          <div className="suprsend-flex suprsend-mb-[-1px] suprsend-z-50">
+          <div className="suprsend-flex suprsend-mb-[-1px] suprsend-z-10">
             {/* Editor tab */}
             {hasEditorTab && (
               <div
@@ -333,7 +337,6 @@ export default function EmailChannel({
               </TooltipProvider>
             </div>
           )}
-
         </div>
 
         <EmailSettingsPreviewBanner

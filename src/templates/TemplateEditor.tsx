@@ -9,15 +9,19 @@ import AndroidPushChannel from '@/templates/channels/androidpush';
 import WhatsappChannel from '@/templates/channels/whatsapp';
 import SMSChannel from '@/templates/channels/sms';
 import InboxChannel from '@/templates/channels/inbox';
-import type { SuprSendTemplateEditorProps } from '@/types';
+import TestButton from '@/templates/TestModal';
+import CommitButton from '@/templates/Commit';
+import type { ChannelId, SuprSendTemplateEditorProps } from '@/types';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { useMockData, useVariantDetails, isHttpError } from '@/apis';
-import { FileX, Loader2 } from '@/assets/icons';
+import { FileX, Loader2, Pencil, X } from '@/assets/icons';
+import { Button } from '@/components/ui/button';
 
 export default function SuprSendTemplateEditor({
   hideChannelsTab = false,
+  onCommit,
 }: SuprSendTemplateEditorProps) {
-  const { channels, templateSlug, variantId } = useTemplateEditorContext();
+  const { channels, templateSlug, variantId, isLive, setMode } = useTemplateEditorContext();
   const [selectedChannel, setSelectedChannel] = useState<string | number>(
     channels[0]
   );
@@ -72,6 +76,36 @@ export default function SuprSendTemplateEditor({
           channels={channels}
           selectedChannel={selectedChannel}
           onTabClick={(id) => setSelectedChannel(id)}
+          ChannelsTabActionComponent={() => (
+            <>
+              {!isLive && (
+                <Button
+                  variant="outline"
+                  className="suprsend-gap-1 !suprsend-py-0 !suprsend-h-8"
+                  onClick={() => setMode('live')}
+                >
+                  <X className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground" />
+                  <span className="suprsend-text-sm">Exit</span>
+                </Button>
+              )}
+              <TestButton
+                selectedChannel={selectedChannel as ChannelId}
+                identityData={(mockData?.user_data as Record<string, unknown>) ?? null}
+              />
+              {isLive ? (
+                <Button
+                  variant="outline"
+                  className="suprsend-gap-1 !suprsend-py-0 !suprsend-h-8"
+                  onClick={() => setMode('draft')}
+                >
+                  <Pencil className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground" />
+                  <span className="suprsend-text-sm">Edit</span>
+                </Button>
+              ) : (
+                <CommitButton onCommit={onCommit ?? (() => {})} />
+              )}
+            </>
+          )}
         />
       )}
       <div className="suprsend-flex-1 suprsend-min-h-0 suprsend-overflow-hidden">

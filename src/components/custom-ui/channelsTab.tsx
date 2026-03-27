@@ -117,7 +117,7 @@ function TabItem({ tab, isSelected, onTabClick }: TabItemProps) {
   );
 }
 
-export function TabBar({ channels, selectedChannel, onTabClick }: TabBarProps) {
+export function TabBar({ channels, selectedChannel, onTabClick, ChannelsTabActionComponent }: TabBarProps) {
   const channelMetaData = CHANNELS.filter((channel) =>
     channels.includes(channel.id)
   );
@@ -136,6 +136,11 @@ export function TabBar({ channels, selectedChannel, onTabClick }: TabBarProps) {
           ))}
         </div>
       </div>
+      {ChannelsTabActionComponent && (
+        <div className="suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-px-2 suprsend-shrink-0">
+          <ChannelsTabActionComponent />
+        </div>
+      )}
     </div>
   );
 }
