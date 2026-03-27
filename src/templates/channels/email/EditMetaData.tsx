@@ -281,7 +281,9 @@ function EmailMetaDataModal({
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <HelpCircle className="suprsend-w-3 suprsend-h-3 suprsend-cursor-default suprsend-text-accent-foreground" />
+                        <span>
+                          <HelpCircle className="suprsend-w-3 suprsend-h-3 suprsend-cursor-default suprsend-text-accent-foreground" />
+                        </span>
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>
@@ -399,15 +401,20 @@ function EmailMetaDataModal({
                     <TooltipProvider delayDuration={0}>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Info className="suprsend-w-3 suprsend-h-3 suprsend-text-accent-foreground" />
+                          <span>
+                            <Info className="suprsend-w-3 suprsend-h-3 suprsend-text-accent-foreground" />
+                          </span>
                         </TooltipTrigger>
 
                         <TooltipContent side="top">
                           <p>
                             Use it to create interactive email and take quick
-                            actions within the email. Examples include: Replying
-                            to meeting invite, tracking delivery status, event
-                            reservation etc.
+                            actions <br />
+                            within the email. Examples include: Replying to
+                            meeting
+                            <br />
+                            invite, tracking delivery status, event reservation
+                            etc.
                           </p>
                         </TooltipContent>
                       </Tooltip>
