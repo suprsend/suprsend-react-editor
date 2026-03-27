@@ -85,11 +85,13 @@ export default function EmailSettingsPreviewBanner({
       </div>
       <Dialog open={emailSettingsOpen} onOpenChange={setEmailSettingsOpen}>
         <DialogTrigger asChild>
-          {isLive ? (
-            <Maximize2 className="suprsend-h-3.5 suprsend-w-3.5 suprsend-shrink-0 suprsend-cursor-pointer suprsend-text-muted-foreground" />
-          ) : (
-            <Pencil className="suprsend-h-3.5 suprsend-w-3.5 suprsend-shrink-0 suprsend-cursor-pointer suprsend-text-muted-foreground" />
-          )}
+          <button className="suprsend-inline-flex suprsend-cursor-pointer suprsend-border-0 suprsend-bg-transparent suprsend-p-0">
+            {isLive ? (
+              <Maximize2 className="suprsend-h-3.5 suprsend-w-3.5 suprsend-shrink-0 suprsend-text-muted-foreground" />
+            ) : (
+              <Pencil className="suprsend-h-3.5 suprsend-w-3.5 suprsend-shrink-0 suprsend-text-muted-foreground" />
+            )}
+          </button>
         </DialogTrigger>
         <EmailMetaDataModal
           otherSettingsOpen={otherSettingsOpen}
@@ -169,7 +171,7 @@ function EmailMetaDataModal({
   }, [getValues, onSave, onFieldsChange, onClose]);
 
   return (
-    <DialogContent className="!suprsend-max-w-3xl !suprsend-max-h-[90vh] !suprsend-overflow-y-auto !suprsend-border-0">
+    <DialogContent aria-describedby={undefined} className="!suprsend-max-w-3xl !suprsend-max-h-[90vh] !suprsend-overflow-y-auto !suprsend-border-0">
       <DialogHeader className="suprsend-pb-2">
         <DialogTitle className="suprsend-pb-2">Email Settings</DialogTitle>
       </DialogHeader>
