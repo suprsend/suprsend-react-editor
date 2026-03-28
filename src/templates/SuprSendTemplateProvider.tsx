@@ -16,7 +16,7 @@ import {
 
 initCustomHelpers();
 
-export default function SuprSendEditorProvider({
+export default function SuprSendTemplateProvider({
   workspaceUid,
   templateSlug,
   variantId,

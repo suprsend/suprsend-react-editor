@@ -1,4 +1,4 @@
-export { default as SuprSendEditorProvider } from '@/components/SuprSendEditorProvider';
+export { default as SuprSendTemplateProvider } from '@/templates/SuprSendTemplateProvider';
 // eslint-disable-next-line react-refresh/only-export-components
 export * from '@/types';
 
