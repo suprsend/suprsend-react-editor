@@ -62,11 +62,7 @@ function VariantRow({
           checked={hasErrors ? false : isDeleted ? true : checked}
           onCheckedChange={onToggle}
           disabled={hasErrors || isDeleted}
-          className={
-            isDeleted
-              ? 'suprsend-border-destructive data-[state=checked]:suprsend-bg-destructive data-[state=checked]:suprsend-border-destructive'
-              : ''
-          }
+          className=""
         />
         <Label
           htmlFor={key}
