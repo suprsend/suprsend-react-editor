@@ -376,6 +376,7 @@ export default function CommitButton({ onCommit }: CommitButtonProps) {
     <>
       <Button
         type="button"
+        size={null}
         className="suprsend-h-7 suprsend-p-3 suprsend-rounded suprsend-flex suprsend-items-center suprsend-gap-1.5"
         disabled={isLive}
         onClick={() => {

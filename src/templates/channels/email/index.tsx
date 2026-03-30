@@ -342,6 +342,7 @@ export default function EmailChannel({
         <EmailSettingsPreviewBanner
           variantData={variantData}
           onSave={saveContent}
+          variables={variables}
         />
       </div>
 
