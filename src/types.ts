@@ -53,6 +53,7 @@ export interface SuprSendTemplateEditorProviderProps {
   actorDistinctId?: string;
   isPrivate?: boolean;
   version?: string;
+  notificationCategory?: string;
 }
 
 export interface FullSuprSendTemplateEditorProviderProps extends SuprSendTemplateEditorProviderProps {
@@ -62,10 +63,13 @@ export interface FullSuprSendTemplateEditorProviderProps extends SuprSendTemplat
 export interface TemplateEditorContextValue extends SuprSendTemplateEditorProviderProps {
   isPrivate: boolean;
   isLive: boolean;
+  notificationCategory?: string;
+  setMode: (mode: TemplateMode) => void;
 }
 
 export interface SuprSendTemplateEditorProps {
   hideChannelsTab?: boolean;
+  onCommit?: () => void;
 }
 
 export interface CommitModalProps {
@@ -744,4 +748,24 @@ export interface MergeTagInfo {
     mergeTagGroup: string | null;
     mergeTagRule: string | null;
   }) => void;
+}
+
+// --- Test Modal ---
+
+export interface TestModalIdentity {
+  identity_type: string;
+  value?: string;
+  value_json?: Record<string, unknown>;
+  id_provider?: string;
+}
+
+export interface MockTestPayload {
+  distinct_id: string;
+  identities: TestModalIdentity[];
+  category?: string;
+  tenant_id?: string;
+}
+
+export interface TestButtonProps {
+  onTestSent?: () => void;
 }

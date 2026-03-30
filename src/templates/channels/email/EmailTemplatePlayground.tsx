@@ -1,8 +1,9 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Loader2 } from '@/assets/icons';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { usePostMessageBridge } from '@/lib/usePostMessageBridge';
 import { useUploadFile } from '@/apis';
+import { renderHandlebars } from '@/components/custom-ui/HandlebarsRenderer';
 import { variablesToDesignerMergeTags } from '@/lib/suggestion-utils';
 import { generateUUID, htmlToText } from '@/lib/utils';
 import type {
@@ -281,6 +282,12 @@ export default function EmailTemplatePlayground({
     return htmlToText(html);
   }, [rawHtmlRef]);
 
+  const resolvedDesignerHtml = useMemo(() => {
+    if (!disabled || editorMode !== 'design') return '';
+    const html = apiBody?.designer?.html ?? '';
+    return html ? renderHandlebars(html, variables) : '';
+  }, [disabled, editorMode, apiBody?.designer?.html, variables]);
+
   const showDesignerIframe = activeTab === 'editor' && editorMode === 'design';
   const hiddenStyle = {
     visibility: 'hidden' as const,
@@ -342,7 +349,7 @@ export default function EmailTemplatePlayground({
           style={showDesignerIframe ? undefined : hiddenStyle}
         >
           <iframe
-            srcDoc={apiBody?.designer?.html ?? ''}
+            srcDoc={resolvedDesignerHtml}
             title="Email preview"
             className="suprsend-w-full suprsend-h-full suprsend-border-0"
           />

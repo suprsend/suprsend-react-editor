@@ -1,4 +1,4 @@
-export { default as SuprSendEditorProvider } from '@/components/SuprSendEditorProvider';
+export { default as SuprSendTemplateProvider } from '@/templates/SuprSendTemplateProvider';
 // eslint-disable-next-line react-refresh/only-export-components
 export * from '@/types';
 
@@ -14,9 +14,11 @@ import _AndroidPushPreview from '@/templates/channels/androidpush/Preview';
 import _SlackPreview from '@/templates/channels/slack/Preview';
 import _MSTeamsPreview from '@/templates/channels/msteams/Preview';
 import _WhatsappPreview from '@/templates/channels/whatsapp/Preview';
+import _TestButton from '@/templates/TestModal';
 
 export const TemplateEditor = withSuprSendRoot(_TemplateEditor);
 export const CommitButton = withSuprSendRoot(_CommitButton);
+export const TestButton = withSuprSendRoot(_TestButton);
 export const EmailPreview = withSuprSendRoot(_EmailPreview);
 export const SMSPreview = withSuprSendRoot(_SMSPreview);
 export const InboxPreview = withSuprSendRoot(_InboxPreview);

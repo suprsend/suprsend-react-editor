@@ -1,6 +1,6 @@
 import * as Handlebars from 'handlebars';
 import get from 'lodash.get';
-import * as moment from 'moment-timezone';
+import moment from 'moment-timezone';
 import getPath from 'get-value';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

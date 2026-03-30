@@ -1,9 +1,10 @@
 import '../index.css';
 import initCustomHelpers from '@/lib/handlebarHelper';
-import { useMemo } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import type {
   FullSuprSendTemplateEditorProviderProps,
   TemplateEditorContextValue,
+  TemplateMode,
 } from '@/types';
 import { TemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { useAuthInterceptor } from '@/lib/useAuthInterceptor';
@@ -15,7 +16,7 @@ import {
 
 initCustomHelpers();
 
-export default function SuprSendEditorProvider({
+export default function SuprSendTemplateProvider({
   workspaceUid,
   templateSlug,
   variantId,
@@ -33,8 +34,16 @@ export default function SuprSendEditorProvider({
   mode,
   isPrivate = false,
   version,
+  notificationCategory,
 }: FullSuprSendTemplateEditorProviderProps) {
-  const isLive = mode === 'live' || !!version;
+  const [internalMode, setInternalMode] = useState<TemplateMode | undefined>(undefined);
+  const currentMode = internalMode ?? mode ?? (version ? 'live' : 'draft');
+  const isLive = currentMode === 'live';
+
+  const setMode = useCallback((newMode: TemplateMode) => {
+    setInternalMode(newMode);
+  }, []);
+
   const resolvedTheme = useThemeResolver(theme);
   const overridesStyle = useThemeOverridesStyle(themeOverrides);
   const themeValue = useMemo(
@@ -58,12 +67,14 @@ export default function SuprSendEditorProvider({
       conditions,
       isPrivate,
       isLive,
+      setMode,
       accessToken,
       refreshAccessToken,
       recipientDistinctId,
       actorDistinctId,
-      mode,
+      mode: currentMode,
       version,
+      notificationCategory,
     }),
     [
       workspaceUid,
@@ -75,12 +86,14 @@ export default function SuprSendEditorProvider({
       conditions,
       isPrivate,
       isLive,
+      setMode,
       accessToken,
       refreshAccessToken,
       recipientDistinctId,
       actorDistinctId,
-      mode,
+      currentMode,
       version,
+      notificationCategory,
     ]
   );
 
