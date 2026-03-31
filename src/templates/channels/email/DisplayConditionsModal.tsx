@@ -415,14 +415,16 @@ function ConditionRow({
               <Label className="suprsend-text-xs suprsend-text-accent-foreground">
                 Value
               </Label>
-              <TooltipProvider>
+              <TooltipProvider delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Info className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground suprsend-cursor-pointer" />
+                    <span className="suprsend-inline-flex">
+                      <Info className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground suprsend-cursor-pointer" />
+                    </span>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>add static values as "string", 12, true, null</p>
-                    <p>variable as variable_key (without brackets)</p>
+                    <p>Add static values as "string", 12, true, null</p>
+                    <p>and variable as variable_key (without brackets)</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

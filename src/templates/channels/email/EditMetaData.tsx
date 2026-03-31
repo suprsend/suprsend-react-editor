@@ -171,12 +171,12 @@ function EmailMetaDataModal({
   }, [getValues, onSave, onFieldsChange, onClose]);
 
   return (
-    <DialogContent aria-describedby={undefined} className="!suprsend-max-w-3xl !suprsend-max-h-[90vh] !suprsend-overflow-y-auto !suprsend-border-0">
+    <DialogContent aria-describedby={undefined} className="!suprsend-max-w-3xl !suprsend-max-h-[90vh] !suprsend-border-0 suprsend-flex suprsend-flex-col">
       <DialogHeader className="suprsend-pb-2">
         <DialogTitle className="suprsend-pb-2">Email Settings</DialogTitle>
       </DialogHeader>
 
-      <div className="suprsend-space-y-6 suprsend-pb-6">
+      <div className="suprsend-space-y-6 suprsend-pb-6 suprsend-overflow-y-auto suprsend-flex-1 suprsend-min-h-0">
         <div className="suprsend-space-y-2">
           <Controller
             name="subject"
@@ -422,9 +422,14 @@ function EmailMetaDataModal({
                       </Tooltip>
                     </TooltipProvider>
 
-                    <span className="cursor-pointer text-muted-foreground hover:text-primary transition">
+                    <a
+                      href="https://www.w3schools.com/js/js_json_datatypes.asp"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="suprsend-cursor-pointer suprsend-text-muted-foreground hover:suprsend-text-primary suprsend-transition"
+                    >
                       <ExternalLink className="suprsend-w-3 suprsend-h-3 suprsend-text-accent-foreground" />
-                    </span>
+                    </a>
                   </div>
                 </div>
 

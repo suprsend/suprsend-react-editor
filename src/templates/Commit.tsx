@@ -29,6 +29,12 @@ import {
   AlertCircle,
   Settings,
 } from '@/assets/icons';
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from '@/components/ui/tooltip';
 import { usePreCommitValidate, useCommitTemplate } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 
@@ -237,11 +243,13 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
             </div>
 
             <div className="suprsend-space-y-3">
-              <p className="suprsend-text-sm suprsend-text-muted-foreground">
-                Below {totalChanges} change
-                {totalChanges !== 1 ? 's are' : ' is'} made. Deselect the ones
-                you don't want to commit
-              </p>
+              {totalChanges > 0 && (
+                <p className="suprsend-text-sm suprsend-text-muted-foreground">
+                  Below {totalChanges} change
+                  {totalChanges !== 1 ? 's are' : ' is'} made. Deselect the
+                  ones you don't want to commit
+                </p>
+              )}
 
               {variants.length > 0 && (
                 <Collapsible open={variantsOpen} onOpenChange={setVariantsOpen}>
@@ -296,17 +304,26 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
               {changedProperties.length > 0 && (
                 <Collapsible open={settingsOpen} onOpenChange={setSettingsOpen}>
                   <CollapsibleTrigger className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-w-full suprsend-bg-transparent suprsend-border-none suprsend-cursor-pointer suprsend-p-0">
-                    <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
-                      <ChevronDown
-                        className={`suprsend-h-4 suprsend-w-4 suprsend-text-muted-foreground suprsend-transition-transform ${
-                          !settingsOpen ? 'suprsend--rotate-90' : ''
-                        }`}
-                      />
-                      <Settings className="suprsend-h-4 suprsend-w-4 suprsend-text-muted-foreground" />
-                      <span className="suprsend-text-sm suprsend-font-semibold suprsend-tracking-wide">
-                        TEMPLATE SETTINGS
-                      </span>
-                    </div>
+                    <TooltipProvider delayDuration={0}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+                            <ChevronDown
+                              className={`suprsend-h-4 suprsend-w-4 suprsend-text-muted-foreground suprsend-transition-transform ${
+                                !settingsOpen ? 'suprsend--rotate-90' : ''
+                              }`}
+                            />
+                            <Settings className="suprsend-h-4 suprsend-w-4 suprsend-text-muted-foreground" />
+                            <span className="suprsend-text-sm suprsend-font-semibold suprsend-tracking-wide">
+                              TEMPLATE SETTINGS
+                            </span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Template changes will always be pushed on commit
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                     <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
                       <span className="suprsend-text-xs suprsend-font-medium suprsend-text-primary suprsend-bg-primary/10 suprsend-px-2.5 suprsend-py-0.5 suprsend-rounded">
                         edited: {changedProperties.length}
