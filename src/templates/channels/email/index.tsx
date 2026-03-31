@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { X, Plus, Brush, CodeXml, Clipboard } from '@/assets/icons';
+import SaveIndicator from '@/components/custom-ui/SaveIndicator';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
@@ -14,7 +15,7 @@ import HtmlSwitchModal from './HTMLEditorSwitchModal';
 import EmailSettingsPreviewBanner from './EditMetaData';
 import { useUpdateVariantContent } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import SaveIndicator from '@/components/custom-ui/SaveIndicator';
+
 import type {
   EmailContentPayload,
   EditorMode,
@@ -213,7 +214,6 @@ export default function EmailChannel({
 
   return (
     <div className="suprsend-h-full suprsend-flex suprsend-flex-col suprsend-m-1.5 suprsend-relative">
-      <SaveIndicator isSaving={isSaving} isSaved={isSaved} />
       <div>
         <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-mt-2">
           {/* ---- Tab bar ---- */}
@@ -294,9 +294,11 @@ export default function EmailChannel({
             )}
           </div>
 
-          {/* ---- Design / HTML toggle + Copy button ---- */}
+          {/* ---- Save indicator + Design / HTML toggle + Copy button ---- */}
+          <div className="suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-mt-[-10px]">
+            <SaveIndicator isSaving={isSaving} isSaved={isSaved} className="suprsend-mr-2" />
           {hasEditorTab && activeTab === 'editor' && !isLive && (
-            <div className="suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-mt-[-10px]">
+            <>
               <Tabs
                 value={editorMode}
                 onValueChange={(v) => {
@@ -335,8 +337,9 @@ export default function EmailChannel({
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            </div>
+            </>
           )}
+          </div>
         </div>
 
         <EmailSettingsPreviewBanner

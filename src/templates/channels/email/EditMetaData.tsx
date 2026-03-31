@@ -64,6 +64,12 @@ export default function EmailSettingsPreviewBanner({
   return (
     <div className="suprsend-flex suprsend-px-3 suprsend-py-2.5 suprsend-items-center suprsend-text-sm suprsend-border">
       <div className="suprsend-flex suprsend-gap-6 suprsend-flex-grow suprsend-min-w-0">
+        <p className="suprsend-text-muted-foreground suprsend-text-xs suprsend-truncate suprsend-flex-1 suprsend-min-w-0">
+          Subject:{' '}
+          <span className="suprsend-text-foreground">
+            {previewMeta.subject || '-'}
+          </span>
+        </p>
         <p className="suprsend-text-muted-foreground suprsend-text-xs suprsend-truncate suprsend-basis-[20%] suprsend-shrink-0">
           From Name:{' '}
           <span className="suprsend-text-foreground">
@@ -74,12 +80,6 @@ export default function EmailSettingsPreviewBanner({
           From Email:{' '}
           <span className="suprsend-text-foreground">
             {previewMeta.from_address || '-'}
-          </span>
-        </p>
-        <p className="suprsend-text-muted-foreground suprsend-text-xs suprsend-truncate suprsend-flex-1 suprsend-min-w-0">
-          Subject:{' '}
-          <span className="suprsend-text-foreground">
-            {previewMeta.subject || '-'}
           </span>
         </p>
       </div>
