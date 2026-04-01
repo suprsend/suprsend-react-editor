@@ -18,7 +18,7 @@ export function renderHandlebars(
     options ?? {};
   let compiled: Handlebars.TemplateDelegate;
   try {
-    compiled = Handlebars.compile(template, compileOptions);
+    compiled = Handlebars.compile(template, { strict: true, ...compileOptions });
   } catch (error) {
     onCompileError?.(error);
     return template;

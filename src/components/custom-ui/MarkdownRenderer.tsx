@@ -28,7 +28,13 @@ export default function MarkdownRenderer({
   children,
   className,
 }: MarkdownRendererProps) {
-  const html = useMemo(() => markdownToHtml(children), [children]);
+  const html = useMemo(() => {
+    const formatted = children
+      ?.replaceAll('\\\n', '&nbsp;')
+      ?.replaceAll('\n', '  \n')
+      ?.replaceAll('&nbsp;', '&nbsp;  \n');
+    return markdownToHtml(formatted);
+  }, [children]);
 
   return (
     <>

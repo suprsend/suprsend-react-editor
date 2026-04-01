@@ -669,6 +669,7 @@ export interface TextEditorsProps {
   variables?: Record<string, unknown>;
   onFetchFromHtml?: () => Promise<string | undefined>;
   disabled?: boolean;
+  onWarningChange?: (warning: string) => void;
 }
 
 export interface MockDataQueryParams {
@@ -704,6 +705,7 @@ export interface EmailTemplatePlaygroundProps {
   plainTextOnlyText: string;
   onPlainTextOnlyTextChange: (v: string) => void;
   disabled?: boolean;
+  onWarningChange?: (warning: string) => void;
 }
 
 export interface IEmailSettingsPreviewBannerProps {

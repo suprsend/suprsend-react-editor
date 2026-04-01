@@ -420,7 +420,12 @@ export default function WhatsappChannel({
             <Controller
               name="body_text"
               control={control}
-              rules={{ required: 'Body is required' }}
+              rules={{
+                required: 'Body is required',
+                validate: (value) =>
+                  countCharsWithHandlebars(value) <= 1024 ||
+                  'Body exceeds 1024 characters',
+              }}
               render={({ field, fieldState }) => (
                 <SuggestionInputWithEmoji
                   label="Body"
@@ -451,6 +456,10 @@ export default function WhatsappChannel({
               rules={{
                 validate: {
                   noEmojisNoVariables,
+                  maxLength: (value) =>
+                    !value ||
+                    countCharsWithHandlebars(value) <= 60 ||
+                    'Footer exceeds 60 characters',
                 },
               }}
               render={({ field, fieldState }) => (
@@ -547,60 +556,71 @@ export default function WhatsappChannel({
                       <p className="suprsend-text-sm suprsend-font-semibold suprsend-text-foreground">
                         Call Phone Number Button
                       </p>
-                      <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
-                        <div className="suprsend-flex-1">
-                          <Controller
-                            name={`cta_buttons.${index}.text`}
-                            control={control}
-                            rules={{
-                              validate: { noEmojisNoVariables },
-                            }}
-                            render={({ field: f, fieldState }) => (
-                              <Input
-                                value={f.value}
-                                onChange={f.onChange}
-                                placeholder="Button Text"
-                                disabled={isLive}
-                                className={
-                                  fieldState.error
-                                    ? 'suprsend-border-destructive'
-                                    : ''
-                                }
-                              />
+                      <Controller
+                        name={
+                          `cta_buttons.${index}.phone_number` as `cta_buttons.${number}.phone_number`
+                        }
+                        control={control}
+                        rules={{
+                          required: 'Phone number is required',
+                          pattern: {
+                            value: /^(\+?)[0-9]{10,20}$/,
+                            message: 'Invalid phone number',
+                          },
+                        }}
+                        render={({ field: phoneField, fieldState: phoneFieldState }) => (
+                          <div className="suprsend-space-y-1">
+                            <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+                              <div className="suprsend-flex-1">
+                                <Controller
+                                  name={`cta_buttons.${index}.text`}
+                                  control={control}
+                                  rules={{
+                                    validate: { noEmojisNoVariables },
+                                  }}
+                                  render={({ field: f, fieldState }) => (
+                                    <Input
+                                      value={f.value}
+                                      onChange={f.onChange}
+                                      placeholder="Button Text"
+                                      disabled={isLive}
+                                      className={
+                                        fieldState.error
+                                          ? 'suprsend-border-destructive'
+                                          : ''
+                                      }
+                                    />
+                                  )}
+                                />
+                              </div>
+                              <div className="suprsend-flex-1">
+                                <Input
+                                  value={(phoneField.value as string) ?? ''}
+                                  onChange={phoneField.onChange}
+                                  placeholder="+1234567890"
+                                  disabled={isLive}
+                                  className={
+                                    phoneFieldState.error
+                                      ? 'suprsend-border-destructive'
+                                      : ''
+                                  }
+                                />
+                              </div>
+                              {!isLive && (
+                                <X
+                                  className="suprsend-w-4 suprsend-h-4 suprsend-cursor-pointer suprsend-text-muted-foreground suprsend-shrink-0"
+                                  onClick={() => removeCTA(index)}
+                                />
+                              )}
+                            </div>
+                            {phoneFieldState.error?.message && (
+                              <p className="suprsend-text-xs suprsend-text-destructive">
+                                {phoneFieldState.error.message}
+                              </p>
                             )}
-                          />
-                        </div>
-                        <div className="suprsend-flex-1">
-                          <Controller
-                            name={
-                              `cta_buttons.${index}.phone_number` as `cta_buttons.${number}.phone_number`
-                            }
-                            control={control}
-                            rules={{
-                              required: 'Phone number is required',
-                            }}
-                            render={({ field: f, fieldState }) => (
-                              <Input
-                                value={(f.value as string) ?? ''}
-                                onChange={f.onChange}
-                                placeholder="+1234567890"
-                                disabled={isLive}
-                                className={
-                                  fieldState.error
-                                    ? 'suprsend-border-destructive'
-                                    : ''
-                                }
-                              />
-                            )}
-                          />
-                        </div>
-                        {!isLive && (
-                          <X
-                            className="suprsend-w-4 suprsend-h-4 suprsend-cursor-pointer suprsend-text-muted-foreground suprsend-shrink-0"
-                            onClick={() => removeCTA(index)}
-                          />
+                          </div>
                         )}
-                      </div>
+                      />
                     </div>
                   );
                 }

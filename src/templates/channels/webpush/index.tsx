@@ -232,10 +232,11 @@ export default function WebpushChannel({
               </div>
             ))}
 
-            {fields.length < 2 && !isLive && (
+            {fields.length < 2 && (
               <Button
                 variant="outline"
                 size="sm"
+                disabled={isLive}
                 onClick={() => append({ text: '', url: '' })}
               >
                 <Plus className="suprsend-w-4 suprsend-h-4" />

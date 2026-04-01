@@ -15,20 +15,16 @@ export function useAutosave<T extends FieldValues>({
   const onSaveRef = useRef(onSave);
   const debounceMsRef = useRef(debounceMs);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isFirstRender = useRef(true);
   const lastSavedRef = useRef<string>('');
 
   onSaveRef.current = onSave;
   debounceMsRef.current = debounceMs;
 
   useEffect(() => {
-    const subscription = watch((data) => {
-      if (isFirstRender.current) {
-        isFirstRender.current = false;
-        lastSavedRef.current = JSON.stringify(data);
-        return;
-      }
+    // Snapshot current form values so the first real user edit isn't skipped
+    lastSavedRef.current = JSON.stringify(watch());
 
+    const subscription = watch((data) => {
       const serialized = JSON.stringify(data);
       if (serialized === lastSavedRef.current) return;
 

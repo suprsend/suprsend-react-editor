@@ -123,6 +123,11 @@ export default function EmailChannel({
   );
 
   const [htmlSwitchModalOpen, setHtmlSwitchModalOpen] = useState(false);
+  const [editorWarning, setEditorWarning] = useState('');
+
+  useEffect(() => {
+    setEditorWarning('');
+  }, [activeTab, editorMode]);
 
   // --- One-time sync when API data arrives after mount (lazy loading) ---
   const initializedRef = useRef(!!apiBodyType);
@@ -354,7 +359,7 @@ export default function EmailChannel({
         designEditorType={editorMode}
       />
 
-      <div className="suprsend-flex-1 suprsend-min-h-0 suprsend-overflow-hidden">
+      <div className={`suprsend-min-h-0 suprsend-overflow-hidden ${editorWarning ? 'suprsend-flex-[0.95]' : 'suprsend-flex-1'}`}>
         <EmailTemplatePlayground
           editorMode={editorMode}
           activeTab={activeTab}
@@ -372,8 +377,14 @@ export default function EmailChannel({
           plainTextOnlyText={plainTextOnlyText}
           onPlainTextOnlyTextChange={setPlainTextOnlyText}
           disabled={isLive}
+          onWarningChange={setEditorWarning}
         />
       </div>
+      {editorWarning && (
+        <p className="suprsend-text-sm suprsend-px-3 suprsend-py-1 suprsend-text-destructive suprsend-shrink-0">
+          {editorWarning}
+        </p>
+      )}
 
       <HtmlSwitchModal
         open={htmlSwitchModalOpen}

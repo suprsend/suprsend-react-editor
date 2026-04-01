@@ -19,6 +19,7 @@ export default function TextEditors({
   variables = {},
   onFetchFromHtml,
   disabled = false,
+  onWarningChange,
 }: TextEditorsProps) {
   const [activePreviewTab, setActivePreviewTab] = useState<
     'desktop' | 'mobile'
@@ -96,6 +97,7 @@ export default function TextEditors({
           containerClassName="suprsend-flex-1 suprsend-min-h-0 !suprsend-mt-0 suprsend-flex suprsend-flex-col"
           className="suprsend-flex-1 suprsend-min-h-0 suprsend-border-0 suprsend-rounded-none"
           disabled={disabled}
+          onWarningChange={onWarningChange}
         />
       </ResizablePanel>
       <ResizableHandle withHandle />

@@ -42,12 +42,21 @@ export function invalidateQueries(queryKey: unknown[]): void {
     return;
   }
 
-  // Prefix match: invalidate all keys that start with the given partial key
-  const prefix = JSON.stringify(queryKey).slice(0, -1); // remove trailing ']'
+  // Prefix match: invalidate all cached keys whose parsed first element
+  // starts with the first element of the given queryKey.
+  // e.g. queryKey ["template/slug"] matches cached ["template/slug/channel/email/variant/abc","draft","v1"]
+  const firstElement = typeof queryKey[0] === 'string' ? queryKey[0] : '';
+  if (!firstElement) return;
+
   for (const [cachedKey] of cache) {
-    if (cachedKey.startsWith(prefix)) {
-      cache.delete(cachedKey);
-      notifyListeners(cachedKey);
+    try {
+      const parsed = JSON.parse(cachedKey) as unknown[];
+      if (typeof parsed[0] === 'string' && parsed[0].startsWith(firstElement)) {
+        cache.delete(cachedKey);
+        notifyListeners(cachedKey);
+      }
+    } catch {
+      // skip malformed keys
     }
   }
 }

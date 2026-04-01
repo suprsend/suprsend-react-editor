@@ -28,6 +28,11 @@ export default function Suggestions({
 }: SuggestionsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [adjustedPos, setAdjustedPos] = useState<{
+    left: number;
+    top: number;
+  } | null>(null);
+
   // Prevent pointerdown from bubbling to document where Radix Dialog's
   // dismiss handler listens (bubble phase). Using bubble phase here ensures
   // the event still reaches child elements (option clicks work) but never
@@ -39,6 +44,31 @@ export default function Suggestions({
     el.addEventListener('pointerdown', stop); // bubble phase
     return () => el.removeEventListener('pointerdown', stop);
   }, []);
+
+  // Reposition dropdown so it stays within the viewport
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+    let { left, top } = caretCoordinates;
+    top += 15; // offset below the caret
+
+    const overflowRight = left + rect.width - window.innerWidth;
+    if (overflowRight > 0) {
+      left -= overflowRight;
+    }
+    if (left < 0) left = 0;
+
+    const overflowBottom = top + rect.height - window.innerHeight;
+    if (overflowBottom > 0) {
+      // Flip above the caret
+      top = caretCoordinates.top - rect.height - 30;
+    }
+    if (top < 0) top = 0;
+
+    setAdjustedPos({ left, top });
+  }, [caretCoordinates]);
 
   const visibleSections = DATA_TYPE_SECTIONS;
 
@@ -112,8 +142,9 @@ export default function Suggestions({
         onSuggestionsMouseDown?.();
       }}
       style={{
-        left: caretCoordinates.left,
-        top: caretCoordinates.top + 15,
+        left: adjustedPos ? adjustedPos.left : caretCoordinates.left,
+        top: adjustedPos ? adjustedPos.top : caretCoordinates.top + 15,
+        visibility: adjustedPos ? 'visible' : 'hidden',
         // Radix Dialog's modal mode sets `pointer-events: none` on document.body
         // to block interaction with background content. Since these suggestions are
         // portaled to body, they inherit that and become unclickable. Override here.

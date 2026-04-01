@@ -102,7 +102,7 @@ export default function MSTeamsChannel({
                 setValue('body_card', val, { shouldDirty: true })
               }
               placeholder="Paste your Adaptive Card JSON / JSONNET here..."
-              height="400px"
+              height="500px"
               disabled={isLive}
             />
           ) : (

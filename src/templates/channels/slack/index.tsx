@@ -102,7 +102,7 @@ export default function SlackChannel({
                 setValue('body_block', val, { shouldDirty: true })
               }
               placeholder="Add template blocks array [...], instead of blocks object {blocks:[...]}"
-              height="400px"
+              height="500px"
               disabled={isLive}
             />
           ) : (

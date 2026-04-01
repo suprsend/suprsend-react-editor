@@ -38,8 +38,6 @@ import { cn } from '@/lib/utils';
 const IMPORTANCE_OPTIONS = [
   { label: 'Default', value: 'default' },
   { label: 'High', value: 'high' },
-  { label: 'Low', value: 'low' },
-  { label: 'Min', value: 'min' },
 ];
 
 export default function InboxChannel({

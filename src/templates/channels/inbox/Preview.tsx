@@ -141,7 +141,7 @@ export default function InboxPreview({
                           className={`suprsend-px-4 suprsend-py-1.5 suprsend-rounded suprsend-text-xs suprsend-font-medium ${
                             i === 0
                               ? 'suprsend-bg-primary suprsend-text-background'
-                              : 'suprsend-border suprsend-border-border suprsend-text-foreground'
+                              : 'suprsend-border suprsend-border-border suprsend-text-foreground suprsend-bg-background'
                           }`}
                         >
                           <HandlebarsRenderer

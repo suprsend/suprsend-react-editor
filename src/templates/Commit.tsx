@@ -35,7 +35,7 @@ import {
   TooltipContent,
   TooltipProvider,
 } from '@/components/ui/tooltip';
-import { usePreCommitValidate, useCommitTemplate } from '@/apis';
+import { usePreCommitValidate, useCommitTemplate, invalidateQueries } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 
 function getErrorCount(errors?: Record<string, string[]>): number {
@@ -201,6 +201,7 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
       },
       {
         onSuccess: () => {
+          invalidateQueries([`template/${templateSlug}`]);
           onOpenChange(false);
           onCommit();
         },
