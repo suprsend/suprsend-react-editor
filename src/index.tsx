@@ -1,6 +1,8 @@
 export { default as SuprSendTemplateProvider } from '@/templates/SuprSendTemplateProvider';
 // eslint-disable-next-line react-refresh/only-export-components
 export * from '@/types';
+// eslint-disable-next-line react-refresh/only-export-components
+export { invalidateQueries } from '@/apis';
 
 import withSuprSendRoot from '@/lib/withSuprSendRoot';
 import _TemplateEditor from '@/templates/TemplateEditor';
