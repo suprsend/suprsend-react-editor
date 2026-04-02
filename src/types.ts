@@ -72,6 +72,7 @@ export interface TemplateEditorContextValue extends SuprSendTemplateEditorProvid
 export interface SuprSendTemplateEditorProps {
   hideChannelsTab?: boolean;
   hideActionButtons?: boolean;
+  hideTestButton?: boolean;
   onCommit?: () => void;
 }
 
@@ -769,6 +770,20 @@ export interface MockTestPayload {
   identities: TestModalIdentity[];
   category?: string;
   tenant_id?: string;
+}
+
+export interface ChannelVariantMockTestParams {
+  workspaceUid: string;
+  templateSlug: string;
+  channel: string;
+  variantId: string;
+  conditions: string;
+  locale: string;
+  tenantId: string | null;
+  isPrivate: boolean;
+  payload: MockTestPayload;
+  mode?: TemplateMode;
+  version?: string;
 }
 
 export interface TestButtonProps {

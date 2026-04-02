@@ -140,6 +140,7 @@ The main editor component. Renders channel tabs, channel editor forms, and previ
 | Prop                | Type         | Required | Default | Description                                                                                                                                             |
 | ------------------- | ------------ | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `hideActionButtons` | `boolean`    | No       | `false` | Hide the default action buttons (Test, Commit, Edit, Exit)                                                                                              |
+| `hideTestButton`    | `boolean`    | No       | `false` | Hide only the Test button while keeping other action buttons visible                                                                                    |
 | `onCommit`          | `() => void` | No       | —       | Callback invoked after a successful commit . If you hide action buttons you dont need to pass it as you can directly pass it to commit button component |
 
 > **Tip:** When `hideActionButtons` is `true`, you can use the standalone `TestButton` and `CommitButton` components to place them anywhere in your layout.

@@ -13,7 +13,7 @@ import type {
   CommitTemplateMutationPayload,
   UseCommitTemplateParams,
   MockTestPayload,
-  TemplateMode,
+  ChannelVariantMockTestParams,
 } from '@/types';
 import { createQueryParams } from '@/lib/utils';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
@@ -75,8 +75,15 @@ export const useVariantDetails = ({
   chanelSlug,
   variantId,
 }: UseVariantDetailsParams) => {
-  const { locale, tenantId, workspaceUid, conditions, isPrivate, mode, version } =
-    useTemplateEditorContext();
+  const {
+    locale,
+    tenantId,
+    workspaceUid,
+    conditions,
+    isPrivate,
+    mode,
+    version,
+  } = useTemplateEditorContext();
 
   return useQuery({
     queryKey: [
@@ -328,10 +335,7 @@ export const useCommitTemplate = ({
 }: UseCommitTemplateParams) => {
   const { workspaceUid, isPrivate, version } = useTemplateEditorContext();
   return useMutation({
-    mutationFn: ({
-      commitMessage,
-      variants,
-    }: CommitTemplateMutationPayload) =>
+    mutationFn: ({ commitMessage, variants }: CommitTemplateMutationPayload) =>
       commitTemplate({
         templateSlug,
         workspaceUid,
@@ -352,22 +356,35 @@ const channelVariantMockTest = async ({
   variantId,
   payload,
   mode,
-}: {
-  workspaceUid: string;
-  templateSlug: string;
-  channel: string;
-  variantId: string;
-  payload: MockTestPayload;
-  mode?: TemplateMode;
-}) => {
-  const qp = createQueryParams({ mode });
-  const url = `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}/channel/${channel}/variant/${variantId}/mock_test/${qp}`;
+  isPrivate,
+  version,
+  conditions,
+  locale,
+  tenantId,
+}: ChannelVariantMockTestParams) => {
+  const qp = createQueryParams({
+    mode,
+    conditions,
+    locale,
+    tenant_id: tenantId,
+  });
+  console.log('qp', qp);
+  const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
+  const url = `${base}/channel/${channel}/variant/${variantId}/mock_test/${qp}`;
   const resp = await fetchClient.post(url, payload);
   return resp.data;
 };
 
 export const useChannelVariantMockTest = () => {
-  const { workspaceUid, mode } = useTemplateEditorContext();
+  const {
+    workspaceUid,
+    mode,
+    isPrivate,
+    version,
+    conditions,
+    locale,
+    tenantId,
+  } = useTemplateEditorContext();
   return useMutation({
     mutationFn: ({
       templateSlug,
@@ -387,6 +404,11 @@ export const useChannelVariantMockTest = () => {
         variantId,
         payload,
         mode,
+        isPrivate,
+        version,
+        conditions: conditions as string | undefined,
+        locale,
+        tenantId,
       }),
   });
 };

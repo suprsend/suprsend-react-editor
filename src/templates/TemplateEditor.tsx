@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 export default function SuprSendTemplateEditor({
   hideChannelsTab = false,
   hideActionButtons = false,
+  hideTestButton = false,
   onCommit,
 }: SuprSendTemplateEditorProps) {
   const { channels, templateSlug, variantId, isLive, setMode, selectedChannel, setSelectedChannel } = useTemplateEditorContext();
@@ -86,7 +87,7 @@ export default function SuprSendTemplateEditor({
                   <span className="suprsend-text-sm">Exit</span>
                 </Button>
               )}
-              <TestButton />
+              {!hideTestButton && <TestButton />}
               {isLive ? (
                 <Button
                   variant="outline"
