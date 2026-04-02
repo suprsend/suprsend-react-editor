@@ -2,6 +2,7 @@ import '../index.css';
 import initCustomHelpers from '@/lib/handlebarHelper';
 import { useMemo, useState, useCallback } from 'react';
 import type {
+  ChannelId,
   FullSuprSendTemplateEditorProviderProps,
   TemplateEditorContextValue,
   TemplateMode,
@@ -36,6 +37,9 @@ export default function SuprSendTemplateProvider({
   version,
   notificationCategory,
 }: FullSuprSendTemplateEditorProviderProps) {
+  const [selectedChannel, setSelectedChannel] = useState<string | null>(
+    channels.length > 0 ? channels[0] : null
+  );
   const [internalMode, setInternalMode] = useState<TemplateMode | undefined>(undefined);
   const currentMode = internalMode ?? mode ?? (version ? 'live' : 'draft');
   const isLive = currentMode === 'live';
@@ -68,6 +72,8 @@ export default function SuprSendTemplateProvider({
       isPrivate,
       isLive,
       setMode,
+      selectedChannel: selectedChannel as ChannelId | null,
+      setSelectedChannel: setSelectedChannel as (channel: ChannelId) => void,
       accessToken,
       refreshAccessToken,
       recipientDistinctId,
@@ -87,6 +93,8 @@ export default function SuprSendTemplateProvider({
       isPrivate,
       isLive,
       setMode,
+      selectedChannel,
+      setSelectedChannel,
       accessToken,
       refreshAccessToken,
       recipientDistinctId,

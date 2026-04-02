@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useSyncExternalStore } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { X } from '@/assets/icons';
 
@@ -39,6 +39,7 @@ function removeToast(id: string) {
   emit();
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function toast(props: Omit<Toast, 'id'>) {
   const id = Math.random().toString(36).slice(2, 9);
   toasts = [...toasts, { ...props, id }];
@@ -47,6 +48,7 @@ export function toast(props: Omit<Toast, 'id'>) {
   timers.set(id, timer);
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToast() {
   return { toast };
 }
@@ -56,7 +58,7 @@ let mountedCount = 0;
 
 export function Toaster({ children }: { children?: React.ReactNode }) {
   const [isFirst, setIsFirst] = useState(false);
-  const currentToasts = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  const [currentToasts, setCurrentToasts] = useState(getSnapshot);
 
   useEffect(() => {
     mountedCount++;
@@ -64,6 +66,11 @@ export function Toaster({ children }: { children?: React.ReactNode }) {
     return () => {
       mountedCount--;
     };
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = subscribe(() => setCurrentToasts(getSnapshot()));
+    return () => { unsubscribe(); };
   }, []);
 
   return (

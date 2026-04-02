@@ -1,11 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import {
-  FlaskConical,
-  Send,
-  CircleCheck,
-  Loader2,
-  Info,
-} from '@/assets/icons';
+import { FlaskConical, Send, CircleCheck, Loader2, Info } from '@/assets/icons';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -21,7 +15,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import { useChannelVariantMockTest } from '@/apis';
+import { useChannelVariantMockTest, useMockData } from '@/apis';
 import { toast } from '@/components/ui/toast';
 import type { ChannelId, TestButtonProps, TestModalIdentity } from '@/types';
 
@@ -140,9 +134,9 @@ function TestModalContent({
     [identityData, selectedChannel]
   );
 
-  const [identityStates, setIdentityStates] = useState<
-    Record<number, boolean>
-  >({});
+  const [identityStates, setIdentityStates] = useState<Record<number, boolean>>(
+    {}
+  );
 
   // Reset identity states when channel identities change
   useEffect(() => {
@@ -156,8 +150,7 @@ function TestModalContent({
   const [isTestSent, setIsTestSent] = useState(false);
   const isSending = channelVariantMockTest.isPending;
 
-  const channelLabel =
-    CHANNEL_LABELS[selectedChannel] || selectedChannel;
+  const channelLabel = CHANNEL_LABELS[selectedChannel] || selectedChannel;
 
   const handleSendTest = useCallback(async () => {
     if (!distinctId) return;
@@ -185,7 +178,9 @@ function TestModalContent({
     } catch (error) {
       toast({
         title: 'Failed to send test',
-        description: (error as { data?: { message?: string } })?.data?.message || 'Something went wrong',
+        description:
+          (error as { data?: { message?: string } })?.data?.message ||
+          'Something went wrong',
         variant: 'destructive',
       });
     }
@@ -280,9 +275,7 @@ function TestModalContent({
         {/* Notification Category - disabled */}
         <div className="suprsend-space-y-1.5">
           <div className="suprsend-flex suprsend-items-center suprsend-gap-1">
-            <Label className="suprsend-text-xs">
-              Notification Category
-            </Label>
+            <Label className="suprsend-text-xs">Notification Category</Label>
             <TooltipProvider delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -310,23 +303,13 @@ function TestModalContent({
         </div>
       </div>
 
-      {/* Error message */}
-      {channelVariantMockTest.isError && (
-        <p className="suprsend-text-xs suprsend-text-destructive">
-          {(channelVariantMockTest.error as { data?: { message?: string } })
-            ?.data?.message || 'Error sending test'}
-        </p>
-      )}
-
       {/* Actions */}
       <div className="suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-pt-2">
         <Button
           onClick={handleSendTest}
           className="suprsend-gap-1.5 suprsend-h-7 suprsend-text-xs"
           disabled={
-            isSending ||
-            !distinctId ||
-            !channels.includes(selectedChannel)
+            isSending || !distinctId || !channels.includes(selectedChannel)
           }
         >
           {isSending ? (
@@ -350,11 +333,10 @@ function TestModalContent({
   );
 }
 
-export default function TestButton({
-  onTestSent,
-  selectedChannel,
-  identityData,
-}: TestButtonProps & { selectedChannel: ChannelId; identityData: Record<string, unknown> | null }) {
+export default function TestButton({ onTestSent }: TestButtonProps) {
+  const { templateSlug, selectedChannel } = useTemplateEditorContext();
+  const { data: mockData } = useMockData({ templateSlug });
+  const identityData = (mockData?.recipient as Record<string, unknown>) ?? null;
   const [isOpen, setIsOpen] = useState(false);
   const [modalKey, setModalKey] = useState(0);
 
@@ -382,7 +364,7 @@ export default function TestButton({
       >
         <TestModalContent
           key={modalKey}
-          selectedChannel={selectedChannel}
+          selectedChannel={selectedChannel as ChannelId}
           identityData={identityData}
           onTestSent={onTestSent}
         />
