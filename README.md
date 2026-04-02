@@ -250,7 +250,84 @@ When a `401` response is received, the SDK automatically calls `refreshAccessTok
 
 ### Generating access token
 
-TBD
+```python
+import time
+import jwt
+from typing import Dict, Any
+
+# ==================== CONFIGURATION ====================
+
+signing_key_id = "signing_key_xxxxxx"
+
+# Private key in PEM format
+signing_private_key = """-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+-----END PRIVATE KEY-----"""
+
+# ==================== PAYLOAD ====================
+
+payload: Dict[str, Any] = {
+    "workspace_uid": "<ws_uid>",
+    "entity_type": "template",
+    "entity_id": "<template-slug>",          # Use "*" to allow access to all templates
+
+    "scope": {
+        # Template-level scope
+        "variant_scope": {                   # variant_scope: If missing, user can access all variants
+            "channels": ["email"],           # If missing, any channel can be accessed
+            "variant_id": "v1",              # If missing, any variant can be accessed
+            "tenant_id": "<tenant1>",        # If missing or null, variants of all tenants can be accessed
+            "locale": "en",                  # If missing, variants of all locales can be accessed
+
+            "conditions": [                  # If missing, variants of all conditions can be accessed
+                {
+                    "expression_v1": {
+                        "op": "AND",
+                        "args": [
+                            {"variable_ns": "", "variable": "age", "op": "==", "value": "18"},
+                            {"variable_ns": "", "variable": "age", "op": "==", "value": "18"}
+                        ]
+                    }
+                }
+            ],
+
+            "fallback_variant_id": "var_1"   # If the requested variant is not present,
+                                             # use content from this fallback variant
+        },
+
+        # Only the recipients mentioned below can be accessed
+        # (used for mock testing and variable fetching)
+        # If this key is missing, mock/variable functionality might not work properly
+        "recipients": [
+            {"distinct_id": "id1"},
+            {"distinct_id": "id2"}
+        ]
+    },
+
+    # Token expiration settings
+    "iat": int(time.time()),                    # Issued at (current time in unix seconds)
+    "exp": int(time.time()) + 3600              # Expiration time (add extra seconds as needed)
+}
+
+# ==================== JWT HEADER ====================
+
+header_dict = {
+    "alg": "ES256",
+    "kid": signing_key_id,
+    "typ": "JWT"
+}
+
+# ==================== GENERATE TOKEN ====================
+
+auth_token = jwt.encode(
+    payload=payload,
+    key=signing_private_key,
+    algorithm="ES256",
+    headers=header_dict
+)
+
+print(auth_token)
+```
 
 ---
 
