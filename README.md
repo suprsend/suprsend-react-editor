@@ -14,7 +14,6 @@ A React SDK for creating and managing multi-channel notification templates. Prov
   - [TestButton](#testbutton)
 - [Theming](#theming)
 - [Authentication](#authentication)
-- [TypeScript Types](#typescript-types)
 
 ---
 
@@ -332,6 +331,4 @@ print(auth_token)
 
 ---
 
-## License
-
-Proprietary. All rights reserved.
+#
