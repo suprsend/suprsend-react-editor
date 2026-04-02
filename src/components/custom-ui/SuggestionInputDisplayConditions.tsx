@@ -411,10 +411,10 @@ export default function SuggestionInputDisplayConditions({
       {label && (
         <Label>
           {label}
-          {mandatory && <span className="text-destructive">*</span>}
+          {mandatory && <span className="suprsend-text-destructive">*</span>}
         </Label>
       )}
-      <div className="relative mt-1" onBlur={handleContainerBlur}>
+      <div className="suprsend-relative suprsend-mt-1" onBlur={handleContainerBlur}>
         <InputComponent
           value={inputValue}
           ref={inputRef as React.Ref<HTMLInputElement & HTMLTextAreaElement>}
@@ -429,7 +429,7 @@ export default function SuggestionInputDisplayConditions({
           {...rest}
         />
         {(error || handlebarWarning) && (
-          <p className="text-sm mt-1 text-destructive">
+          <p className="suprsend-text-sm suprsend-mt-1 suprsend-text-destructive">
             {error || handlebarWarning}
           </p>
         )}
@@ -488,12 +488,31 @@ function SuggestionsDropdown({
   isClickingDropdownRef,
 }: SuggestionsDropdownProps) {
   const portalContainer = usePortalContainer();
+  const optionsListRef = useRef<HTMLDivElement | null>(null);
   const [selectedSection, setSelectedSection] = useState(
     DATA_TYPE_SECTIONS[0].id
   );
   const [optionsList, setOptionsList] = useState<
     Record<string, unknown> | undefined
   >(undefined);
+
+  // Prevent react-remove-scroll (used by Radix Dialog) from blocking
+  // wheel events on the portaled dropdown's scrollable area.
+  useEffect(() => {
+    const el = optionsListRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      const { scrollTop, scrollHeight, clientHeight } = el;
+      const atTop = scrollTop <= 0 && e.deltaY < 0;
+      const atBottom =
+        scrollTop + clientHeight >= scrollHeight - 1 && e.deltaY > 0;
+      if (!atTop && !atBottom) {
+        e.stopPropagation();
+      }
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
 
   useEffect(() => {
     const context = parseInputContext(
@@ -610,8 +629,8 @@ function SuggestionsDropdown({
     <div
       ref={dropdownRef}
       className={cn(
-        viewportCoordinates ? 'fixed z-[100]' : 'absolute z-50',
-        'border rounded bg-muted flex-row flex shadow'
+        viewportCoordinates ? 'suprsend-fixed suprsend-z-[100]' : 'suprsend-absolute suprsend-z-50',
+        'suprsend-border suprsend-rounded suprsend-bg-muted suprsend-flex-row suprsend-flex suprsend-shadow'
       )}
       tabIndex={-1}
       onMouseDown={handleDropdownInteraction}
@@ -624,14 +643,14 @@ function SuggestionsDropdown({
       style={{ ...dropdownStyle, pointerEvents: 'auto' }}
     >
       {/* Section sidebar */}
-      <div className="border-r py-1">
-        <div className="border-b pb-1 w-[140px]">
+      <div className="suprsend-border-r suprsend-py-1">
+        <div className="suprsend-border-b suprsend-pb-1 suprsend-w-[140px]">
           {DATA_TYPE_SECTIONS.map((option) => (
             <div
               key={option.id}
               className={cn(
-                'px-3 mx-1 py-2 my-0.5 text-sm hover:bg-[#EDF1F5] hover:rounded cursor-pointer',
-                selectedSection === option.id && 'bg-[#EDF1F5] rounded'
+                'suprsend-px-3 suprsend-mx-1 suprsend-py-2 suprsend-my-0.5 suprsend-text-sm hover:suprsend-bg-[#EDF1F5] hover:suprsend-rounded suprsend-cursor-pointer',
+                selectedSection === option.id && 'suprsend-bg-[#EDF1F5] suprsend-rounded'
               )}
               onMouseDown={handleDropdownInteraction}
               onClick={(e) => {
@@ -639,15 +658,15 @@ function SuggestionsDropdown({
                 setSelectedSection(option.id);
               }}
             >
-              <p>{option.label}</p>
+              <p className="suprsend-text-sm">{option.label}</p>
             </div>
           ))}
         </div>
 
         <div
           className={cn(
-            'px-3 mx-1 py-2 my-1 text-sm hover:bg-[#EDF1F5] hover:rounded cursor-pointer',
-            selectedSection === 'custom_helpers' && 'bg-[#EDF1F5] rounded'
+            'suprsend-px-3 suprsend-mx-1 suprsend-py-2 suprsend-my-1 suprsend-text-sm hover:suprsend-bg-[#EDF1F5] hover:suprsend-rounded suprsend-cursor-pointer',
+            selectedSection === 'custom_helpers' && 'suprsend-bg-[#EDF1F5] suprsend-rounded'
           )}
           onMouseDown={handleDropdownInteraction}
           onClick={(e) => {
@@ -655,14 +674,18 @@ function SuggestionsDropdown({
             setSelectedSection('custom_helpers');
           }}
         >
-          <p>Custom helpers</p>
+          <p className="suprsend-text-sm">Custom helpers</p>
         </div>
       </div>
 
       {/* Options list */}
-      <div className="py-1 max-h-[280px] min-w-[400px] overflow-scroll bg-background rounded-r">
+      <div
+        ref={optionsListRef}
+        className="suprsend-py-1 suprsend-min-w-[400px] suprsend-bg-background suprsend-rounded-r"
+        style={{ maxHeight: 280, overflowY: 'auto' }}
+      >
         {noOptions ? (
-          <p className="px-3 mx-1 py-2 my-0.5 text-muted-foreground text-sm text-center mt-4">
+          <p className="suprsend-px-3 suprsend-mx-1 suprsend-py-2 suprsend-my-0.5 suprsend-text-muted-foreground suprsend-text-sm suprsend-text-center suprsend-mt-4">
             No variables found matching the search
           </p>
         ) : (
@@ -680,7 +703,7 @@ function SuggestionsDropdown({
             return (
               <div
                 key={option}
-                className="px-3 mx-1 py-2 my-0.5 text-sm hover:bg-[#EDF1F5] hover:rounded cursor-pointer"
+                className="suprsend-px-3 suprsend-mx-1 suprsend-py-2 suprsend-my-0.5 suprsend-text-sm hover:suprsend-bg-[#EDF1F5] hover:suprsend-rounded suprsend-cursor-pointer"
                 onPointerDown={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -697,8 +720,8 @@ function SuggestionsDropdown({
                   });
                 }}
               >
-                <p className="text-sm">{label}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="suprsend-text-sm">{label}</p>
+                <p className="suprsend-text-xs suprsend-text-muted-foreground suprsend-mt-0.5">
                   {subLabel}
                 </p>
               </div>

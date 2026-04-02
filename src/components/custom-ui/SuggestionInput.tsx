@@ -10,6 +10,7 @@ import {
   flatten,
   replaceBetween,
   isValidVariable,
+  isHelperHandlebar,
 } from '@/lib/suggestion-utils';
 import { hasInvalidHandlebarsSyntax } from './HandlebarsRenderer';
 import type { CaretCoordinates } from '@/lib/suggestion-utils';
@@ -56,6 +57,8 @@ function highlightHandlebars(
     .split(/(\{\{.*?\}\})/g)
     .map((part) => {
       if (/^\{\{.*\}\}$/.test(part)) {
+        // Skip highlighting for helper handlebars
+        if (isHelperHandlebar(part)) return escapeHtml(part);
         const isValid = isValidVariable(part, flattenedVars);
         const color = isValid
           ? 'var(--primary)'

@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { X, Plus, Brush, CodeXml, Clipboard } from '@/assets/icons';
+import SaveIndicator from '@/components/custom-ui/SaveIndicator';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
@@ -14,7 +15,7 @@ import HtmlSwitchModal from './HTMLEditorSwitchModal';
 import EmailSettingsPreviewBanner from './EditMetaData';
 import { useUpdateVariantContent } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import SaveIndicator from '@/components/custom-ui/SaveIndicator';
+
 import type {
   EmailContentPayload,
   EditorMode,
@@ -122,6 +123,11 @@ export default function EmailChannel({
   );
 
   const [htmlSwitchModalOpen, setHtmlSwitchModalOpen] = useState(false);
+  const [editorWarning, setEditorWarning] = useState('');
+
+  useEffect(() => {
+    setEditorWarning('');
+  }, [activeTab, editorMode]);
 
   // --- One-time sync when API data arrives after mount (lazy loading) ---
   const initializedRef = useRef(!!apiBodyType);
@@ -213,7 +219,6 @@ export default function EmailChannel({
 
   return (
     <div className="suprsend-h-full suprsend-flex suprsend-flex-col suprsend-m-1.5 suprsend-relative">
-      <SaveIndicator isSaving={isSaving} isSaved={isSaved} />
       <div>
         <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-mt-2">
           {/* ---- Tab bar ---- */}
@@ -294,9 +299,11 @@ export default function EmailChannel({
             )}
           </div>
 
-          {/* ---- Design / HTML toggle + Copy button ---- */}
+          {/* ---- Save indicator + Design / HTML toggle + Copy button ---- */}
+          <div className="suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-mt-[-10px]">
+            <SaveIndicator isSaving={isSaving} isSaved={isSaved} className="suprsend-mr-2" />
           {hasEditorTab && activeTab === 'editor' && !isLive && (
-            <div className="suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-mt-[-10px]">
+            <>
               <Tabs
                 value={editorMode}
                 onValueChange={(v) => {
@@ -335,8 +342,9 @@ export default function EmailChannel({
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            </div>
+            </>
           )}
+          </div>
         </div>
 
         <EmailSettingsPreviewBanner
@@ -351,7 +359,7 @@ export default function EmailChannel({
         designEditorType={editorMode}
       />
 
-      <div className="suprsend-flex-1 suprsend-min-h-0 suprsend-overflow-hidden">
+      <div className={`suprsend-min-h-0 suprsend-overflow-hidden ${editorWarning ? 'suprsend-flex-[0.95]' : 'suprsend-flex-1'}`}>
         <EmailTemplatePlayground
           editorMode={editorMode}
           activeTab={activeTab}
@@ -369,8 +377,14 @@ export default function EmailChannel({
           plainTextOnlyText={plainTextOnlyText}
           onPlainTextOnlyTextChange={setPlainTextOnlyText}
           disabled={isLive}
+          onWarningChange={setEditorWarning}
         />
       </div>
+      {editorWarning && (
+        <p className="suprsend-text-sm suprsend-px-3 suprsend-py-1 suprsend-text-destructive suprsend-shrink-0">
+          {editorWarning}
+        </p>
+      )}
 
       <HtmlSwitchModal
         open={htmlSwitchModalOpen}

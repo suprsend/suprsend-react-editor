@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import {
   flatten,
   isValidVariable,
+  isHelperHandlebar,
   shouldShowSuggestions,
 } from '@/lib/suggestion-utils';
 import { hasInvalidHandlebarsSyntax } from './HandlebarsRenderer';
@@ -42,6 +43,7 @@ interface SuggestionCodeEditorProps {
   error?: string;
   label?: string;
   mandatory?: boolean;
+  onWarningChange?: (warning: string) => void;
 }
 
 // --- Highlight Extensions ---
@@ -62,6 +64,8 @@ function buildDecorations(
     let match: RegExpExecArray | null;
 
     while ((match = HANDLEBAR_REGEX.exec(text)) !== null) {
+      // Skip helper handlebars — no highlighting for helpers
+      if (isHelperHandlebar(match[0])) continue;
       const start = from + match.index;
       const end = start + match[0].length;
       const isValid = isValidVariable(match[0], flattenedVars);
@@ -121,6 +125,7 @@ export default function SuggestionCodeEditor({
   error,
   label,
   mandatory = true,
+  onWarningChange,
 }: SuggestionCodeEditorProps) {
   const portalContainer = usePortalContainer();
   const editorRef = useRef<CodeMirrorEditorHandle>(null);
@@ -132,7 +137,11 @@ export default function SuggestionCodeEditor({
     top: 0,
     left: 0,
   });
-  const [warning, setWarning] = useState('');
+  const [warning, setWarningState] = useState('');
+  const setWarning = useCallback((w: string) => {
+    setWarningState(w);
+    onWarningChange?.(w);
+  }, [onWarningChange]);
 
   // Variables without __translations for suggestions
   const modifiedVariables = useMemo(() => {
@@ -305,7 +314,7 @@ export default function SuggestionCodeEditor({
           onUpdate={handleUpdate}
           className={cn(
             disabled
-              ? 'suprsend-bg-muted suprsend-opacity-50'
+              ? 'suprsend-bg-muted'
               : 'suprsend-bg-background',
             error || warning
               ? 'suprsend-border-destructive'
@@ -313,12 +322,6 @@ export default function SuggestionCodeEditor({
             className
           )}
         />
-
-        {(error || warning) && (
-          <p className="suprsend-text-sm suprsend-mt-1 suprsend-text-destructive suprsend-shrink-0">
-            {error || warning}
-          </p>
-        )}
 
         {enableSuggestions &&
           !disabled &&
@@ -339,6 +342,11 @@ export default function SuggestionCodeEditor({
             portalContainer ?? document.body
           )}
       </div>
+      {(error || (!onWarningChange && warning)) && (
+        <p className="suprsend-text-sm suprsend-mt-1 suprsend-text-destructive suprsend-shrink-0">
+          {error || warning}
+        </p>
+      )}
     </>
   );
 }

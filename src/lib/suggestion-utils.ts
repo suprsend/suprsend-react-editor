@@ -24,8 +24,12 @@ export const CustomHelpers: Record<string, string> = {
   default: "{{default key 'default_value'}}",
   compare:
     "{{#compare key '==' 'value'}}true_block{{else}}false_block{{/compare}}",
+  condition:
+    "{{#condition key '==' 'value'}}true_block{{else}}false_block{{/condition}}",
   if: '{{#if key}}true_block{{else}}false_block{{/if}}',
   each: '{{#each array_object}} {{variable_key}} {{/each}}',
+  and: '{{#and condition1 condition2}}true_block{{/and}}',
+  or: '{{#or condition1 condition2}}true_block{{/or}}',
   'datetime-format': "{{datetime-format variable 'format string' 'timezone'}}",
   add: '{{add number1 number2}}',
   subtract: '{{subtract number1 number2}}',
@@ -35,6 +39,7 @@ export const CustomHelpers: Record<string, string> = {
   mod: '{{mod dividend divisor}}',
   unique: "{{unique variable 'key' }}",
   itemAt: '{{itemAt variable index }}',
+  'list-agg': "{{list-agg variable 'key'}}",
   join: "{{join variable 'separator'}}",
   length: '{{length variable}}',
   jsonStringify: '{{jsonStringify json}}',
@@ -43,6 +48,7 @@ export const CustomHelpers: Record<string, string> = {
   lowercase: "{{lowercase 'string'}}",
   uppercase: "{{uppercase 'string'}}",
   capitalize: "{{capitalize 'string'}}",
+  t: "{{t 'translation_key'}}",
 };
 
 export const HELPER_NAMES = new Set(Object.keys(CustomHelpers));
@@ -167,10 +173,7 @@ export function replaceBetween(
   return input.substring(0, start) + what + input.substring(end);
 }
 
-export function isValidVariable(
-  handlebar: string,
-  flattenedVars: Record<string, unknown>
-): boolean {
+export function isHelperHandlebar(handlebar: string): boolean {
   const content = handlebar.slice(2, -2).trim();
 
   // Block helper syntax (#if, /if, else)
@@ -185,6 +188,17 @@ export function isValidVariable(
   // Known helper function (first word matches a helper name)
   const firstWord = content.split(/\s+/)[0];
   if (HELPER_NAMES.has(firstWord)) return true;
+
+  return false;
+}
+
+export function isValidVariable(
+  handlebar: string,
+  flattenedVars: Record<string, unknown>
+): boolean {
+  if (isHelperHandlebar(handlebar)) return true;
+
+  const content = handlebar.slice(2, -2).trim();
 
   // Preference URLs
   if (

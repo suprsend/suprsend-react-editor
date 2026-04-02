@@ -35,6 +35,7 @@ export default function EmailTemplatePlayground({
   onPlainTextOnlyTextChange,
   variables = {},
   disabled = false,
+  onWarningChange,
 }: EmailTemplatePlaygroundProps) {
   const { isPrivate } = useTemplateEditorContext();
 
@@ -371,6 +372,7 @@ export default function EmailTemplatePlayground({
           onChange={handleHtmlChange}
           variables={variables}
           disabled={disabled}
+          onWarningChange={onWarningChange}
         />
       </div>
 
@@ -387,6 +389,7 @@ export default function EmailTemplatePlayground({
             variables={variables}
             onFetchFromHtml={fetchDesignerHtml}
             disabled={disabled}
+            onWarningChange={onWarningChange}
           />
         </div>
       )}
@@ -404,6 +407,7 @@ export default function EmailTemplatePlayground({
             variables={variables}
             onFetchFromHtml={fetchRawHtml}
             disabled={disabled}
+            onWarningChange={onWarningChange}
           />
         </div>
       )}
@@ -420,6 +424,7 @@ export default function EmailTemplatePlayground({
             onChange={handlePlainTextOnlyChange}
             variables={variables}
             disabled={disabled}
+            onWarningChange={onWarningChange}
           />
         </div>
       )}

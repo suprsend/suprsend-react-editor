@@ -1,5 +1,7 @@
 /// <reference types="vite/client" />
 
+declare module 'markdown-it-task-lists';
+
 declare module '*.svg?react' {
   import * as React from 'react';
   const ReactComponent: React.FunctionComponent<

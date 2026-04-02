@@ -180,6 +180,7 @@ export default function MergeTagsModal({
             variables={variables}
             placeholder="Add {{variable_key}} or handlebars helper {{jsonPath a.b}}"
             value={currentMergeTag}
+            enableHighlighting={false}
             onChange={(value: string) => {
               setError('');
               setWarning('');
