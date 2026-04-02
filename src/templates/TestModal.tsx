@@ -21,7 +21,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import { useChannelVariantMockTest } from '@/apis';
+import { useChannelVariantMockTest, useMockData } from '@/apis';
 import { toast } from '@/components/ui/toast';
 import type { ChannelId, TestButtonProps, TestModalIdentity } from '@/types';
 
@@ -352,9 +352,10 @@ function TestModalContent({
 
 export default function TestButton({
   onTestSent,
-  selectedChannel,
-  identityData,
-}: TestButtonProps & { selectedChannel: ChannelId; identityData: Record<string, unknown> | null }) {
+}: TestButtonProps) {
+  const { templateSlug, selectedChannel } = useTemplateEditorContext();
+  const { data: mockData } = useMockData({ templateSlug });
+  const identityData = (mockData?.user_data as Record<string, unknown>) ?? null;
   const [isOpen, setIsOpen] = useState(false);
   const [modalKey, setModalKey] = useState(0);
 
@@ -382,7 +383,7 @@ export default function TestButton({
       >
         <TestModalContent
           key={modalKey}
-          selectedChannel={selectedChannel}
+          selectedChannel={selectedChannel as ChannelId}
           identityData={identityData}
           onTestSent={onTestSent}
         />

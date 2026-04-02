@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { TabBar } from '@/components/custom-ui/channelsTab';
 import EmailChannel from '@/templates/channels/email';
 import IOSPushChannel from '@/templates/channels/iospush';
@@ -19,12 +19,10 @@ import { Button } from '@/components/ui/button';
 
 export default function SuprSendTemplateEditor({
   hideChannelsTab = false,
+  hideActionButtons = false,
   onCommit,
 }: SuprSendTemplateEditorProps) {
-  const { channels, templateSlug, variantId, isLive, setMode } = useTemplateEditorContext();
-  const [selectedChannel, setSelectedChannel] = useState<string | number>(
-    channels[0]
-  );
+  const { channels, templateSlug, variantId, isLive, setMode, selectedChannel, setSelectedChannel } = useTemplateEditorContext();
 
   const { data: variantData, error: variantError } = useVariantDetails({
     chanelSlug: selectedChannel as string,
@@ -75,8 +73,8 @@ export default function SuprSendTemplateEditor({
         <TabBar
           channels={channels}
           selectedChannel={selectedChannel}
-          onTabClick={(id) => setSelectedChannel(id)}
-          ChannelsTabActionComponent={() => (
+          onTabClick={(id) => setSelectedChannel(id as ChannelId)}
+          ChannelsTabActionComponent={hideActionButtons ? undefined : () => (
             <>
               {!isLive && (
                 <Button
@@ -88,10 +86,7 @@ export default function SuprSendTemplateEditor({
                   <span className="suprsend-text-sm">Exit</span>
                 </Button>
               )}
-              <TestButton
-                selectedChannel={selectedChannel as ChannelId}
-                identityData={(mockData?.user_data as Record<string, unknown>) ?? null}
-              />
+              <TestButton />
               {isLive ? (
                 <Button
                   variant="outline"

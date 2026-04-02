@@ -65,10 +65,13 @@ export interface TemplateEditorContextValue extends SuprSendTemplateEditorProvid
   isLive: boolean;
   notificationCategory?: string;
   setMode: (mode: TemplateMode) => void;
+  selectedChannel: ChannelId | null;
+  setSelectedChannel: (channel: ChannelId) => void;
 }
 
 export interface SuprSendTemplateEditorProps {
   hideChannelsTab?: boolean;
+  hideActionButtons?: boolean;
   onCommit?: () => void;
 }
 

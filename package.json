@@ -1,5 +1,5 @@
 {
-  "name": "suprsend-react-editor",
+  "name": "@suprsend/react-editor",
   "private": true,
   "version": "0.0.0",
   "type": "module",
