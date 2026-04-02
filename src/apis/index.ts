@@ -368,7 +368,6 @@ const channelVariantMockTest = async ({
     locale,
     tenant_id: tenantId,
   });
-  console.log('qp', qp);
   const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
   const url = `${base}/channel/${channel}/variant/${variantId}/mock_test/${qp}`;
   const resp = await fetchClient.post(url, payload);
@@ -406,7 +405,7 @@ export const useChannelVariantMockTest = () => {
         mode,
         isPrivate,
         version,
-        conditions: conditions as string | undefined,
+        conditions,
         locale,
         tenantId,
       }),

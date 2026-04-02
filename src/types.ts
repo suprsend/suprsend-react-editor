@@ -777,7 +777,7 @@ export interface ChannelVariantMockTestParams {
   templateSlug: string;
   channel: string;
   variantId: string;
-  conditions: string;
+  conditions: unknown;
   locale: string;
   tenantId: string | null;
   isPrivate: boolean;
