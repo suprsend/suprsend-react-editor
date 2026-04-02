@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/tooltip';
 import { usePreCommitValidate, useCommitTemplate, invalidateQueries } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
+import { toast } from '@/components/ui/toast';
 
 function getErrorCount(errors?: Record<string, string[]>): number {
   if (!errors) return 0;
@@ -204,6 +205,13 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
           invalidateQueries([`template/${templateSlug}`]);
           onOpenChange(false);
           onCommit();
+        },
+        onError: (error) => {
+          toast({
+            title: 'Commit failed',
+            description: (error as { data?: { message?: string } })?.data?.message || 'Something went wrong',
+            variant: 'destructive',
+          });
         },
       }
     );

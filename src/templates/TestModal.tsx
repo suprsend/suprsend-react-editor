@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/popover';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { useChannelVariantMockTest } from '@/apis';
+import { toast } from '@/components/ui/toast';
 import type { ChannelId, TestButtonProps, TestModalIdentity } from '@/types';
 
 // Maps channel id to identity $key
@@ -181,8 +182,12 @@ function TestModalContent({
       });
       setIsTestSent(true);
       onTestSent?.();
-    } catch {
-      // error is available via channelVariantMockTest.error
+    } catch (error) {
+      toast({
+        title: 'Failed to send test',
+        description: (error as { data?: { message?: string } })?.data?.message || 'Something went wrong',
+        variant: 'destructive',
+      });
     }
   }, [
     distinctId,

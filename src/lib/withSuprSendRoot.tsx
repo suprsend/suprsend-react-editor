@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect, type ComponentType } from 'react';
 import { PortalContext } from '@/lib/PortalContext';
 import { useTheme } from '@/lib/ThemeContext';
+import { Toaster } from '@/components/ui/toast';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function withSuprSendRoot<P extends Record<string, any>>(
@@ -21,9 +22,11 @@ export default function withSuprSendRoot<P extends Record<string, any>>(
         className={`suprsend-root${resolvedTheme === 'dark' ? ' dark' : ''}`}
         style={{ height: '100%', ...overridesStyle }}
       >
-        <PortalContext.Provider value={container}>
-          <Component {...props} />
-        </PortalContext.Provider>
+        <Toaster>
+          <PortalContext.Provider value={container}>
+            <Component {...props} />
+          </PortalContext.Provider>
+        </Toaster>
       </div>
     );
   };
