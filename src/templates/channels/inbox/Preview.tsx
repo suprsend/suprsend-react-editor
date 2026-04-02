@@ -3,7 +3,7 @@ import { Bell, MoreHorizontal } from '@/assets/icons';
 import HandlebarsRenderer, {
   renderHandlebars,
 } from '@/components/custom-ui/HandlebarsRenderer';
-import MarkdownRenderer from '@/components/custom-ui/MarkdownRenderer';
+import { InboxMarkdownRenderer } from '@/components/custom-ui/MarkdownRenderer';
 import { makeAbsoluteUrl } from '@/lib/utils';
 import type { InboxPreviewProps } from '@/types';
 import defaultAvatar from '@/assets/defaultPreviewIcon.png';
@@ -121,9 +121,9 @@ export default function InboxPreview({
               {/* Body */}
 
               <div className="suprsend-mt-0.5">
-                <MarkdownRenderer className="suprsend-text-sm suprsend-text-foreground suprsend-break-words [&_p]:suprsend-m-0 [&_p]:suprsend-text-sm">
+                <InboxMarkdownRenderer className="suprsend-text-sm suprsend-text-foreground suprsend-break-words [&_p]:suprsend-m-0 [&_p]:suprsend-text-sm">
                   {resolvedBody}
-                </MarkdownRenderer>
+                </InboxMarkdownRenderer>
               </div>
 
               <p className="suprsend-text-xs suprsend-text-muted-foreground suprsend-mt-1 suprsend-m-0">

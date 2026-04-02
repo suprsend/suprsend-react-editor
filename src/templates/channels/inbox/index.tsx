@@ -186,7 +186,7 @@ export default function InboxChannel({
               )}
             />
             <p className="suprsend-text-xs suprsend-text-muted-foreground">
-              Supports{' '}
+              Supports HTML,{' '}
               <a
                 href="https://docs.suprsend.com/docs/in-app-inbox-template#supported-markdown-syntax-in-text-field"
                 className="suprsend-text-primary suprsend-underline"
