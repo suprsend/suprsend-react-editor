@@ -6,6 +6,7 @@ import {
   setCached,
   hasCached,
   subscribe,
+  deduplicatedFetch,
 } from './queryCache';
 
 interface UseQueryOptions<T> {
@@ -65,30 +66,36 @@ export function useQuery<T>({
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    let failureCount = 0;
 
-    while (true) {
-      try {
-        const result = await queryFnRef.current();
-        if (keyRef.current === key) {
-          setCached(key, result);
-          setData(result);
-          setDataKey(key);
-          setIsLoading(false);
-          onSuccessRef.current?.(result);
-        }
-        return;
-      } catch (err) {
-        failureCount++;
-        if (!shouldRetry(failureCount, retryRef.current, err)) {
-          if (keyRef.current === key) {
-            setError(err);
-            setDataKey(key);
-            setIsLoading(false);
-            onErrorRef.current?.(err);
+    const doFetch = async () => {
+      let failureCount = 0;
+      while (true) {
+        try {
+          return await queryFnRef.current();
+        } catch (err) {
+          failureCount++;
+          if (!shouldRetry(failureCount, retryRef.current, err)) {
+            throw err;
           }
-          return;
         }
+      }
+    };
+
+    try {
+      const result = await deduplicatedFetch<T>(key, doFetch);
+      if (keyRef.current === key) {
+        setCached(key, result);
+        setData(result);
+        setDataKey(key);
+        setIsLoading(false);
+        onSuccessRef.current?.(result);
+      }
+    } catch (err) {
+      if (keyRef.current === key) {
+        setError(err);
+        setDataKey(key);
+        setIsLoading(false);
+        onErrorRef.current?.(err);
       }
     }
   }, [key]);

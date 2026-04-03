@@ -2,6 +2,26 @@ type Listener = () => void;
 
 const cache = new Map<string, unknown>();
 const listeners = new Map<string, Set<Listener>>();
+const inflight = new Map<string, Promise<unknown>>();
+
+/**
+ * Deduplicate concurrent fetches for the same key.
+ * If a request for `key` is already in-flight, return the existing promise
+ * instead of firing a duplicate network call.
+ */
+export function deduplicatedFetch<T>(
+  key: string,
+  fn: () => Promise<T>
+): Promise<T> {
+  const existing = inflight.get(key);
+  if (existing) return existing as Promise<T>;
+
+  const promise = fn().finally(() => {
+    inflight.delete(key);
+  });
+  inflight.set(key, promise);
+  return promise;
+}
 
 export function serializeKey(key: unknown[]): string {
   return JSON.stringify(key);

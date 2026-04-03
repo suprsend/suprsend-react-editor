@@ -13,6 +13,43 @@ export type ChannelId =
 
 export type TemplateMode = 'live' | 'draft';
 
+// --- Generic channel type helpers ---
+
+export interface ContentResponse<T> {
+  content: T;
+}
+
+export type ContentPayload<T> = {
+  content: Partial<T>;
+};
+
+export interface ChannelProps<TContent, TResponse = ContentResponse<TContent>> {
+  variantData: TResponse;
+  variables: Record<string, unknown>;
+}
+
+export interface ChannelPreviewProps<T> {
+  formValues: T;
+  variables: Record<string, unknown>;
+}
+
+// --- Common API params ---
+
+export interface BaseApiParams {
+  workspaceUid: string;
+  templateSlug: string;
+  isPrivate: boolean;
+  mode?: TemplateMode;
+  version?: string;
+  variantId: string;
+  fallbackVariantId?: string;
+  tenantId: string | null;
+  locale: string;
+  conditions: unknown;
+  recipientDistinctId?: string;
+  actorDistinctId?: string;
+}
+
 export interface ThemeOverrides {
   background?: string;
   foreground?: string;
@@ -54,6 +91,7 @@ export interface SuprSendTemplateEditorProviderProps {
   isPrivate?: boolean;
   version?: string;
   notificationCategory?: string;
+  fallbackVariantId?: string;
 }
 
 export interface FullSuprSendTemplateEditorProviderProps extends SuprSendTemplateEditorProviderProps {
@@ -108,13 +146,9 @@ export interface PreCommitValidateResponse {
   variants: CommitVariant[];
 }
 
-export interface CommitTemplateParams {
-  templateSlug: string;
-  workspaceUid: string;
-  isPrivate: boolean;
+export interface CommitTemplateParams extends BaseApiParams {
   commitMessage: string;
   variants: CommitVariant[];
-  version?: string;
 }
 
 export interface UseCommitTemplateParams {
@@ -132,15 +166,7 @@ export interface UseVariantDetailsParams {
   variantId: string;
 }
 
-export interface GetVariantDetailsParams extends UseVariantDetailsParams {
-  tenantId: string | null;
-  locale: string;
-  conditions: unknown;
-  workspaceUid: string;
-  isPrivate: boolean;
-  mode?: TemplateMode;
-  version?: string;
-}
+export interface GetVariantDetailsParams extends UseVariantDetailsParams, BaseApiParams {}
 
 export interface EmailMetaDataFormValues {
   subject: string;
@@ -188,8 +214,7 @@ export interface IEmailContent {
   templating_language?: string;
 }
 
-export interface IEmailContentResponse {
-  content: IEmailContent;
+export interface IEmailContentResponse extends ContentResponse<IEmailContent> {
   email_editor_userid?: string;
 }
 
@@ -206,25 +231,11 @@ export interface IIOSPushContent {
   action_url: string;
 }
 
-export interface IIOSPushContentResponse {
-  content: IIOSPushContent;
-}
-
+export type IIOSPushContentResponse = ContentResponse<IIOSPushContent>;
 export type IOSPushFormValues = IIOSPushContent;
-
-export type IOSPushContentPayload = {
-  content: Partial<IIOSPushContent>;
-};
-
-export interface IOSPushChannelProps {
-  variantData: IIOSPushContentResponse;
-  variables: Record<string, unknown>;
-}
-
-export interface IOSPushPreviewProps {
-  formValues: IOSPushFormValues;
-  variables: Record<string, unknown>;
-}
+export type IOSPushContentPayload = ContentPayload<IIOSPushContent>;
+export type IOSPushChannelProps = ChannelProps<IIOSPushContent>;
+export type IOSPushPreviewProps = ChannelPreviewProps<IOSPushFormValues>;
 
 // --- Web Push ---
 
@@ -241,25 +252,11 @@ export interface IWebpushContent {
   action_url: string;
 }
 
-export interface IWebpushContentResponse {
-  content: IWebpushContent;
-}
-
+export type IWebpushContentResponse = ContentResponse<IWebpushContent>;
 export type WebpushFormValues = IWebpushContent;
-
-export type WebpushContentPayload = {
-  content: Partial<IWebpushContent>;
-};
-
-export interface WebpushChannelProps {
-  variantData: IWebpushContentResponse;
-  variables: Record<string, unknown>;
-}
-
-export interface WebpushPreviewProps {
-  formValues: WebpushFormValues;
-  variables: Record<string, unknown>;
-}
+export type WebpushContentPayload = ContentPayload<IWebpushContent>;
+export type WebpushChannelProps = ChannelProps<IWebpushContent>;
+export type WebpushPreviewProps = ChannelPreviewProps<WebpushFormValues>;
 
 export type PreviewTab = 'windows' | 'macos';
 
@@ -275,9 +272,7 @@ export interface IMSTeamsContent {
   body_text?: string;
 }
 
-export interface IMSTeamsContentResponse {
-  content: IMSTeamsContent;
-}
+export type IMSTeamsContentResponse = ContentResponse<IMSTeamsContent>;
 
 export type MSTeamsFormValues = {
   body_type: 'card' | 'text';
@@ -285,14 +280,8 @@ export type MSTeamsFormValues = {
   body_text: string;
 };
 
-export type MSTeamsContentPayload = {
-  content: Partial<IMSTeamsContent>;
-};
-
-export interface MSTeamsChannelProps {
-  variantData: IMSTeamsContentResponse;
-  variables: Record<string, unknown>;
-}
+export type MSTeamsContentPayload = ContentPayload<IMSTeamsContent>;
+export type MSTeamsChannelProps = ChannelProps<IMSTeamsContent>;
 
 export interface MSTeamsPreviewProps {
   bodyType: 'card' | 'text';
@@ -329,9 +318,7 @@ export interface ISlackContent {
   body_text?: string;
 }
 
-export interface ISlackContentResponse {
-  content: ISlackContent;
-}
+export type ISlackContentResponse = ContentResponse<ISlackContent>;
 
 export type SlackFormValues = {
   body_type: 'block' | 'text';
@@ -339,14 +326,8 @@ export type SlackFormValues = {
   body_text: string;
 };
 
-export type SlackContentPayload = {
-  content: Partial<ISlackContent>;
-};
-
-export interface SlackChannelProps {
-  variantData: ISlackContentResponse;
-  variables: Record<string, unknown>;
-}
+export type SlackContentPayload = ContentPayload<ISlackContent>;
+export type SlackChannelProps = ChannelProps<ISlackContent>;
 
 export interface SlackPreviewProps {
   bodyType: 'block' | 'text';
@@ -388,9 +369,7 @@ export interface ISMSContent {
   templating_language: string;
 }
 
-export interface ISMSContentResponse {
-  content: ISMSContent;
-}
+export type ISMSContentResponse = ContentResponse<ISMSContent>;
 
 export type SMSFormValues = {
   body: string;
@@ -398,19 +377,9 @@ export type SMSFormValues = {
   category: string;
 };
 
-export type SMSContentPayload = {
-  content: Partial<ISMSContent>;
-};
-
-export interface SMSChannelProps {
-  variantData: ISMSContentResponse;
-  variables: Record<string, unknown>;
-}
-
-export interface SMSPreviewProps {
-  formValues: SMSFormValues;
-  variables: Record<string, unknown>;
-}
+export type SMSContentPayload = ContentPayload<ISMSContent>;
+export type SMSChannelProps = ChannelProps<ISMSContent>;
+export type SMSPreviewProps = ChannelPreviewProps<SMSFormValues>;
 
 // --- Android Push ---
 
@@ -457,28 +426,16 @@ export interface AndroidPushFormValues {
   extra_payload: IAndroidPushExtraPayloadEntry[];
 }
 
-export interface IAndroidPushContentResponse {
-  content: IAndroidPushContent;
-}
-
-export type AndroidPushContentPayload = {
-  content: Partial<IAndroidPushContent>;
-};
-
-export interface AndroidPushChannelProps {
-  variantData: IAndroidPushContentResponse;
-  variables: Record<string, unknown>;
-}
+export type IAndroidPushContentResponse = ContentResponse<IAndroidPushContent>;
+export type AndroidPushContentPayload = ContentPayload<IAndroidPushContent>;
+export type AndroidPushChannelProps = ChannelProps<IAndroidPushContent>;
 
 export interface PhoneFrameProps {
   children?: ReactNode;
   className?: string;
 }
 
-export interface AndroidPushPreviewProps {
-  formValues: AndroidPushFormValues;
-  variables: Record<string, unknown>;
-}
+export type AndroidPushPreviewProps = ChannelPreviewProps<AndroidPushFormValues>;
 
 // --- WhatsApp ---
 
@@ -528,9 +485,7 @@ export interface IWhatsappContent {
   buttons?: IWhatsappButton[];
 }
 
-export interface IWhatsappContentResponse {
-  content: IWhatsappContent;
-}
+export type IWhatsappContentResponse = ContentResponse<IWhatsappContent>;
 
 export interface WhatsappFormValues {
   category: string;
@@ -546,19 +501,9 @@ export interface WhatsappFormValues {
   quick_reply_buttons: IWhatsappQuickReplyButton[];
 }
 
-export type WhatsappContentPayload = {
-  content: Partial<IWhatsappContent>;
-};
-
-export interface WhatsappChannelProps {
-  variantData: IWhatsappContentResponse;
-  variables: Record<string, unknown>;
-}
-
-export interface WhatsappPreviewProps {
-  formValues: WhatsappFormValues;
-  variables: Record<string, unknown>;
-}
+export type WhatsappContentPayload = ContentPayload<IWhatsappContent>;
+export type WhatsappChannelProps = ChannelProps<IWhatsappContent>;
+export type WhatsappPreviewProps = ChannelPreviewProps<WhatsappFormValues>;
 
 // --- Inbox ---
 
@@ -601,27 +546,15 @@ export interface IInboxContent {
   extra_data: string;
 }
 
-export interface IInboxContentResponse {
-  content: IInboxContent;
-}
+export type IInboxContentResponse = ContentResponse<IInboxContent>;
 
 export type InboxFormValues = Omit<IInboxContent, 'tags'> & {
   tags: { label: string; value: string }[];
 };
 
-export type InboxContentPayload = {
-  content: Partial<IInboxContent>;
-};
-
-export interface InboxChannelProps {
-  variantData: IInboxContentResponse;
-  variables: Record<string, unknown>;
-}
-
-export interface InboxPreviewProps {
-  formValues: InboxFormValues;
-  variables: Record<string, unknown>;
-}
+export type InboxContentPayload = ContentPayload<IInboxContent>;
+export type InboxChannelProps = ChannelProps<IInboxContent>;
+export type InboxPreviewProps = ChannelPreviewProps<InboxFormValues>;
 
 export interface EmailPreviewProps {
   variantData: IEmailContentResponse;
@@ -643,8 +576,6 @@ export type ChannelContentPayload =
 
 export interface UpdateVariantContentParams extends GetVariantDetailsParams {
   payload: ChannelContentPayload;
-  isPrivate: boolean;
-  version?: string;
 }
 
 export interface UploadFileParams {
@@ -656,15 +587,7 @@ export interface UseMockDataParams {
   templateSlug: string;
 }
 
-export interface GetMockDataParams extends UseMockDataParams {
-  workspaceUid: string;
-  tenantId: string | null;
-  isPrivate: boolean;
-  recipientDistinctId?: string;
-  actorDistinctId?: string;
-  mode?: TemplateMode;
-  version?: string;
-}
+export interface GetMockDataParams extends UseMockDataParams, BaseApiParams {}
 
 export interface TextEditorsProps {
   type: 'html' | 'plaintext';
@@ -680,6 +603,10 @@ export interface MockDataQueryParams {
   tenant_id?: string | null;
   recipient_distinct_id?: string;
   actor_distinct_id?: string;
+  variant_id?: string;
+  fallback_variant_id?: string;
+  locale?: string;
+  conditions?: unknown;
 }
 
 // --- Email Editor ---
@@ -772,18 +699,9 @@ export interface MockTestPayload {
   tenant_id?: string;
 }
 
-export interface ChannelVariantMockTestParams {
-  workspaceUid: string;
-  templateSlug: string;
+export interface ChannelVariantMockTestParams extends BaseApiParams {
   channel: string;
-  variantId: string;
-  conditions: unknown;
-  locale: string;
-  tenantId: string | null;
-  isPrivate: boolean;
   payload: MockTestPayload;
-  mode?: TemplateMode;
-  version?: string;
 }
 
 export interface TestButtonProps {
