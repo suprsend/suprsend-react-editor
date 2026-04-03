@@ -8,7 +8,6 @@ import {
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PlainTextBanner } from './TopBanners';
 import { renderHandlebars } from '@/components/custom-ui/HandlebarsRenderer';
 import type { TextEditorsProps } from '@/types';
 
@@ -17,27 +16,34 @@ export default function TextEditors({
   value,
   onChange,
   variables = {},
-  onFetchFromHtml,
   disabled = false,
   onWarningChange,
+  autoValue,
 }: TextEditorsProps) {
   const [activePreviewTab, setActivePreviewTab] = useState<
     'desktop' | 'mobile'
   >('desktop');
-  const [localValue, setLocalValue] = useState(value);
-  const localValueRef = useRef(value);
-  const lastExternalRef = useRef(value);
+
+  // Whether we're showing auto-generated text (value is empty, autoValue provided)
+  const isAutoMode = !value && !!autoValue;
+
+  // The text to display in the editor
+  const displayValue = isAutoMode ? autoValue : value;
+
+  const [localValue, setLocalValue] = useState(displayValue);
+  const localValueRef = useRef(displayValue);
+  const lastExternalRef = useRef(displayValue);
 
   // Smart sync: only apply external value change if the user hasn't locally diverged.
-  // This prevents API responses from overwriting what the user just typed.
   useEffect(() => {
     const prev = lastExternalRef.current;
-    lastExternalRef.current = value;
+    const newDisplay = isAutoMode ? autoValue : value;
+    lastExternalRef.current = newDisplay;
     if (localValueRef.current === prev) {
-      localValueRef.current = value;
-      setLocalValue(value);
+      localValueRef.current = newDisplay;
+      setLocalValue(newDisplay);
     }
-  }, [value]);
+  }, [value, autoValue, isAutoMode]);
 
   const handleChange = useCallback(
     (v: string) => {
@@ -47,12 +53,6 @@ export default function TextEditors({
     },
     [onChange]
   );
-
-  const handleFetchFromHtml = useCallback(async () => {
-    if (!onFetchFromHtml) return;
-    const text = await onFetchFromHtml();
-    if (text !== undefined) handleChange(text);
-  }, [onFetchFromHtml, handleChange]);
 
   const renderedContent = useMemo(
     () => renderHandlebars(localValue, variables),
@@ -80,23 +80,20 @@ export default function TextEditors({
         defaultSize={50}
         className="suprsend-overflow-hidden suprsend-flex suprsend-flex-col suprsend-h-full"
       >
-        {type === 'plaintext' && onFetchFromHtml && !disabled && (
-          <PlainTextBanner onFetchFromHtml={handleFetchFromHtml} />
-        )}
         <SuggestionCodeEditor
           value={localValue}
           onChange={handleChange}
           variables={variables}
           language={type === 'html' ? 'html' : undefined}
           placeholder={
-            type === 'plaintext'
+            type === 'plaintext' && !autoValue
               ? 'Plain text is always sent to reach users with HTML blocked in their email client. To preview or edit it, click "Fetch from HTML" above.'
               : undefined
           }
           height=""
           containerClassName="suprsend-flex-1 suprsend-min-h-0 !suprsend-mt-0 suprsend-flex suprsend-flex-col"
           className="suprsend-flex-1 suprsend-min-h-0 suprsend-border-0 suprsend-rounded-none"
-          disabled={disabled}
+          disabled={disabled || isAutoMode}
           onWarningChange={onWarningChange}
         />
       </ResizablePanel>
