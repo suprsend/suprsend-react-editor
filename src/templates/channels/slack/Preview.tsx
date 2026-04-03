@@ -103,7 +103,9 @@ function BlockPreview({ bodyBlock }: SlackBlockPreviewProps) {
           variant="outline"
           size="sm"
           onClick={() => {
-            window.open('https://app.slack.com/block-kit-builder/', '_blank');
+            const domain = 'https://app.slack.com/block-kit-builder/#';
+            const path = window.encodeURI(bodyBlock);
+            window.open(`${domain}${path}`, '_blank');
           }}
         >
           View on Slack Builder

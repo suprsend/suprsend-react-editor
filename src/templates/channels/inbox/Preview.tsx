@@ -51,7 +51,7 @@ export default function InboxPreview({
       </div>
 
       {/* Notification panel */}
-      <div className="suprsend-bg-white suprsend-border suprsend-rounded-md suprsend-shadow-lg suprsend-overflow-hidden">
+      <div className="suprsend-bg-white suprsend-border suprsend-rounded-md suprsend-shadow-lg suprsend-overflow-hidden suprsend-max-h-[500px] suprsend-flex suprsend-flex-col">
         {/* Header */}
         <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-p-5">
           <h3 className="suprsend-text-lg suprsend-font-semibold suprsend-text-foreground">
@@ -87,6 +87,8 @@ export default function InboxPreview({
           </div>
         </div>
 
+        {/* Scrollable notification area */}
+        <div className="suprsend-flex-1 suprsend-overflow-y-auto">
         {/* Notification item */}
         <div className="suprsend-bg-primary/10 suprsend-px-5 suprsend-py-4">
           <div className="suprsend-flex suprsend-items-start suprsend-gap-3">
@@ -167,6 +169,7 @@ export default function InboxPreview({
 
         {/* Empty space below notification */}
         <div className="suprsend-h-48" />
+        </div>
 
         {/* Footer */}
         <div className="suprsend-flex suprsend-items-center suprsend-justify-center suprsend-gap-1.5 suprsend-py-3 suprsend-border-t suprsend-border-border">
