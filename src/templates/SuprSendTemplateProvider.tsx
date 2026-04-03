@@ -36,11 +36,14 @@ export default function SuprSendTemplateProvider({
   isPrivate = false,
   version,
   notificationCategory,
+  fallbackVariantId,
 }: FullSuprSendTemplateEditorProviderProps) {
   const [selectedChannel, setSelectedChannel] = useState<string | null>(
     channels.length > 0 ? channels[0] : null
   );
-  const [internalMode, setInternalMode] = useState<TemplateMode | undefined>(undefined);
+  const [internalMode, setInternalMode] = useState<TemplateMode | undefined>(
+    undefined
+  );
   const currentMode = internalMode ?? mode ?? (version ? 'live' : 'draft');
   const isLive = currentMode === 'live';
 
@@ -56,9 +59,13 @@ export default function SuprSendTemplateProvider({
   );
 
   const PRIVATE_ONLY_CHANNELS = ['sms', 'whatsapp'];
-  const filteredChannels = isPrivate
-    ? channels
-    : channels.filter((ch) => !PRIVATE_ONLY_CHANNELS.includes(ch));
+  const filteredChannels = useMemo(
+    () =>
+      isPrivate
+        ? channels
+        : channels.filter((ch) => !PRIVATE_ONLY_CHANNELS.includes(ch)),
+    [channels, isPrivate]
+  );
 
   const value = useMemo<TemplateEditorContextValue>(
     () => ({
@@ -81,6 +88,7 @@ export default function SuprSendTemplateProvider({
       mode: currentMode,
       version,
       notificationCategory,
+      fallbackVariantId,
     }),
     [
       workspaceUid,
@@ -102,6 +110,7 @@ export default function SuprSendTemplateProvider({
       currentMode,
       version,
       notificationCategory,
+      fallbackVariantId,
     ]
   );
 

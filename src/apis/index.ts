@@ -14,6 +14,7 @@ import type {
   UseCommitTemplateParams,
   MockTestPayload,
   ChannelVariantMockTestParams,
+  BaseApiParams,
 } from '@/types';
 import { createQueryParams } from '@/lib/utils';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
@@ -56,13 +57,22 @@ const getVariantDetails = async ({
   isPrivate,
   mode,
   version,
+  recipientDistinctId,
+  actorDistinctId,
+  fallbackVariantId,
 }: GetVariantDetailsParams) => {
-  const qp = createQueryParams({
-    conditions,
-    locale,
-    tenant_id: tenantId,
-    mode,
-  });
+  const qp = isPrivate
+    ? createQueryParams({ mode })
+    : createQueryParams({
+        tenant_id: tenantId,
+        locale,
+        conditions,
+        recipient_distinct_id: recipientDistinctId,
+        actor_distinct_id: actorDistinctId,
+        mode,
+        variant_id: variantId,
+        fallback_variant_id: fallbackVariantId,
+      });
   const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
   const url = `${base}/channel/${chanelSlug}/variant/${variantId}/${qp}`;
 
@@ -83,6 +93,9 @@ export const useVariantDetails = ({
     isPrivate,
     mode,
     version,
+    recipientDistinctId,
+    actorDistinctId,
+    fallbackVariantId,
   } = useTemplateEditorContext();
 
   return useQuery({
@@ -103,6 +116,9 @@ export const useVariantDetails = ({
         isPrivate,
         mode,
         version,
+        recipientDistinctId,
+        actorDistinctId,
+        fallbackVariantId,
       }),
   });
 };
@@ -118,12 +134,23 @@ const updateVariantContent = async ({
   payload,
   isPrivate,
   version,
+  recipientDistinctId,
+  actorDistinctId,
+  fallbackVariantId,
 }: UpdateVariantContentParams) => {
-  const qp = createQueryParams({ conditions, locale, tenant_id: tenantId });
+  const qp = isPrivate
+    ? ''
+    : createQueryParams({
+        tenant_id: tenantId,
+        locale,
+        conditions,
+        recipient_distinct_id: recipientDistinctId,
+        actor_distinct_id: actorDistinctId,
+        variant_id: variantId,
+        fallback_variant_id: fallbackVariantId,
+      });
   const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
-  const url = isPrivate
-    ? `${base}/channel/${chanelSlug}/variant/${variantId}/content/`
-    : `${base}/channel/${chanelSlug}/variant/${variantId}/content/${qp}`;
+  const url = `${base}/channel/${chanelSlug}/variant/${variantId}/content/${qp}`;
 
   const resp = await fetchClient.patch(url, payload);
   return resp.data;
@@ -134,8 +161,17 @@ export const useUpdateVariantContent = ({
   chanelSlug,
   variantId,
 }: UseVariantDetailsParams) => {
-  const { locale, tenantId, workspaceUid, conditions, isPrivate, version } =
-    useTemplateEditorContext();
+  const {
+    locale,
+    tenantId,
+    workspaceUid,
+    conditions,
+    isPrivate,
+    version,
+    recipientDistinctId,
+    actorDistinctId,
+    fallbackVariantId,
+  } = useTemplateEditorContext();
 
   return useMutation({
     mutationFn: (payload: ChannelContentPayload) =>
@@ -150,6 +186,9 @@ export const useUpdateVariantContent = ({
         payload,
         isPrivate,
         version,
+        recipientDistinctId,
+        actorDistinctId,
+        fallbackVariantId,
       }),
   });
 };
@@ -177,6 +216,10 @@ const getMockData = async ({
   isPrivate,
   mode,
   version,
+  variantId,
+  fallbackVariantId,
+  locale,
+  conditions,
 }: GetMockDataParams) => {
   let queryObject: MockDataQueryParams = {};
 
@@ -185,6 +228,10 @@ const getMockData = async ({
       tenant_id: tenantId,
       recipient_distinct_id: recipientDistinctId,
       actor_distinct_id: actorDistinctId,
+      variant_id: variantId,
+      fallback_variant_id: fallbackVariantId,
+      locale,
+      conditions,
     };
   }
 
@@ -196,39 +243,6 @@ const getMockData = async ({
   return resp.data;
 };
 
-const getPreCommitValidate = async ({
-  templateSlug,
-  workspaceUid,
-  isPrivate,
-  version,
-}: {
-  templateSlug: string;
-  workspaceUid: string;
-  isPrivate: boolean;
-  version?: string;
-}) => {
-  const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
-  const url = `${base}/pre_commit_validate/`;
-  const resp = await fetchClient.post(url);
-  return resp.data;
-};
-
-export const usePreCommitValidate = ({
-  templateSlug,
-  enabled,
-}: {
-  templateSlug: string;
-  enabled: boolean;
-}) => {
-  const { workspaceUid, isPrivate, version } = useTemplateEditorContext();
-  return useQuery({
-    queryKey: [`template/${templateSlug}/pre_commit_validate`, version],
-    queryFn: () =>
-      getPreCommitValidate({ templateSlug, workspaceUid, isPrivate, version }),
-    enabled,
-  });
-};
-
 export const useMockData = ({ templateSlug }: UseMockDataParams) => {
   const {
     tenantId,
@@ -238,6 +252,10 @@ export const useMockData = ({ templateSlug }: UseMockDataParams) => {
     actorDistinctId,
     mode,
     version,
+    variantId,
+    fallbackVariantId,
+    locale,
+    conditions,
   } = useTemplateEditorContext();
   return useQuery({
     queryKey: [`template/${templateSlug}/mock_data`, mode, version],
@@ -251,7 +269,90 @@ export const useMockData = ({ templateSlug }: UseMockDataParams) => {
         actorDistinctId,
         mode,
         version,
+        variantId,
+        fallbackVariantId,
+        locale,
+        conditions,
       }),
+  });
+};
+
+const getPreCommitValidate = async ({
+  templateSlug,
+  workspaceUid,
+  isPrivate,
+  version,
+  variantId,
+  fallbackVariantId,
+  tenantId,
+  locale,
+  conditions,
+  recipientDistinctId,
+  actorDistinctId,
+  mode,
+  channel,
+}: BaseApiParams & { channel?: string | null }) => {
+  const qp = isPrivate
+    ? createQueryParams({ mode })
+    : createQueryParams({
+        tenant_id: tenantId,
+        locale,
+        conditions,
+        recipient_distinct_id: recipientDistinctId,
+        actor_distinct_id: actorDistinctId,
+        mode,
+        variant_id: variantId,
+        fallback_variant_id: fallbackVariantId,
+      });
+  const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
+  const url = `${base}/pre_commit_validate/${qp}`;
+  const body = !isPrivate
+    ? { variants: [{ id: variantId, channel }] }
+    : undefined;
+  const resp = await fetchClient.post(url, body);
+  return resp.data;
+};
+
+export const usePreCommitValidate = ({
+  templateSlug,
+  enabled,
+}: {
+  templateSlug: string;
+  enabled: boolean;
+}) => {
+  const {
+    workspaceUid,
+    isPrivate,
+    version,
+    variantId,
+    fallbackVariantId,
+    tenantId,
+    locale,
+    conditions,
+    recipientDistinctId,
+    actorDistinctId,
+    mode,
+    selectedChannel,
+  } = useTemplateEditorContext();
+  return useQuery({
+    queryKey: [`template/${templateSlug}/pre_commit_validate`, version],
+    queryFn: () =>
+      getPreCommitValidate({
+        templateSlug,
+        workspaceUid,
+        isPrivate,
+        version,
+        variantId,
+        fallbackVariantId,
+        tenantId,
+        locale,
+        conditions,
+        recipientDistinctId,
+        actorDistinctId,
+        mode,
+        channel: selectedChannel,
+      }),
+    enabled,
   });
 };
 
@@ -321,19 +422,56 @@ const commitTemplate = async ({
   commitMessage,
   variants,
   version,
-}: CommitTemplateParams) => {
-  const qp = createQueryParams({ commit_message: commitMessage });
+  variantId,
+  fallbackVariantId,
+  tenantId,
+  locale,
+  conditions,
+  recipientDistinctId,
+  actorDistinctId,
+  mode,
+  channel,
+}: CommitTemplateParams & { channel?: string | null }) => {
+  const qp = isPrivate
+    ? createQueryParams({ commit_message: commitMessage, mode })
+    : createQueryParams({
+        commit_message: commitMessage,
+        tenant_id: tenantId,
+        locale,
+        conditions,
+        recipient_distinct_id: recipientDistinctId,
+        actor_distinct_id: actorDistinctId,
+        mode,
+        variant_id: variantId,
+        fallback_variant_id: fallbackVariantId,
+      });
   const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
   const url = `${base}/commit/${qp}`;
 
-  const resp = await fetchClient.patch(url, { variants });
+  const body = !isPrivate
+    ? { variants: [{ id: variantId, channel }] }
+    : { variants };
+  const resp = await fetchClient.patch(url, body);
   return resp.data;
 };
 
 export const useCommitTemplate = ({
   templateSlug,
 }: UseCommitTemplateParams) => {
-  const { workspaceUid, isPrivate, version } = useTemplateEditorContext();
+  const {
+    workspaceUid,
+    isPrivate,
+    version,
+    variantId,
+    fallbackVariantId,
+    tenantId,
+    locale,
+    conditions,
+    recipientDistinctId,
+    actorDistinctId,
+    mode,
+    selectedChannel,
+  } = useTemplateEditorContext();
   return useMutation({
     mutationFn: ({ commitMessage, variants }: CommitTemplateMutationPayload) =>
       commitTemplate({
@@ -343,6 +481,15 @@ export const useCommitTemplate = ({
         commitMessage,
         variants,
         version,
+        variantId,
+        fallbackVariantId,
+        tenantId,
+        locale,
+        conditions,
+        recipientDistinctId,
+        actorDistinctId,
+        mode,
+        channel: selectedChannel,
       }),
   });
 };
@@ -361,13 +508,22 @@ const channelVariantMockTest = async ({
   conditions,
   locale,
   tenantId,
+  recipientDistinctId,
+  actorDistinctId,
+  fallbackVariantId,
 }: ChannelVariantMockTestParams) => {
-  const qp = createQueryParams({
-    mode,
-    conditions,
-    locale,
-    tenant_id: tenantId,
-  });
+  const qp = isPrivate
+    ? createQueryParams({ mode })
+    : createQueryParams({
+        tenant_id: tenantId,
+        locale,
+        conditions,
+        recipient_distinct_id: recipientDistinctId,
+        actor_distinct_id: actorDistinctId,
+        mode,
+        variant_id: variantId,
+        fallback_variant_id: fallbackVariantId,
+      });
   const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
   const url = `${base}/channel/${channel}/variant/${variantId}/mock_test/${qp}`;
   const resp = await fetchClient.post(url, payload);
@@ -383,6 +539,9 @@ export const useChannelVariantMockTest = () => {
     conditions,
     locale,
     tenantId,
+    recipientDistinctId,
+    actorDistinctId,
+    fallbackVariantId,
   } = useTemplateEditorContext();
   return useMutation({
     mutationFn: ({
@@ -408,6 +567,9 @@ export const useChannelVariantMockTest = () => {
         conditions,
         locale,
         tenantId,
+        recipientDistinctId,
+        actorDistinctId,
+        fallbackVariantId,
       }),
   });
 };
