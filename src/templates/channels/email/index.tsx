@@ -513,7 +513,7 @@ export default function EmailChannel({
         />
       </div>
 
-      <EditorTopBanner
+      {!isLive && <EditorTopBanner
         editorType={activeTab === 'editor' ? 'design_editor' : 'plain_text'}
         designEditorType={editorMode}
         plainTextMode={plainTextMode}
@@ -539,7 +539,7 @@ export default function EmailChannel({
             saveContent({ content: { body: { raw: { text: '' } } } });
           }
         }}
-      />
+      />}
 
       <div
         className={`suprsend-min-h-0 suprsend-overflow-hidden ${editorWarning ? 'suprsend-flex-[0.95]' : 'suprsend-flex-1'}`}

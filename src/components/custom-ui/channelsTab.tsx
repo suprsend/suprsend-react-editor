@@ -24,7 +24,7 @@ interface TabBarProps {
   channels: ChannelId[];
   selectedChannel: string | number;
   onTabClick?: (id: string | number) => void;
-  ChannelsTabActionComponent?: React.ComponentType;
+  ChannelsTabActionComponent?: React.ReactNode;
   liveMode?: boolean;
 }
 
@@ -138,7 +138,7 @@ export function TabBar({ channels, selectedChannel, onTabClick, ChannelsTabActio
       </div>
       {ChannelsTabActionComponent && (
         <div className="suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-px-2 suprsend-shrink-0">
-          <ChannelsTabActionComponent />
+          {ChannelsTabActionComponent}
         </div>
       )}
     </div>

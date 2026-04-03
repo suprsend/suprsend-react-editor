@@ -114,6 +114,14 @@ export interface SuprSendTemplateEditorProps {
   onCommit?: () => void;
 }
 
+export interface ChannelActionsProps {
+  isLive: boolean;
+  hideActionButtons: boolean;
+  hideTestButton: boolean;
+  onCommit?: () => void;
+  setMode: (mode: TemplateMode) => void;
+}
+
 export interface CommitModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
