@@ -32,8 +32,6 @@ export const fetchClient = new FetchClient({
   credentials: 'include',
 });
 
-// ---------- API functions ----------
-
 function templateBasePath(
   workspaceUid: string,
   templateSlug: string,
@@ -46,6 +44,7 @@ function templateBasePath(
     : `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}${versionSegment}/embedded`;
 }
 
+// variant details api
 const getVariantDetails = async ({
   templateSlug,
   chanelSlug,
@@ -123,6 +122,7 @@ export const useVariantDetails = ({
   });
 };
 
+// update variant details api
 const updateVariantContent = async ({
   templateSlug,
   chanelSlug,
@@ -193,20 +193,7 @@ export const useUpdateVariantContent = ({
   });
 };
 
-const uploadFile = async ({ workspaceUid, file }: UploadFileParams) => {
-  const formData = new FormData();
-  formData.append('file', file);
-  const url = `${API_BASE_URL}/v1/${workspaceUid}/public/upload_file/`;
-  const resp = await fetchClient.put(url, formData);
-  return resp.data;
-};
-
-export const useUploadFile = (workspaceUid: string) => {
-  return useMutation({
-    mutationFn: (file: File) => uploadFile({ workspaceUid, file }),
-  });
-};
-
+// get mock data api
 const getMockData = async ({
   templateSlug,
   workspaceUid,
@@ -277,6 +264,7 @@ export const useMockData = ({ templateSlug }: UseMockDataParams) => {
   });
 };
 
+// precommit validation api
 const getPreCommitValidate = async ({
   templateSlug,
   workspaceUid,
@@ -356,65 +344,7 @@ export const usePreCommitValidate = ({
   });
 };
 
-const getSMSHeaders = async ({
-  workspaceUid,
-  notifCategory,
-}: {
-  workspaceUid: string;
-  notifCategory: string;
-}) => {
-  const url = `${API_BASE_URL}/v1/${workspaceUid}/tenant/default/vendor/sms_headers/?root_category=${notifCategory}`;
-  const resp = await fetchClient.get(url);
-  return resp.data;
-};
-
-export const useSMSHeaders = (notifCategory: string) => {
-  const { workspaceUid } = useTemplateEditorContext();
-
-  return useQuery({
-    queryKey: [
-      `${workspaceUid}/tenant/default/vendor/sms_headers`,
-      notifCategory,
-    ],
-    queryFn: () => getSMSHeaders({ workspaceUid, notifCategory }),
-    enabled: !!notifCategory,
-  });
-};
-
-const getInboxTags = async ({
-  workspaceUid,
-  search,
-}: {
-  workspaceUid: string;
-  search: string;
-}) => {
-  const url = `${API_BASE_URL}/v1/${workspaceUid}/inbox_tag/?search=${encodeURIComponent(search)}&limit=50`;
-  const resp = await fetchClient.get(url);
-  return resp.data;
-};
-
-export const useInboxTags = (search: string) => {
-  const { workspaceUid } = useTemplateEditorContext();
-
-  return useQuery({
-    queryKey: ['inbox_tags', search],
-    queryFn: () => getInboxTags({ workspaceUid, search }),
-  });
-};
-
-const renderJsonnet = async (
-  body: JsonnetRenderBody
-): Promise<JsonnetRenderResponse> => {
-  const resp = await fetchClient.post(`${JSONNET_API_BASE_URL}/render/`, body);
-  return resp.data as JsonnetRenderResponse;
-};
-
-export const useJsonnetRender = () => {
-  return useMutation({
-    mutationFn: (body: JsonnetRenderBody) => renderJsonnet(body),
-  });
-};
-
+// commit template
 const commitTemplate = async ({
   templateSlug,
   workspaceUid,
@@ -494,8 +424,7 @@ export const useCommitTemplate = ({
   });
 };
 
-// ---------- Channel Variant Mock Test ----------
-
+// test template
 const channelVariantMockTest = async ({
   workspaceUid,
   templateSlug,
@@ -571,5 +500,82 @@ export const useChannelVariantMockTest = () => {
         actorDistinctId,
         fallbackVariantId,
       }),
+  });
+};
+
+// upload file api
+const uploadFile = async ({ workspaceUid, file }: UploadFileParams) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const url = `${API_BASE_URL}/v1/${workspaceUid}/public/upload_file/`;
+  const resp = await fetchClient.put(url, formData);
+  return resp.data;
+};
+
+export const useUploadFile = (workspaceUid: string) => {
+  return useMutation({
+    mutationFn: (file: File) => uploadFile({ workspaceUid, file }),
+  });
+};
+
+// sms template headers api
+const getSMSHeaders = async ({
+  workspaceUid,
+  notifCategory,
+}: {
+  workspaceUid: string;
+  notifCategory: string;
+}) => {
+  const url = `${API_BASE_URL}/v1/${workspaceUid}/tenant/default/vendor/sms_headers/?root_category=${notifCategory}`;
+  const resp = await fetchClient.get(url);
+  return resp.data;
+};
+
+export const useSMSHeaders = (notifCategory: string) => {
+  const { workspaceUid } = useTemplateEditorContext();
+
+  return useQuery({
+    queryKey: [
+      `${workspaceUid}/tenant/default/vendor/sms_headers`,
+      notifCategory,
+    ],
+    queryFn: () => getSMSHeaders({ workspaceUid, notifCategory }),
+    enabled: !!notifCategory,
+  });
+};
+
+// inbox tags api
+const getInboxTags = async ({
+  workspaceUid,
+  search,
+}: {
+  workspaceUid: string;
+  search: string;
+}) => {
+  const url = `${API_BASE_URL}/v1/${workspaceUid}/inbox_tag/?search=${encodeURIComponent(search)}&limit=50`;
+  const resp = await fetchClient.get(url);
+  return resp.data;
+};
+
+export const useInboxTags = (search: string) => {
+  const { workspaceUid } = useTemplateEditorContext();
+
+  return useQuery({
+    queryKey: ['inbox_tags', search],
+    queryFn: () => getInboxTags({ workspaceUid, search }),
+  });
+};
+
+// jsonnet render api
+const renderJsonnet = async (
+  body: JsonnetRenderBody
+): Promise<JsonnetRenderResponse> => {
+  const resp = await fetchClient.post(`${JSONNET_API_BASE_URL}/render/`, body);
+  return resp.data as JsonnetRenderResponse;
+};
+
+export const useJsonnetRender = () => {
+  return useMutation({
+    mutationFn: (body: JsonnetRenderBody) => renderJsonnet(body),
   });
 };
