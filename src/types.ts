@@ -114,6 +114,14 @@ export interface SuprSendTemplateEditorProps {
   onCommit?: () => void;
 }
 
+export interface ChannelActionsProps {
+  isLive: boolean;
+  hideActionButtons: boolean;
+  hideTestButton: boolean;
+  onCommit?: () => void;
+  setMode: (mode: TemplateMode) => void;
+}
+
 export interface CommitModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -594,9 +602,10 @@ export interface TextEditorsProps {
   value: string;
   onChange: (value: string) => void;
   variables?: Record<string, unknown>;
-  onFetchFromHtml?: () => Promise<string | undefined>;
   disabled?: boolean;
   onWarningChange?: (warning: string) => void;
+  /** Auto-generated plain text shown when value is empty. Edits are not saved until user modifies it. */
+  autoValue?: string;
 }
 
 export interface MockDataQueryParams {
@@ -631,6 +640,8 @@ export interface EmailTemplatePlaygroundProps {
   variables?: Record<string, unknown>;
   designerText: string;
   onDesignerTextChange: (v: string) => void;
+  rawHtmlValue: string;
+  onRawHtmlValueChange: (v: string) => void;
   rawText: string;
   onRawTextChange: (v: string) => void;
   plainTextOnlyText: string;

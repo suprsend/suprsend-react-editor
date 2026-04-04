@@ -29,6 +29,8 @@ export default function EmailTemplatePlayground({
   variantData,
   designerText,
   onDesignerTextChange,
+  rawHtmlValue,
+  onRawHtmlValueChange,
   rawText,
   onRawTextChange,
   plainTextOnlyText,
@@ -52,6 +54,11 @@ export default function EmailTemplatePlayground({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const designJsonRef = useRef(apiBody?.designer?.design_json);
   const { on, post } = usePostMessageBridge(iframeRef);
+
+  // Track latest designer HTML as state so auto plain text updates reactively
+  const [latestDesignerHtml, setLatestDesignerHtml] = useState(
+    apiBody?.designer?.html ?? ''
+  );
 
   // --- Display conditions ---
   const displayConditionInfoRef = useRef<DisplayConditionInfo | null>(null);
@@ -122,11 +129,15 @@ export default function EmailTemplatePlayground({
     if (apiBody?.type === 'designer' && apiBody?.designer?.design_json) {
       designJsonRef.current = apiBody.designer.design_json;
     }
-  }, [apiBody?.designer?.design_json, apiBody?.type]);
+    if (apiBody?.type === 'designer' && apiBody?.designer?.html) {
+      setLatestDesignerHtml(apiBody.designer.html);
+    }
+  }, [apiBody?.designer?.design_json, apiBody?.designer?.html, apiBody?.type]);
 
   useEffect(() => {
     if (apiBody?.type === 'raw' && apiBody?.raw?.html !== undefined) {
       rawHtmlRef.current = apiBody.raw.html;
+      onRawHtmlValueChange(apiBody.raw.html);
     }
   }, [apiBody?.raw?.html, apiBody?.type, rawHtmlRef]);
 
@@ -165,6 +176,7 @@ export default function EmailTemplatePlayground({
       };
       designerHtmlRef.current = html;
       designJsonRef.current = design_json;
+      setLatestDesignerHtml(html);
       saveContent({
         content: {
           body: {
@@ -239,6 +251,7 @@ export default function EmailTemplatePlayground({
   const handleHtmlChange = useCallback(
     (v: string) => {
       rawHtmlRef.current = v;
+      onRawHtmlValueChange(v);
       saveContent({ content: { body: { raw: { html: v } } } });
     },
     [saveContent, rawHtmlRef]
@@ -268,26 +281,21 @@ export default function EmailTemplatePlayground({
     [saveContent, onPlainTextOnlyTextChange]
   );
 
-  // --- Fetch-from-HTML helpers ---
-  const fetchDesignerHtml = useCallback(async () => {
-    const html = exportHtmlRef.current
-      ? await exportHtmlRef.current()
-      : designerHtmlRef.current;
-    if (!html) return undefined;
-    return htmlToText(html);
-  }, [exportHtmlRef, designerHtmlRef]);
-
-  const fetchRawHtml = useCallback(async () => {
-    const html = rawHtmlRef.current;
-    if (!html) return undefined;
-    return htmlToText(html);
-  }, [rawHtmlRef]);
-
   const resolvedDesignerHtml = useMemo(() => {
     if (!disabled || editorMode !== 'design') return '';
     const html = apiBody?.designer?.html ?? '';
     return html ? renderHandlebars(html, variables) : '';
   }, [disabled, editorMode, apiBody?.designer?.html, variables]);
+
+  // Auto-generated plain text from HTML (shown when plain text field is empty)
+  const autoDesignerText = useMemo(
+    () => (latestDesignerHtml ? htmlToText(latestDesignerHtml) : ''),
+    [latestDesignerHtml]
+  );
+  const autoRawText = useMemo(
+    () => (rawHtmlValue ? htmlToText(rawHtmlValue) : ''),
+    [rawHtmlValue]
+  );
 
   const showDesignerIframe = activeTab === 'editor' && editorMode === 'design';
   const hiddenStyle = {
@@ -368,7 +376,7 @@ export default function EmailTemplatePlayground({
       >
         <TextEditors
           type="html"
-          value={apiBody?.raw?.html ?? ''}
+          value={rawHtmlValue}
           onChange={handleHtmlChange}
           variables={variables}
           disabled={disabled}
@@ -387,9 +395,9 @@ export default function EmailTemplatePlayground({
             value={designerText}
             onChange={handleDesignerTextChange}
             variables={variables}
-            onFetchFromHtml={fetchDesignerHtml}
             disabled={disabled}
             onWarningChange={onWarningChange}
+            autoValue={autoDesignerText}
           />
         </div>
       )}
@@ -405,9 +413,9 @@ export default function EmailTemplatePlayground({
             value={rawText}
             onChange={handleRawTextChange}
             variables={variables}
-            onFetchFromHtml={fetchRawHtml}
             disabled={disabled}
             onWarningChange={onWarningChange}
+            autoValue={autoRawText}
           />
         </div>
       )}

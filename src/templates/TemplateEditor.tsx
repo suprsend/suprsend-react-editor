@@ -11,11 +11,52 @@ import SMSChannel from '@/templates/channels/sms';
 import InboxChannel from '@/templates/channels/inbox';
 import TestButton from '@/templates/TestModal';
 import CommitButton from '@/templates/Commit';
-import type { ChannelId, SuprSendTemplateEditorProps } from '@/types';
+import type {
+  ChannelId,
+  ChannelActionsProps,
+  SuprSendTemplateEditorProps,
+} from '@/types';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { useMockData, useVariantDetails, isHttpError } from '@/apis';
 import { FileX, Loader2, Pencil, X } from '@/assets/icons';
 import { Button } from '@/components/ui/button';
+
+function ChannelActions({
+  isLive,
+  hideActionButtons,
+  hideTestButton,
+  onCommit,
+  setMode,
+}: ChannelActionsProps) {
+  if (hideActionButtons) return null;
+  return (
+    <>
+      {!isLive && (
+        <Button
+          variant="outline"
+          className="suprsend-gap-1 !suprsend-py-0 !suprsend-h-8"
+          onClick={() => setMode('live')}
+        >
+          <X className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground" />
+          <span className="suprsend-text-sm">Exit</span>
+        </Button>
+      )}
+      {!hideTestButton && <TestButton />}
+      {isLive ? (
+        <Button
+          variant="outline"
+          className="suprsend-gap-1 !suprsend-py-0 !suprsend-h-8"
+          onClick={() => setMode('draft')}
+        >
+          <Pencil className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground" />
+          <span className="suprsend-text-sm">Edit</span>
+        </Button>
+      ) : (
+        <CommitButton onCommit={onCommit ?? (() => {})} />
+      )}
+    </>
+  );
+}
 
 export default function SuprSendTemplateEditor({
   hideChannelsTab = false,
@@ -23,7 +64,15 @@ export default function SuprSendTemplateEditor({
   hideTestButton = false,
   onCommit,
 }: SuprSendTemplateEditorProps) {
-  const { channels, templateSlug, variantId, isLive, setMode, selectedChannel, setSelectedChannel } = useTemplateEditorContext();
+  const {
+    channels,
+    templateSlug,
+    variantId,
+    isLive,
+    setMode,
+    selectedChannel,
+    setSelectedChannel,
+  } = useTemplateEditorContext();
 
   const { data: variantData, error: variantError } = useVariantDetails({
     chanelSlug: selectedChannel as string,
@@ -31,7 +80,6 @@ export default function SuprSendTemplateEditor({
     variantId,
   });
 
-  // TODO: if mock data api errors then what to do
   const { data: mockData } = useMockData({ templateSlug });
 
   useEffect(() => {
@@ -75,33 +123,15 @@ export default function SuprSendTemplateEditor({
           channels={channels}
           selectedChannel={selectedChannel}
           onTabClick={(id) => setSelectedChannel(id as ChannelId)}
-          ChannelsTabActionComponent={hideActionButtons ? undefined : () => (
-            <>
-              {!isLive && (
-                <Button
-                  variant="outline"
-                  className="suprsend-gap-1 !suprsend-py-0 !suprsend-h-8"
-                  onClick={() => setMode('live')}
-                >
-                  <X className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground" />
-                  <span className="suprsend-text-sm">Exit</span>
-                </Button>
-              )}
-              {!hideTestButton && <TestButton />}
-              {isLive ? (
-                <Button
-                  variant="outline"
-                  className="suprsend-gap-1 !suprsend-py-0 !suprsend-h-8"
-                  onClick={() => setMode('draft')}
-                >
-                  <Pencil className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-muted-foreground" />
-                  <span className="suprsend-text-sm">Edit</span>
-                </Button>
-              ) : (
-                <CommitButton onCommit={onCommit ?? (() => {})} />
-              )}
-            </>
-          )}
+          ChannelsTabActionComponent={
+            <ChannelActions
+              isLive={isLive}
+              hideActionButtons={hideActionButtons}
+              hideTestButton={hideTestButton}
+              onCommit={onCommit}
+              setMode={setMode}
+            />
+          }
         />
       )}
       <div className="suprsend-flex-1 suprsend-min-h-0 suprsend-overflow-hidden">
