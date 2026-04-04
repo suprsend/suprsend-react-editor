@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useForm, Controller, useFieldArray, useWatch } from 'react-hook-form';
 import SuggestionInput from '@/components/custom-ui/SuggestionInput';
+import SuggestionInputWithUpload from '@/components/custom-ui/SuggestionInputWithUpload';
 import SuggestionInputWithEmoji from '@/components/custom-ui/SuggestionInputWithEmoji';
 import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent, useInboxTags } from '@/apis';
@@ -170,7 +171,7 @@ export default function InboxChannel({
               rules={{ required: 'Text is required' }}
               render={({ field, fieldState }) => (
                 <SuggestionInputWithEmoji
-                  label="Text"
+                  label="Body"
                   mandatory
                   as="textarea"
                   rows={4}
@@ -213,15 +214,16 @@ export default function InboxChannel({
                     },
                   }}
                   render={({ field, fieldState }) => (
-                    <SuggestionInput
+                    <SuggestionInputWithUpload
                       value={field.value}
                       onChange={(val) => {
                         field.onChange(val);
                         trigger('avatar.url');
                       }}
-                      placeholder="Image URL"
+                      placeholder="https://example.com/profile-image.png"
                       mandatory={false}
                       error={fieldState.error?.message}
+                      accept="image/*"
                       enableHighlighting
                       enableSuggestions
                       variables={variables}
@@ -234,23 +236,12 @@ export default function InboxChannel({
                 <Controller
                   name="avatar.url"
                   control={control}
-                  rules={{
-                    validate: (value) => {
-                      const imageUrl = getValues('avatar.image_url');
-                      if (imageUrl && !value) return 'Action URL is required';
-                      return true;
-                    },
-                  }}
-                  render={({ field, fieldState }) => (
+                  render={({ field }) => (
                     <SuggestionInput
                       value={field.value}
-                      onChange={(val) => {
-                        field.onChange(val);
-                        trigger('avatar.image_url');
-                      }}
-                      placeholder="Click Action URL"
+                      onChange={field.onChange}
+                      placeholder="Redirection Link on avatar click"
                       mandatory={false}
-                      error={fieldState.error?.message}
                       enableHighlighting
                       enableSuggestions
                       variables={variables}
@@ -283,7 +274,7 @@ export default function InboxChannel({
                         field.onChange(val);
                         trigger('subtext.url');
                       }}
-                      placeholder="Subtext"
+                      placeholder="Text shown below body"
                       mandatory={false}
                       error={fieldState.error?.message}
                       enableHighlighting
@@ -298,23 +289,12 @@ export default function InboxChannel({
                 <Controller
                   name="subtext.url"
                   control={control}
-                  rules={{
-                    validate: (value) => {
-                      const text = getValues('subtext.text');
-                      if (text && !value) return 'Action URL is required';
-                      return true;
-                    },
-                  }}
-                  render={({ field, fieldState }) => (
+                  render={({ field }) => (
                     <SuggestionInput
                       value={field.value}
-                      onChange={(val) => {
-                        field.onChange(val);
-                        trigger('subtext.text');
-                      }}
-                      placeholder="Click Action URL"
+                      onChange={field.onChange}
+                      placeholder="Redirection Link on subtext click"
                       mandatory={false}
-                      error={fieldState.error?.message}
                       enableHighlighting
                       enableSuggestions
                       variables={variables}
@@ -336,7 +316,7 @@ export default function InboxChannel({
                   mandatory={false}
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder="Launch URL"
+                  placeholder="Redirect link on card click"
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
