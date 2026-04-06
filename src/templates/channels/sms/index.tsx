@@ -13,6 +13,7 @@ import { useUpdateVariantContent, useSMSHeaders } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import SaveIndicator from '@/components/custom-ui/SaveIndicator';
 import type { SMSChannelProps, SMSFormValues } from '@/types';
+import VendorApprovalBanner from '@/components/custom-ui/VendorApprovalBanner';
 import SMSPreview from './Preview';
 
 const CATEGORY_OPTIONS = [
@@ -88,6 +89,14 @@ export default function SMSChannel({
       <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto suprsend-relative">
         <SaveIndicator isSaving={isSaving} isSaved={isSaved} />
         <div className="suprsend-max-w-2xl suprsend-space-y-6">
+          {isLive && variantData?.needs_vendor_approval && (
+            <VendorApprovalBanner
+              channelSlug="sms"
+              vendorApprovals={variantData?.vendor_approvals}
+              sysgenTemplateName={variantData?.sysgen_template_name}
+              locale={variantData?.locale}
+            />
+          )}
           {isDlt && (
             <div className="suprsend-space-y-1">
               <Controller

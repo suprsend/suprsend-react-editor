@@ -24,6 +24,7 @@ import {
   ReactSelect,
   type DefaultOption,
 } from '@/components/custom-ui/ReactSelect';
+import VendorApprovalBanner from '@/components/custom-ui/VendorApprovalBanner';
 // --- Validation helpers ---
 
 const EMOJI_REGEX = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u;
@@ -240,6 +241,15 @@ export default function WhatsappChannel({
       <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto suprsend-relative">
         <SaveIndicator isSaving={isSaving} isSaved={isSaved} />
         <div className="suprsend-max-w-2xl suprsend-space-y-6">
+          {isLive && variantData?.needs_vendor_approval && (
+            <VendorApprovalBanner
+              channelSlug="whatsapp"
+              vendorApprovals={variantData?.vendor_approvals}
+              sysgenTemplateName={variantData?.sysgen_template_name}
+              locale={variantData?.locale}
+              content={variantData?.content}
+            />
+          )}
           <div>
             <Controller
               name="category"

@@ -566,6 +566,90 @@ export const useInboxTags = (search: string) => {
   });
 };
 
+// vendor approval api
+const getVendorsForApproval = async ({
+  workspaceUid,
+  channelSlug,
+  tenantId,
+}: {
+  workspaceUid: string;
+  channelSlug: string;
+  tenantId: string;
+}) => {
+  const url = `${API_BASE_URL}/v1/${workspaceUid}/tenant/${tenantId}/vendor/${channelSlug}/for_template_approval/`;
+  const resp = await fetchClient.get(url);
+  return resp.data;
+};
+
+export const useVendorsForApproval = (channelSlug: string) => {
+  const { workspaceUid, tenantId } = useTemplateEditorContext();
+  const tenant = tenantId || 'default';
+
+  return useQuery({
+    queryKey: [
+      `${workspaceUid}/tenant/${tenant}/vendor/${channelSlug}/for_template_approval`,
+    ],
+    queryFn: () =>
+      getVendorsForApproval({ workspaceUid, channelSlug, tenantId: tenant }),
+  });
+};
+
+// vendor approval api
+export interface VendorApprovalPayload {
+  approval_status: 'pending' | 'sent_for_approval';
+  vendor_slug: string;
+  vendor_uid: string;
+  vendor_template_name: string;
+}
+
+const startVendorApproval = async ({
+  workspaceUid,
+  templateSlug,
+  channelSlug,
+  variantId,
+  isPrivate,
+  version,
+  payload,
+}: {
+  workspaceUid: string;
+  templateSlug: string;
+  channelSlug: string;
+  variantId: string;
+  isPrivate: boolean;
+  version?: string;
+  payload: VendorApprovalPayload;
+}) => {
+  const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
+  const url = `${base}/channel/${channelSlug}/variant/${variantId}/vendor_approval/?mode=live`;
+  const resp = await fetchClient.patch(url, payload);
+  return resp.data;
+};
+
+export const useStartVendorApproval = ({
+  templateSlug,
+  channelSlug,
+  variantId,
+}: {
+  templateSlug: string;
+  channelSlug: string;
+  variantId: string;
+}) => {
+  const { workspaceUid, isPrivate, version } = useTemplateEditorContext();
+
+  return useMutation({
+    mutationFn: (payload: VendorApprovalPayload) =>
+      startVendorApproval({
+        workspaceUid,
+        templateSlug,
+        channelSlug,
+        variantId,
+        isPrivate,
+        version,
+        payload,
+      }),
+  });
+};
+
 // jsonnet render api
 const renderJsonnet = async (
   body: JsonnetRenderBody

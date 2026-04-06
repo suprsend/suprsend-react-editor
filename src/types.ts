@@ -15,8 +15,26 @@ export type TemplateMode = 'live' | 'draft';
 
 // --- Generic channel type helpers ---
 
+export interface VendorApproval {
+  vendor_slug: string;
+  vendor_uid: string;
+  vendor_template_name: string | null;
+  vendor_template_id: string | null;
+  vendor_locale_code: string | null;
+  vendor_template_category: string | null;
+  provider_template_id: string | null;
+  approval_status: string;
+  comment: string | null;
+  sent_for_approval_at: string | null;
+  approval_status_received_at: string | null;
+}
+
 export interface ContentResponse<T> {
   content: T;
+  needs_vendor_approval?: boolean;
+  vendor_approvals?: VendorApproval[];
+  sysgen_template_name?: string;
+  locale?: string;
 }
 
 export type ContentPayload<T> = {
@@ -458,6 +476,7 @@ export interface IWhatsappURLButton {
   url_type: 'static' | 'dynamic';
   url_static_part: string;
   url_dynamic_part?: string;
+  _examples?: string[];
 }
 
 export interface IWhatsappPhoneButton {
@@ -482,12 +501,14 @@ export interface IWhatsappHeader {
   text?: string;
   media_url?: string;
   filename?: string;
+  _parsed_text?: string;
+  _examples?: string[];
 }
 
 export interface IWhatsappContent {
   category?: WhatsappCategory;
-  body?: { text: string };
-  footer?: { text: string };
+  body?: { text: string; _parsed_text?: string; _examples?: string[] };
+  footer?: { text: string; _parsed_text?: string };
   header?: IWhatsappHeader;
   button_type?: WhatsappButtonType;
   buttons?: IWhatsappButton[];
