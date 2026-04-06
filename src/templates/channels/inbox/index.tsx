@@ -6,7 +6,7 @@ import SuggestionInputWithEmoji from '@/components/custom-ui/SuggestionInputWith
 import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent, useInboxTags } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import { X, Plus, ChevronRight } from '@/assets/icons';
+import { X, Plus, ChevronRight, HelpCircle, ExternalLink } from '@/assets/icons';
 import SaveIndicator from '@/components/custom-ui/SaveIndicator';
 import type { InboxChannelProps, InboxFormValues } from '@/types';
 import InboxPreview from './Preview';
@@ -20,26 +20,20 @@ import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from '@/components/ui/tooltip';
 import DurationInput from '@/components/custom-ui/DurationInput';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
 import { cn } from '@/lib/utils';
-
-const IMPORTANCE_OPTIONS = [
-  { label: 'Default', value: 'default' },
-  { label: 'High', value: 'high' },
-];
 
 export default function InboxChannel({
   variantData,
@@ -471,7 +465,29 @@ export default function InboxChannel({
             <CollapsibleContent>
               <div className="suprsend-space-y-5 suprsend-pt-4">
                 <div className="suprsend-space-y-2">
-                  <Label>Tags</Label>
+                  <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+                    <Label>Tags</Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <HelpCircle className="suprsend-w-3 suprsend-h-3 suprsend-cursor-default suprsend-text-accent-foreground" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Used to filter and organize notifications in tabs</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <a
+                      href="https://docs.suprsend.com/docs/in-app-inbox-template#tags"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="suprsend-cursor-pointer suprsend-text-muted-foreground hover:suprsend-text-primary suprsend-transition"
+                    >
+                      <ExternalLink className="suprsend-w-3 suprsend-h-3 suprsend-text-accent-foreground" />
+                    </a>
+                  </div>
                   <ReactSelect<DefaultOption, true>
                     variant="creatable"
                     isMulti
@@ -508,7 +524,29 @@ export default function InboxChannel({
                 </div>
 
                 <div className="suprsend-flex suprsend-items-center suprsend-gap-3">
-                  <Label>Pinned Notification</Label>
+                  <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+                    <Label>Pinned</Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <HelpCircle className="suprsend-w-3 suprsend-h-3 suprsend-cursor-default suprsend-text-accent-foreground" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="suprsend-max-w-64">
+                          <p>Pin critical messages to the top of Inbox. Doesn't move down in order when new notification arrives. Combine with expiry to auto remove pinned notification after some time.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <a
+                      href="https://docs.suprsend.com/docs/in-app-inbox-template#pinned"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="suprsend-cursor-pointer suprsend-text-muted-foreground hover:suprsend-text-primary suprsend-transition"
+                    >
+                      <ExternalLink className="suprsend-w-3 suprsend-h-3 suprsend-text-accent-foreground" />
+                    </a>
+                  </div>
                   <Controller
                     name="is_pinned"
                     control={control}
@@ -524,7 +562,29 @@ export default function InboxChannel({
 
                 <div className="suprsend-space-y-3">
                   <div className="suprsend-flex suprsend-items-center suprsend-gap-3">
-                    <Label>Expiry</Label>
+                    <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+                      <Label>Expiry</Label>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <HelpCircle className="suprsend-w-3 suprsend-h-3 suprsend-cursor-default suprsend-text-accent-foreground" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className="suprsend-max-w-64">
+                            <p>Notification is auto-deleted after a time. You can decide to show or hide expiry timer to user.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <a
+                        href="https://docs.suprsend.com/docs/in-app-inbox-template#expiry"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="suprsend-cursor-pointer suprsend-text-muted-foreground hover:suprsend-text-primary suprsend-transition"
+                      >
+                        <ExternalLink className="suprsend-w-3 suprsend-h-3 suprsend-text-accent-foreground" />
+                      </a>
+                    </div>
                     <Controller
                       name="is_expiry_enabled"
                       control={control}
@@ -627,34 +687,24 @@ export default function InboxChannel({
                   )}
                 </div>
 
-                <div className="suprsend-space-y-1">
-                  <Label>Importance</Label>
-                  <Controller
-                    name="importance"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={isLive}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select importance" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {IMPORTANCE_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </div>
+                {/* Importance field hidden — value defaults to 'default' */}
 
                 <div className="suprsend-space-y-1">
-                  <Label>Extra Data</Label>
+                  <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+                    <Label>Extra Data</Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <HelpCircle className="suprsend-w-3 suprsend-h-3 suprsend-cursor-default suprsend-text-accent-foreground" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Can be used to design custom notification card.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <Controller
                     name="extra_data"
                     control={control}

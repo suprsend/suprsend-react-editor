@@ -198,7 +198,10 @@ export function isValidVariable(
 ): boolean {
   if (isHelperHandlebar(handlebar)) return true;
 
-  const content = handlebar.slice(2, -2).trim();
+  const isTriple = handlebar.startsWith('{{{') && handlebar.endsWith('}}}');
+  const content = isTriple
+    ? handlebar.slice(3, -3).trim()
+    : handlebar.slice(2, -2).trim();
 
   // Preference URLs
   if (
@@ -211,10 +214,7 @@ export function isValidVariable(
   return content in flattenedVars;
 }
 
-export function shouldShowSuggestions(
-  text: string,
-  caretPos: number
-): boolean {
+export function shouldShowSuggestions(text: string, caretPos: number): boolean {
   const strippedValue = text.slice(0, caretPos);
   const startBracketIndex = strippedValue.lastIndexOf('{{');
   const endBracketIndex = strippedValue.lastIndexOf('}}');

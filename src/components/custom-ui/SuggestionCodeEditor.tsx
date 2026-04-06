@@ -50,7 +50,7 @@ interface SuggestionCodeEditorProps {
 
 const validVarDeco = Decoration.mark({ class: 'cm-hbs-valid' });
 const invalidVarDeco = Decoration.mark({ class: 'cm-hbs-invalid' });
-const HANDLEBAR_REGEX = /\{\{.*?\}\}/g;
+const HANDLEBAR_REGEX = /\{\{\{.*?\}\}\}|\{\{.*?\}\}/g;
 
 function buildDecorations(
   view: EditorView,
@@ -241,24 +241,32 @@ export default function SuggestionCodeEditor({
       const docText = view.state.doc.toString();
       const str1 = docText.substring(0, currentCaretPos);
       const LI = str1.lastIndexOf('{{');
-      const str2 = docText.substring(LI);
-      const FI = str2.indexOf('}}');
+      const isTriple = LI > 0 && docText[LI - 1] === '{';
+      const actualFrom = isTriple ? LI - 1 : LI;
+      if (isTriple) {
+        selectedValue = selectedValue.replace(/^\{\{/, '{{{').replace(/\}\}$/, '}}}');
+      }
+      const str2 = docText.substring(actualFrom);
+      const closingBrace = isTriple ? '}}}' : '}}';
+      const FI = str2.indexOf(closingBrace);
 
       let replaceFrom: number;
       let replaceTo: number;
 
+      const closingLen = isTriple ? 3 : 2;
       if (FI < 0) {
-        replaceFrom = LI;
+        replaceFrom = actualFrom;
         replaceTo = currentCaretPos;
       } else {
         const str3 = str2.substring(0, FI);
-        const LI1 = str3.lastIndexOf('{{');
+        const openingBrace = isTriple ? '{{{' : '{{';
+        const LI1 = str3.lastIndexOf(openingBrace);
         if (LI1 > 0) {
-          replaceFrom = LI;
+          replaceFrom = actualFrom;
           replaceTo = currentCaretPos;
         } else {
-          replaceFrom = LI;
-          replaceTo = LI + FI + 2;
+          replaceFrom = actualFrom;
+          replaceTo = actualFrom + FI + closingLen;
         }
       }
 

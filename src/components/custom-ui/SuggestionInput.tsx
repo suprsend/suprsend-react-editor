@@ -54,9 +54,9 @@ function highlightHandlebars(
 ): string {
   if (!text) return '';
   return text
-    .split(/(\{\{.*?\}\})/g)
+    .split(/(\{\{\{.*?\}\}\}|\{\{.*?\}\})/g)
     .map((part) => {
-      if (/^\{\{.*\}\}$/.test(part)) {
+      if (/^\{\{\{.*\}\}\}$/.test(part) || /^\{\{.*\}\}$/.test(part)) {
         // Skip highlighting for helper handlebars
         if (isHelperHandlebar(part)) return escapeHtml(part);
         const isValid = isValidVariable(part, flattenedVars);
@@ -264,33 +264,41 @@ export default function SuggestionInput({
     (selectedValue: string) => {
       const str1 = inputValue.substring(0, currentCaretPos);
       const LI = str1.lastIndexOf('{{');
-      const str2 = inputValue.substring(LI);
-      const FI = str2.indexOf('}}');
+      const isTriple = LI > 0 && inputValue[LI - 1] === '{';
+      const actualFrom = isTriple ? LI - 1 : LI;
+      if (isTriple) {
+        selectedValue = selectedValue.replace(/^\{\{/, '{{{').replace(/\}\}$/, '}}}');
+      }
+      const str2 = inputValue.substring(actualFrom);
+      const closingBrace = isTriple ? '}}}' : '}}';
+      const closingLen = isTriple ? 3 : 2;
+      const FI = str2.indexOf(closingBrace);
 
       let result: string;
 
       if (FI < 0) {
-        result = replaceBetween(inputValue, LI, currentCaretPos, selectedValue);
+        result = replaceBetween(inputValue, actualFrom, currentCaretPos, selectedValue);
       } else {
         const str3 = str2.substring(0, FI);
-        const LI1 = str3.lastIndexOf('{{');
+        const openingBrace = isTriple ? '{{{' : '{{';
+        const LI1 = str3.lastIndexOf(openingBrace);
 
         if (LI1 > 0) {
           result = replaceBetween(
             inputValue,
-            LI,
+            actualFrom,
             currentCaretPos,
             selectedValue
           );
         } else {
-          result = replaceBetween(inputValue, LI, LI + FI + 2, selectedValue);
+          result = replaceBetween(inputValue, actualFrom, actualFrom + FI + closingLen, selectedValue);
         }
       }
 
       setInputValue(result);
       onChange(result);
 
-      const afterSelectCaretPosition = LI + selectedValue.length;
+      const afterSelectCaretPosition = actualFrom + selectedValue.length;
       setShowSuggestions(false);
 
       setTimeout(() => {
