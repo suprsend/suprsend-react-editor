@@ -14,7 +14,7 @@ import {
   TooltipContent,
   TooltipProvider,
 } from '@/components/ui/tooltip';
-import { HelpCircle, Plus, Clipboard, Check } from '@/assets/icons';
+import { HelpCircle, Plus, Clipboard, Check, RefreshCw } from '@/assets/icons';
 import VendorApproveModal from './VendorApproveModal';
 import UpdateStatusModal from './UpdateStatusModal';
 import { useStartVendorApproval } from '@/apis';
@@ -130,6 +130,8 @@ function StatusTooltipContent({
   return <p>{tooltip}</p>;
 }
 
+const AUTO_APPROVAL_VENDORS = ['cloud_api-whatsapp', 'twilio-whatsapp'];
+
 function RowActions({
   approval,
   onModal,
@@ -137,7 +139,20 @@ function RowActions({
   approval: VendorApproval;
   onModal: (state: VendorApprovalModalState) => void;
 }) {
-  const { approval_status } = approval;
+  const { approval_status, vendor_slug } = approval;
+  const isAutoApproval = AUTO_APPROVAL_VENDORS.includes(vendor_slug);
+
+  if (isAutoApproval) {
+    if (approval_status === 'sent_for_approval') {
+      return (
+        <Button variant="outline" size="sm" disabled>
+          <RefreshCw className="suprsend-w-3.5 suprsend-h-3.5" />
+          Auto-approval
+        </Button>
+      );
+    }
+    return null;
+  }
 
   if (approval_status === 'approved' || approval_status === 'rejected') return null;
 
