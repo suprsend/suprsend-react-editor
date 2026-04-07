@@ -57,7 +57,11 @@ function getStatusConfig(
     },
   };
 
-  return config[status] ?? null;
+  return config[status] ?? {
+    label: status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+    className: 'suprsend-bg-gray-50 suprsend-border-gray-200 suprsend-text-gray-700',
+    tooltip: `${channel} template status: ${status.replace(/_/g, ' ')}`,
+  };
 }
 
 function ApprovedTooltip({ approval }: { approval: VendorApproval }) {

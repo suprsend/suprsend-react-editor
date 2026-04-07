@@ -663,6 +663,64 @@ export const useStartVendorApproval = ({
   });
 };
 
+// discard vendor approval api
+const discardVendorApproval = async ({
+  workspaceUid,
+  templateSlug,
+  channelSlug,
+  variantId,
+  isPrivate,
+  version,
+  payload,
+}: {
+  workspaceUid: string;
+  templateSlug: string;
+  channelSlug: string;
+  variantId: string;
+  isPrivate: boolean;
+  version?: string;
+  payload: { discard_comment: string };
+}) => {
+  const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
+  const modeParam = version ? '' : '?mode=live';
+  const url = `${base}/channel/${channelSlug}/variant/${variantId}/discard/${modeParam}`;
+  const resp = await fetchClient.patch(url, payload);
+  return resp.data;
+};
+
+export const useDiscardVendorApproval = ({
+  templateSlug,
+  channelSlug,
+  variantId,
+}: {
+  templateSlug: string;
+  channelSlug: string;
+  variantId: string;
+}) => {
+  const { workspaceUid, isPrivate, version, mode } =
+    useTemplateEditorContext();
+
+  return useMutation({
+    mutationFn: (payload: { discard_comment: string }) =>
+      discardVendorApproval({
+        workspaceUid,
+        templateSlug,
+        channelSlug,
+        variantId,
+        isPrivate,
+        version,
+        payload,
+      }),
+    onSuccess: () => {
+      invalidateQueries([
+        `template/${templateSlug}/channel/${channelSlug}/variant/${variantId}`,
+        mode,
+        version,
+      ]);
+    },
+  });
+};
+
 // jsonnet render api
 const renderJsonnet = async (
   body: JsonnetRenderBody

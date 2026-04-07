@@ -65,8 +65,13 @@ export default function SlackChannel({
 
   return (
     <div className="suprsend-h-full suprsend-flex">
-      <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto suprsend-relative">
-        <SaveIndicator isSaving={isSaving} isSaved={isSaved} />
+      <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto">
+        <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-mb-6">
+          <h2 className="suprsend-text-base suprsend-font-semibold suprsend-text-foreground">
+            Slack Template
+          </h2>
+          <SaveIndicator isSaving={isSaving} isSaved={isSaved} className="" />
+        </div>
         <div className="suprsend-max-w-3xl suprsend-space-y-4">
           {/* Body Type Toggle */}
           <Tabs

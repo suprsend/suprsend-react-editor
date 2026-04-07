@@ -32,6 +32,8 @@ export interface VendorApproval {
 export interface ContentResponse<T> {
   content: T;
   needs_vendor_approval?: boolean;
+  approval_status?: string;
+  discard_comment?: string;
   vendor_approvals?: VendorApproval[];
   sysgen_template_name?: string;
   locale?: string;
