@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Clipboard, Check } from '@/assets/icons';
 import { useStartVendorApproval, invalidateQueries } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import type { VendorApproval, IWhatsappContent } from '@/types';
+import type { VendorApproval, IWhatsappContent, ISMSContent } from '@/types';
 
 // --- Copyable field ---
 
@@ -132,7 +132,7 @@ interface VendorApproveModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   approval: VendorApproval;
-  content: IWhatsappContent;
+  content: IWhatsappContent | ISMSContent;
   sysgenTemplateName: string;
   locale: string;
   channelSlug: string;
@@ -202,89 +202,121 @@ export default function VendorApproveModal({
   };
 
   const templateName = sysgenTemplateName;
-  const language = LOCALE_LABELS[locale] ?? locale;
-  const category =
-    CATEGORY_LABELS[
-      approval.vendor_template_category ?? content.category ?? ''
-    ] ?? (content.category ?? '');
+  const isSms = channelSlug === 'sms';
 
-  const headerFormat = content.header?.format;
-  const isMedia =
-    headerFormat && headerFormat !== 'TEXT';
-  const templateType = isMedia ? 'Media' : 'Text';
-  const mediaType = isMedia
-    ? (FORMAT_LABELS[headerFormat] ?? headerFormat)
-    : '';
+  const renderSmsFields = () => {
+    const smsContent = content as ISMSContent;
+    const SMS_CATEGORY_LABELS: Record<string, string> = {
+      service_implicit: 'Transactional',
+      service_explicit: 'Engagement',
+      promotional: 'Promotional',
+    };
+    const commType =
+      SMS_CATEGORY_LABELS[smsContent.category] ?? smsContent.category;
 
-  const headerText =
-    headerFormat === 'TEXT'
-      ? (content.header?._parsed_text ?? '')
-      : '';
-  const headerMediaUrl = isMedia ? (content.header?.media_url ?? '') : '';
+    const examples = smsContent._examples ?? [];
 
-  const bodyText = content.body?._parsed_text ?? '';
-  const footerText = content.footer?.text ?? '';
-
-  // Build button rows
-  const buttons = content.buttons ?? [];
-
-  // Sample values
-  const headerExamples = content.header?._examples ?? [];
-  const bodyExamples = content.body?._examples ?? [];
-  const dynamicUrlExamples = buttons
-    .filter((b) => b.type === 'URL' && b.url_type === 'dynamic' && b._examples?.length)
-    .flatMap((b) => (b.type === 'URL' ? (b._examples ?? []) : []));
-  const hasSampleValues =
-    headerExamples.length > 0 ||
-    bodyExamples.length > 0 ||
-    dynamicUrlExamples.length > 0;
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="suprsend-max-w-2xl suprsend-max-h-[85vh] suprsend-flex suprsend-flex-col suprsend-gap-0">
-        <DialogHeader className="suprsend-pb-4 suprsend-border-b suprsend-border-border suprsend--mx-6 suprsend-px-6">
-          <DialogTitle>Message template to add on vendor portal</DialogTitle>
-          <DialogDescription>
-            Paste these values into your vendor portal. Skip this step if
-            approved, already.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="suprsend-flex-1 suprsend-overflow-y-auto suprsend-space-y-6 suprsend-py-4 suprsend--mx-6 suprsend-px-6">
-          <CopyableField label="Name" value={templateName} />
-          <CopyableField label="Language" value={language} />
-          <ReadOnlySelect label="Category" value={category} />
-
-          <div className="suprsend-flex suprsend-items-end suprsend-gap-2">
-            <div className="suprsend-flex-1">
-              <ReadOnlySelect label="Type" value={templateType} />
-            </div>
-            {isMedia && (
-              <div className="suprsend-flex-1">
-                <ReadOnlySelect label="" value={mediaType} />
-              </div>
-            )}
+    return (
+      <>
+        <CopyableField label="Template Name" value={templateName} />
+        {smsContent.header && (
+          <CopyableField label="Header" value={smsContent.header} />
+        )}
+        {commType && (
+          <ReadOnlySelect
+            label="Template / Communication Type"
+            value={commType}
+          />
+        )}
+        <CopyableField label="Content" value={smsContent._parsed_body ?? smsContent.body} multiline />
+        {examples.length > 0 && (
+          <div className="suprsend-space-y-2">
+            <p className="suprsend-text-xs suprsend-font-medium suprsend-text-foreground">
+              Variables
+            </p>
+            {examples.map((val, i) => (
+              <CopyableField key={i} label="" value={val} />
+            ))}
           </div>
+        )}
+      </>
+    );
+  };
 
-          {!isMedia && headerText && (
-            <CopyableField label="Header" value={headerText} />
+  const renderWhatsappFields = () => {
+    const waContent = content as IWhatsappContent;
+    const language = LOCALE_LABELS[locale] ?? locale;
+    const category =
+      CATEGORY_LABELS[
+        approval.vendor_template_category ?? waContent.category ?? ''
+      ] ?? (waContent.category ?? '');
+
+    const headerFormat = waContent.header?.format;
+    const isMedia = headerFormat && headerFormat !== 'TEXT';
+    const templateType = isMedia ? 'Media' : 'Text';
+    const mediaType = isMedia
+      ? (FORMAT_LABELS[headerFormat] ?? headerFormat)
+      : '';
+
+    const headerText =
+      headerFormat === 'TEXT'
+        ? (waContent.header?._parsed_text ?? '')
+        : '';
+
+    const bodyText = waContent.body?._parsed_text ?? '';
+    const footerText = waContent.footer?.text ?? '';
+    const buttons = waContent.buttons ?? [];
+
+    const headerExamples = waContent.header?._examples ?? [];
+    const bodyExamples = waContent.body?._examples ?? [];
+    const dynamicUrlExamples = buttons
+      .filter(
+        (b) =>
+          b.type === 'URL' && b.url_type === 'dynamic' && b._examples?.length
+      )
+      .flatMap((b) => (b.type === 'URL' ? (b._examples ?? []) : []));
+    const hasSampleValues =
+      headerExamples.length > 0 ||
+      bodyExamples.length > 0 ||
+      dynamicUrlExamples.length > 0;
+
+    return (
+      <>
+        <CopyableField label="Name" value={templateName} />
+        <CopyableField label="Language" value={language} />
+        <ReadOnlySelect label="Category" value={category} />
+
+        <div className="suprsend-flex suprsend-items-end suprsend-gap-2">
+          <div className="suprsend-flex-1">
+            <ReadOnlySelect label="Type" value={templateType} />
+          </div>
+          {isMedia && (
+            <div className="suprsend-flex-1">
+              <ReadOnlySelect label="" value={mediaType} />
+            </div>
           )}
+        </div>
 
-          <CopyableField label="Body" value={bodyText} multiline />
+        {!isMedia && headerText && (
+          <CopyableField label="Header" value={headerText} />
+        )}
 
-          {footerText && <CopyableField label="Footer" value={footerText} />}
+        <CopyableField label="Body" value={bodyText} multiline />
 
-          {buttons.length > 0 && (
-            <div className="suprsend-space-y-2">
-              <p className="suprsend-text-xs suprsend-font-medium suprsend-text-foreground">
-                Buttons
-              </p>
-              <div className="suprsend-space-y-6">
+        {footerText && <CopyableField label="Footer" value={footerText} />}
+
+        {buttons.length > 0 && (
+          <div className="suprsend-space-y-2">
+            <p className="suprsend-text-xs suprsend-font-medium suprsend-text-foreground">
+              Buttons
+            </p>
+            <div className="suprsend-space-y-6">
               {buttons.map((btn, i) => {
                 if (btn.type === 'URL') {
                   const extra = [
                     {
-                      label: btn.url_type === 'dynamic' ? 'Dynamic' : 'Static',
+                      label:
+                        btn.url_type === 'dynamic' ? 'Dynamic' : 'Static',
                       value: btn.url_static_part,
                     },
                   ];
@@ -299,7 +331,10 @@ export default function VendorApproveModal({
                 }
                 if (btn.type === 'PHONE_NUMBER') {
                   return (
-                    <div key={i} className="suprsend-flex suprsend-items-center suprsend-gap-2">
+                    <div
+                      key={i}
+                      className="suprsend-flex suprsend-items-center suprsend-gap-2"
+                    >
                       <div className="suprsend-w-[140px]">
                         <ReadOnlySelect label="" value="Phone Number" />
                       </div>
@@ -323,50 +358,72 @@ export default function VendorApproveModal({
                 }
                 return null;
               })}
+            </div>
+          </div>
+        )}
+
+        {hasSampleValues && (
+          <div className="suprsend-space-y-4">
+            <p className="suprsend-text-sm suprsend-font-semibold suprsend-text-foreground">
+              Sample Values
+            </p>
+
+            {headerExamples.length > 0 && (
+              <div className="suprsend-space-y-2">
+                <p className="suprsend-text-xs suprsend-font-medium suprsend-text-foreground">
+                  Header
+                </p>
+                {headerExamples.map((val: string, i: number) => (
+                  <CopyableField key={i} label="" value={val} />
+                ))}
               </div>
-            </div>
-          )}
+            )}
 
-          {hasSampleValues && (
-            <div className="suprsend-space-y-4">
-              <p className="suprsend-text-xs suprsend-font-medium suprsend-text-foreground">
-                Sample Values
-              </p>
+            {bodyExamples.length > 0 && (
+              <div className="suprsend-space-y-2">
+                <p className="suprsend-text-xs suprsend-font-medium suprsend-text-foreground">
+                  Body
+                </p>
+                {bodyExamples.map((val: string, i: number) => (
+                  <CopyableField key={i} label="" value={val} />
+                ))}
+              </div>
+            )}
 
-              {headerExamples.length > 0 && (
-                <div className="suprsend-space-y-2">
-                  <p className="suprsend-text-xs suprsend-font-medium suprsend-text-foreground">
-                    Header
-                  </p>
-                  {headerExamples.map((val, i) => (
-                    <CopyableField key={i} label="" value={val} />
-                  ))}
-                </div>
-              )}
+            {dynamicUrlExamples.length > 0 && (
+              <div className="suprsend-space-y-2">
+                <p className="suprsend-text-xs suprsend-font-medium suprsend-text-foreground">
+                  Visit Website Button
+                </p>
+                {dynamicUrlExamples.map((val: string, i: number) => (
+                  <CopyableField key={i} label="" value={val} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </>
+    );
+  };
 
-              {bodyExamples.length > 0 && (
-                <div className="suprsend-space-y-2">
-                  <p className="suprsend-text-xs suprsend-font-medium suprsend-text-foreground">
-                    Body
-                  </p>
-                  {bodyExamples.map((val, i) => (
-                    <CopyableField key={i} label="" value={val} />
-                  ))}
-                </div>
-              )}
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="suprsend-max-w-2xl suprsend-max-h-[85vh] suprsend-flex suprsend-flex-col suprsend-gap-0">
+        <DialogHeader className="suprsend-pb-4 suprsend-border-b suprsend-border-border suprsend--mx-6 suprsend-px-6">
+          <DialogTitle>
+            {isSms
+              ? 'Form to upload on DLT portal'
+              : 'Message template to add on vendor portal'}
+          </DialogTitle>
+          <DialogDescription>
+            {isSms
+              ? 'Paste these values into the vendor portal form. Skip this step if approved, already.'
+              : 'Paste these values into your vendor portal. Skip this step if approved, already.'}
+          </DialogDescription>
+        </DialogHeader>
 
-              {dynamicUrlExamples.length > 0 && (
-                <div className="suprsend-space-y-2">
-                  <p className="suprsend-text-xs suprsend-font-medium suprsend-text-foreground">
-                    Visit Website Button
-                  </p>
-                  {dynamicUrlExamples.map((val, i) => (
-                    <CopyableField key={i} label="" value={val} />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+        <div className="suprsend-flex-1 suprsend-overflow-y-auto suprsend-space-y-6 suprsend-py-4 suprsend--mx-6 suprsend-px-6">
+          {isSms ? renderSmsFields() : renderWhatsappFields()}
         </div>
 
         <DialogFooter className="suprsend-pt-4 suprsend-border-t suprsend-border-border suprsend--mx-6 suprsend-px-6">
@@ -379,7 +436,7 @@ export default function VendorApproveModal({
           </Button>
           {!readOnly && (
             <Button disabled={isPending} onClick={handleConfirm}>
-              Added, Next
+              {isSms ? 'Sent for Approval, Next' : 'Added, Next'}
             </Button>
           )}
         </DialogFooter>

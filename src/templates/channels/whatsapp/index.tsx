@@ -101,7 +101,7 @@ export default function WhatsappChannel({
   variantData,
   variables,
 }: WhatsappChannelProps) {
-  const { templateSlug, variantId, isLive } = useTemplateEditorContext();
+  const { templateSlug, variantId, isLive, isPrivate } = useTemplateEditorContext();
 
   const {
     mutate,
@@ -241,7 +241,7 @@ export default function WhatsappChannel({
       <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto suprsend-relative">
         <SaveIndicator isSaving={isSaving} isSaved={isSaved} />
         <div className="suprsend-max-w-2xl suprsend-space-y-6">
-          {isLive && variantData?.needs_vendor_approval && (
+          {isLive && isPrivate && variantData?.needs_vendor_approval && (
             <VendorApprovalBanner
               channelSlug="whatsapp"
               vendorApprovals={variantData?.vendor_approvals}

@@ -596,10 +596,14 @@ export const useVendorsForApproval = (channelSlug: string) => {
 
 // vendor approval api
 export interface VendorApprovalPayload {
-  approval_status: 'pending' | 'sent_for_approval';
+  approval_status: 'pending' | 'sent_for_approval' | 'approved' | 'rejected';
   vendor_slug: string;
   vendor_uid: string;
   vendor_template_name: string;
+  vendor_template_id?: string;
+  vendor_locale_code?: string;
+  vendor_template_category?: string;
+  comment?: string;
 }
 
 const startVendorApproval = async ({

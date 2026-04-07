@@ -389,6 +389,8 @@ export interface JsonnetRenderResponse {
 
 export interface ISMSContent {
   body: string;
+  _parsed_body?: string;
+  _examples?: string[];
   type: string;
   header: string;
   category: string;

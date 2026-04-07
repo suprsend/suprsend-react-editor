@@ -18,10 +18,13 @@ import {
   TooltipContent,
   TooltipProvider,
 } from '@/components/ui/tooltip';
-import { HelpCircle, Plus } from '@/assets/icons';
+import { HelpCircle, Plus, Clipboard, Check } from '@/assets/icons';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import VendorApproveModal from './VendorApproveModal';
-import type { VendorApproval, IWhatsappContent } from '@/types';
+import UpdateStatusModal from './UpdateStatusModal';
+import type { VendorApproval, IWhatsappContent, ISMSContent } from '@/types';
+
+type ChannelContent = IWhatsappContent | ISMSContent;
 
 interface VendorFromAPI {
   id: string;
@@ -85,6 +88,57 @@ function getStatusConfig(
   };
 
   return config[status] ?? null;
+}
+
+function ApprovedTooltip({ approval }: { approval: VendorApproval }) {
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const handleCopy = (value: string, field: string) => {
+    navigator.clipboard.writeText(value);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 1500);
+  };
+
+  return (
+    <div className="suprsend-space-y-2 suprsend-min-w-[240px]">
+      <p className="suprsend-font-semibold suprsend-text-xs">
+        Approved Template Details
+      </p>
+      {approval.vendor_template_name && (
+        <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+          <span className="suprsend-text-xs suprsend-text-muted-foreground suprsend-w-[100px] suprsend-shrink-0">
+            Template Name
+          </span>
+          <span className="suprsend-flex suprsend-items-center suprsend-gap-1 suprsend-text-xs">
+            {approval.vendor_template_name}
+            <button
+              type="button"
+              onClick={() =>
+                handleCopy(approval.vendor_template_name!, 'name')
+              }
+              className="suprsend-text-muted-foreground hover:suprsend-text-background suprsend-transition-colors"
+            >
+              {copiedField === 'name' ? (
+                <Check className="suprsend-w-3 suprsend-h-3" />
+              ) : (
+                <Clipboard className="suprsend-w-3 suprsend-h-3" />
+              )}
+            </button>
+          </span>
+        </div>
+      )}
+      {approval.vendor_template_id && (
+        <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+          <span className="suprsend-text-xs suprsend-text-muted-foreground suprsend-w-[100px] suprsend-shrink-0">
+            Template ID
+          </span>
+          <span className="suprsend-text-xs">
+            {approval.vendor_template_id}
+          </span>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function AddVendorRow({
@@ -184,7 +238,7 @@ interface VendorApprovalBannerProps {
   vendorApprovals?: VendorApproval[];
   sysgenTemplateName?: string;
   locale?: string;
-  content?: IWhatsappContent;
+  content?: ChannelContent;
 }
 
 export default function VendorApprovalBanner({
@@ -198,6 +252,9 @@ export default function VendorApprovalBanner({
   const [approveModalApproval, setApproveModalApproval] =
     useState<VendorApproval | null>(null);
   const [approveModalReadOnly, setApproveModalReadOnly] = useState(false);
+  const [updateStatusApproval, setUpdateStatusApproval] =
+    useState<VendorApproval | null>(null);
+  const [updateStatusDefault, setUpdateStatusDefault] = useState<'approved' | 'rejected'>('approved');
 
   const approvalVendors: VendorFromAPI[] = Array.isArray(data?.results)
     ? data.results
@@ -245,17 +302,17 @@ export default function VendorApprovalBanner({
   return (
     <div className="suprsend-pb-6 suprsend-mb-6 suprsend-border-b suprsend-border-dashed suprsend-border-border suprsend-space-y-2">
       {rows.length > 0 && (
-        <div className="suprsend-rounded-lg suprsend-border suprsend-border-border suprsend-bg-background">
-          {rows.map((row, index) => {
+        <div className="suprsend-space-y-3">
+          {rows.map((row) => {
             const statusConfig = row.approval
               ? getStatusConfig(row.approval.approval_status, channelSlug)
               : null;
 
             return (
-              <div key={row.key}>
-                {index > 0 && (
-                  <div className="suprsend-border-t suprsend-border-dashed suprsend-border-border" />
-                )}
+              <div
+                key={row.key}
+                className="suprsend-rounded-lg suprsend-border suprsend-border-border suprsend-bg-background"
+              >
                 <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-px-4 suprsend-py-3">
                   <div className="suprsend-flex suprsend-items-center suprsend-gap-3 suprsend-min-w-0">
                     <TooltipProvider>
@@ -282,50 +339,82 @@ export default function VendorApprovalBanner({
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>{statusConfig.tooltip}</p>
+                            {row.approval?.approval_status === 'approved' ? (
+                              <ApprovedTooltip approval={row.approval} />
+                            ) : row.approval?.approval_status === 'rejected' ? (
+                              <div className="suprsend-space-y-1">
+                                <p>
+                                  Rejection reason:{' '}
+                                  <strong>{row.approval.comment || 'No reason provided'}</strong>
+                                </p>
+                                <p>Fix and republish the template</p>
+                              </div>
+                            ) : (
+                              <p>{statusConfig.tooltip}</p>
+                            )}
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     )}
                   </div>
-                  <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
-                    {row.approval?.approval_status === 'sent_for_approval' ? (
-                      <>
-                        <Button size="sm">
-                          Update Status
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (row.approval) {
-                              setApproveModalApproval(row.approval);
-                              setApproveModalReadOnly(true);
-                            }
-                          }}
-                        >
-                          Message Template
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            if (row.approval) {
-                              setApproveModalApproval(row.approval);
-                              setApproveModalReadOnly(false);
-                            }
-                          }}
-                        >
-                          Approve Now
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          Reject
-                        </Button>
-                      </>
-                    )}
-                  </div>
+                  {row.approval?.approval_status !== 'approved' &&
+                    row.approval?.approval_status !== 'rejected' && (
+                    <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+                      {row.approval?.approval_status === 'sent_for_approval' ? (
+                        <>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              if (row.approval) {
+                                setUpdateStatusApproval(row.approval);
+                                setUpdateStatusDefault('approved');
+                              }
+                            }}
+                          >
+                            Update Status
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (row.approval) {
+                                setApproveModalApproval(row.approval);
+                                setApproveModalReadOnly(true);
+                              }
+                            }}
+                          >
+                            Message Template
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              if (row.approval) {
+                                setApproveModalApproval(row.approval);
+                                setApproveModalReadOnly(false);
+                              }
+                            }}
+                          >
+                            Approve Now
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (row.approval) {
+                                setUpdateStatusApproval(row.approval);
+                                setUpdateStatusDefault('rejected');
+                              }
+                            }}
+                          >
+                            Reject
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -356,6 +445,24 @@ export default function VendorApprovalBanner({
           locale={locale}
           channelSlug={channelSlug}
           readOnly={approveModalReadOnly}
+        />
+      )}
+
+      {updateStatusApproval && (
+        <UpdateStatusModal
+          open={!!updateStatusApproval}
+          onOpenChange={(open) => {
+            if (!open) {
+              setUpdateStatusApproval(null);
+              setUpdateStatusDefault('approved');
+            }
+          }}
+          approval={updateStatusApproval}
+          channelSlug={channelSlug}
+          sysgenTemplateName={sysgenTemplateName}
+          locale={locale}
+          contentCategory={content?.category}
+          defaultStatus={updateStatusDefault}
         />
       )}
     </div>
