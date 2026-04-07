@@ -373,7 +373,9 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
           <Button
             onClick={handleCommit}
             disabled={
-              isLoading || commitMutation.isPending || selectedList.length === 0
+              isLoading ||
+              commitMutation.isPending ||
+              (selectedList.length === 0 && changedProperties.length === 0)
             }
           >
             {commitMutation.isPending ? (

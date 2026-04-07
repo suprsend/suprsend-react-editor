@@ -1,11 +1,12 @@
 import { useCallback, useState } from 'react';
 import { useForm, Controller, useFieldArray, useWatch } from 'react-hook-form';
 import SuggestionInput from '@/components/custom-ui/SuggestionInput';
+import SuggestionInputWithUpload from '@/components/custom-ui/SuggestionInputWithUpload';
 import SuggestionInputWithEmoji from '@/components/custom-ui/SuggestionInputWithEmoji';
 import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent, useInboxTags } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import { X, Plus, ChevronRight } from '@/assets/icons';
+import { X, Plus, ChevronRight, HelpCircle, ExternalLink } from '@/assets/icons';
 import SaveIndicator from '@/components/custom-ui/SaveIndicator';
 import type { InboxChannelProps, InboxFormValues } from '@/types';
 import InboxPreview from './Preview';
@@ -19,26 +20,20 @@ import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from '@/components/ui/tooltip';
 import DurationInput from '@/components/custom-ui/DurationInput';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
 import { cn } from '@/lib/utils';
-
-const IMPORTANCE_OPTIONS = [
-  { label: 'Default', value: 'default' },
-  { label: 'High', value: 'high' },
-];
 
 export default function InboxChannel({
   variantData,
@@ -175,7 +170,7 @@ export default function InboxChannel({
               rules={{ required: 'Text is required' }}
               render={({ field, fieldState }) => (
                 <SuggestionInputWithEmoji
-                  label="Text"
+                  label="Body"
                   mandatory
                   as="textarea"
                   rows={4}
@@ -218,15 +213,16 @@ export default function InboxChannel({
                     },
                   }}
                   render={({ field, fieldState }) => (
-                    <SuggestionInput
+                    <SuggestionInputWithUpload
                       value={field.value}
                       onChange={(val) => {
                         field.onChange(val);
                         trigger('avatar.url');
                       }}
-                      placeholder="Image URL"
+                      placeholder="https://example.com/profile-image.png"
                       mandatory={false}
                       error={fieldState.error?.message}
+                      accept="image/*"
                       enableHighlighting
                       enableSuggestions
                       variables={variables}
@@ -239,23 +235,12 @@ export default function InboxChannel({
                 <Controller
                   name="avatar.url"
                   control={control}
-                  rules={{
-                    validate: (value) => {
-                      const imageUrl = getValues('avatar.image_url');
-                      if (imageUrl && !value) return 'Action URL is required';
-                      return true;
-                    },
-                  }}
-                  render={({ field, fieldState }) => (
+                  render={({ field }) => (
                     <SuggestionInput
                       value={field.value}
-                      onChange={(val) => {
-                        field.onChange(val);
-                        trigger('avatar.image_url');
-                      }}
-                      placeholder="Click Action URL"
+                      onChange={field.onChange}
+                      placeholder="Redirection Link on avatar click"
                       mandatory={false}
-                      error={fieldState.error?.message}
                       enableHighlighting
                       enableSuggestions
                       variables={variables}
@@ -288,7 +273,7 @@ export default function InboxChannel({
                         field.onChange(val);
                         trigger('subtext.url');
                       }}
-                      placeholder="Subtext"
+                      placeholder="Text shown below body"
                       mandatory={false}
                       error={fieldState.error?.message}
                       enableHighlighting
@@ -303,23 +288,12 @@ export default function InboxChannel({
                 <Controller
                   name="subtext.url"
                   control={control}
-                  rules={{
-                    validate: (value) => {
-                      const text = getValues('subtext.text');
-                      if (text && !value) return 'Action URL is required';
-                      return true;
-                    },
-                  }}
-                  render={({ field, fieldState }) => (
+                  render={({ field }) => (
                     <SuggestionInput
                       value={field.value}
-                      onChange={(val) => {
-                        field.onChange(val);
-                        trigger('subtext.text');
-                      }}
-                      placeholder="Click Action URL"
+                      onChange={field.onChange}
+                      placeholder="Redirection Link on subtext click"
                       mandatory={false}
-                      error={fieldState.error?.message}
                       enableHighlighting
                       enableSuggestions
                       variables={variables}
@@ -341,7 +315,7 @@ export default function InboxChannel({
                   mandatory={false}
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder="Launch URL"
+                  placeholder="Redirect link on card click"
                   enableHighlighting
                   enableSuggestions
                   variables={variables}
@@ -496,7 +470,29 @@ export default function InboxChannel({
             <CollapsibleContent>
               <div className="suprsend-space-y-5 suprsend-pt-4">
                 <div className="suprsend-space-y-2">
-                  <Label>Tags</Label>
+                  <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+                    <Label>Tags</Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <HelpCircle className="suprsend-w-3 suprsend-h-3 suprsend-cursor-default suprsend-text-accent-foreground" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Used to filter and organize notifications in tabs</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <a
+                      href="https://docs.suprsend.com/docs/in-app-inbox-template#tags"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="suprsend-cursor-pointer suprsend-text-muted-foreground hover:suprsend-text-primary suprsend-transition"
+                    >
+                      <ExternalLink className="suprsend-w-3 suprsend-h-3 suprsend-text-accent-foreground" />
+                    </a>
+                  </div>
                   <ReactSelect<DefaultOption, true>
                     variant="creatable"
                     isMulti
@@ -533,7 +529,29 @@ export default function InboxChannel({
                 </div>
 
                 <div className="suprsend-flex suprsend-items-center suprsend-gap-3">
-                  <Label>Pinned Notification</Label>
+                  <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+                    <Label>Pinned</Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <HelpCircle className="suprsend-w-3 suprsend-h-3 suprsend-cursor-default suprsend-text-accent-foreground" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="suprsend-max-w-64">
+                          <p>Pin critical messages to the top of Inbox. Doesn't move down in order when new notification arrives. Combine with expiry to auto remove pinned notification after some time.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <a
+                      href="https://docs.suprsend.com/docs/in-app-inbox-template#pinned"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="suprsend-cursor-pointer suprsend-text-muted-foreground hover:suprsend-text-primary suprsend-transition"
+                    >
+                      <ExternalLink className="suprsend-w-3 suprsend-h-3 suprsend-text-accent-foreground" />
+                    </a>
+                  </div>
                   <Controller
                     name="is_pinned"
                     control={control}
@@ -549,7 +567,29 @@ export default function InboxChannel({
 
                 <div className="suprsend-space-y-3">
                   <div className="suprsend-flex suprsend-items-center suprsend-gap-3">
-                    <Label>Expiry</Label>
+                    <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+                      <Label>Expiry</Label>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <HelpCircle className="suprsend-w-3 suprsend-h-3 suprsend-cursor-default suprsend-text-accent-foreground" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className="suprsend-max-w-64">
+                            <p>Notification is auto-deleted after a time. You can decide to show or hide expiry timer to user.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <a
+                        href="https://docs.suprsend.com/docs/in-app-inbox-template#expiry"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="suprsend-cursor-pointer suprsend-text-muted-foreground hover:suprsend-text-primary suprsend-transition"
+                      >
+                        <ExternalLink className="suprsend-w-3 suprsend-h-3 suprsend-text-accent-foreground" />
+                      </a>
+                    </div>
                     <Controller
                       name="is_expiry_enabled"
                       control={control}
@@ -652,34 +692,24 @@ export default function InboxChannel({
                   )}
                 </div>
 
-                <div className="suprsend-space-y-1">
-                  <Label>Importance</Label>
-                  <Controller
-                    name="importance"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        disabled={isLive}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select importance" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {IMPORTANCE_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </div>
+                {/* Importance field hidden — value defaults to 'default' */}
 
                 <div className="suprsend-space-y-1">
-                  <Label>Extra Data</Label>
+                  <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+                    <Label>Extra Data</Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <HelpCircle className="suprsend-w-3 suprsend-h-3 suprsend-cursor-default suprsend-text-accent-foreground" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Can be used to design custom notification card.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <Controller
                     name="extra_data"
                     control={control}
