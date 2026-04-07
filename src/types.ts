@@ -15,8 +15,28 @@ export type TemplateMode = 'live' | 'draft';
 
 // --- Generic channel type helpers ---
 
+export interface VendorApproval {
+  vendor_slug: string;
+  vendor_uid: string;
+  vendor_template_name: string | null;
+  vendor_template_id: string | null;
+  vendor_locale_code: string | null;
+  vendor_template_category: string | null;
+  provider_template_id: string | null;
+  approval_status: string;
+  comment: string | null;
+  sent_for_approval_at: string | null;
+  approval_status_received_at: string | null;
+}
+
 export interface ContentResponse<T> {
   content: T;
+  needs_vendor_approval?: boolean;
+  approval_status?: string;
+  discard_comment?: string;
+  vendor_approvals?: VendorApproval[];
+  sysgen_template_name?: string;
+  locale?: string;
 }
 
 export type ContentPayload<T> = {
@@ -371,6 +391,8 @@ export interface JsonnetRenderResponse {
 
 export interface ISMSContent {
   body: string;
+  _parsed_body?: string;
+  _examples?: string[];
   type: string;
   header: string;
   category: string;
@@ -458,6 +480,7 @@ export interface IWhatsappURLButton {
   url_type: 'static' | 'dynamic';
   url_static_part: string;
   url_dynamic_part?: string;
+  _examples?: string[];
 }
 
 export interface IWhatsappPhoneButton {
@@ -482,12 +505,14 @@ export interface IWhatsappHeader {
   text?: string;
   media_url?: string;
   filename?: string;
+  _parsed_text?: string;
+  _examples?: string[];
 }
 
 export interface IWhatsappContent {
   category?: WhatsappCategory;
-  body?: { text: string };
-  footer?: { text: string };
+  body?: { text: string; _parsed_text?: string; _examples?: string[] };
+  footer?: { text: string; _parsed_text?: string };
   header?: IWhatsappHeader;
   button_type?: WhatsappButtonType;
   buttons?: IWhatsappButton[];
@@ -717,4 +742,74 @@ export interface ChannelVariantMockTestParams extends BaseApiParams {
 
 export interface TestButtonProps {
   onTestSent?: () => void;
+}
+
+// --- Vendor Approval ---
+
+export type VendorApprovalChannelContent = IWhatsappContent | ISMSContent;
+
+export interface VendorFromAPI {
+  id: string;
+  nickname: string;
+  unique_identifier: string | null;
+  vendor: {
+    name: string;
+    slug: string;
+    logo: string;
+    is_template_approval_required: boolean;
+  };
+  is_enabled: boolean;
+}
+
+export interface MergedVendorRow {
+  key: string;
+  label: string;
+  approval: VendorApproval | null;
+  hasVendor: boolean;
+}
+
+export type VendorApprovalModalState =
+  | { type: 'closed' }
+  | { type: 'approve'; approval: VendorApproval; readOnly: boolean }
+  | { type: 'updateStatus'; approval: VendorApproval; defaultStatus: 'approved' | 'rejected' };
+
+export interface VendorApproveModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  approval: VendorApproval;
+  content: IWhatsappContent | ISMSContent;
+  sysgenTemplateName: string;
+  locale: string;
+  channelSlug: string;
+  readOnly?: boolean;
+  onConfirmSuccess?: () => void;
+}
+
+export interface UpdateStatusFormValues {
+  status: 'approved' | 'rejected';
+  templateName: string;
+  templateId: string;
+  language: string;
+  category: string;
+  providerTemplateId: string;
+  rejectionReason: string;
+}
+
+export interface UpdateStatusModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  approval: VendorApproval;
+  channelSlug: string;
+  sysgenTemplateName: string;
+  locale?: string;
+  contentCategory?: string;
+  defaultStatus?: 'approved' | 'rejected';
+}
+
+export interface VendorApprovalBannerProps {
+  channelSlug: string;
+  vendorApprovals?: VendorApproval[];
+  sysgenTemplateName?: string;
+  locale?: string;
+  content?: VendorApprovalChannelContent;
 }

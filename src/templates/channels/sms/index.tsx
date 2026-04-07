@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 import SuggestionInputWithEmoji from '@/components/custom-ui/SuggestionInputWithEmoji';
 import {
@@ -12,7 +12,11 @@ import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent, useSMSHeaders } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import SaveIndicator from '@/components/custom-ui/SaveIndicator';
+import ApprovalStatusBadge from '@/templates/vendor-approval/ApprovalStatusBadge';
+import DiscardApprovalModal from '@/templates/vendor-approval/DiscardApprovalModal';
 import type { SMSChannelProps, SMSFormValues } from '@/types';
+import VendorApprovalBanner from '@/templates/vendor-approval/VendorApprovalBanner';
+import { Button } from '@/components/ui/button';
 import SMSPreview from './Preview';
 
 const CATEGORY_OPTIONS = [
@@ -33,7 +37,8 @@ export default function SMSChannel({
   variantData,
   variables,
 }: SMSChannelProps) {
-  const { templateSlug, variantId, isLive } = useTemplateEditorContext();
+  const { templateSlug, variantId, isLive, isPrivate } = useTemplateEditorContext();
+  const [discardOpen, setDiscardOpen] = useState(false);
 
   const {
     mutate,
@@ -85,9 +90,38 @@ export default function SMSChannel({
   return (
     <div className="suprsend-h-full suprsend-flex">
       {/* Form */}
-      <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto suprsend-relative">
-        <SaveIndicator isSaving={isSaving} isSaved={isSaved} />
+      <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto">
+        <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-mb-6">
+          <div className="suprsend-flex suprsend-items-center suprsend-gap-3">
+            <h2 className="suprsend-text-base suprsend-font-semibold suprsend-text-foreground">
+              SMS Template
+            </h2>
+            {isLive && <ApprovalStatusBadge approvalStatus={variantData?.approval_status} discardComment={variantData?.discard_comment} />}
+          </div>
+          <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
+            {isLive && variantData?.needs_vendor_approval && !['approved', 'rejected', 'discarded'].includes(variantData?.approval_status ?? '') && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="suprsend-text-destructive suprsend-border-destructive hover:suprsend-bg-destructive/10"
+                onClick={() => setDiscardOpen(true)}
+              >
+                Cancel Approval
+              </Button>
+            )}
+            <SaveIndicator isSaving={isSaving} isSaved={isSaved} className="" />
+          </div>
+        </div>
         <div className="suprsend-max-w-2xl suprsend-space-y-6">
+          {isLive && isPrivate && variantData?.needs_vendor_approval && (
+            <VendorApprovalBanner
+              channelSlug="sms"
+              vendorApprovals={variantData?.vendor_approvals}
+              sysgenTemplateName={variantData?.sysgen_template_name}
+              locale={variantData?.locale}
+              content={content}
+            />
+          )}
           {isDlt && (
             <div className="suprsend-space-y-1">
               <Controller
@@ -219,6 +253,12 @@ export default function SMSChannel({
           variables={variables}
         />
       </div>
+
+      <DiscardApprovalModal
+        open={discardOpen}
+        onOpenChange={setDiscardOpen}
+        channelSlug="sms"
+      />
     </div>
   );
 }

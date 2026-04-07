@@ -119,8 +119,13 @@ export default function AndroidPushChannel({
   return (
     <div className="suprsend-h-full suprsend-flex">
       {/* Form */}
-      <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto suprsend-relative">
-        <SaveIndicator isSaving={isSaving} isSaved={isSaved} />
+      <div className="suprsend-flex-1 suprsend-p-6 suprsend-overflow-y-auto">
+        <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-mb-6">
+          <h2 className="suprsend-text-base suprsend-font-semibold suprsend-text-foreground">
+            Android Push Template
+          </h2>
+          <SaveIndicator isSaving={isSaving} isSaved={isSaved} className="" />
+        </div>
         <div className="suprsend-max-w-2xl suprsend-space-y-6">
           <div className="suprsend-space-y-1">
             <Controller

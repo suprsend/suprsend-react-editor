@@ -4,7 +4,9 @@ import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { cn } from '@/lib/utils';
 import { usePortalContainer } from '@/lib/PortalContext';
 
-const TooltipProvider = TooltipPrimitive.Provider;
+const TooltipProvider = (
+  props: React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Provider>
+) => <TooltipPrimitive.Provider delayDuration={200} {...props} />;
 
 const Tooltip = TooltipPrimitive.Root;
 

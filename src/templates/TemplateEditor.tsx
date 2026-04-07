@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { TabBar } from '@/components/custom-ui/channelsTab';
+import { TabBar } from './channels/ChannelsTab';
 import EmailChannel from '@/templates/channels/email';
 import IOSPushChannel from '@/templates/channels/iospush';
 import WebpushChannel from '@/templates/channels/webpush';

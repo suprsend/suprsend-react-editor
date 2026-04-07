@@ -21,7 +21,8 @@ import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { useQuery } from '@/lib/useQuery';
 import { useMutation } from '@/lib/useMutation';
 import { FetchClient } from '@/lib/fetchClient';
-export { invalidateQueries } from '@/lib/queryCache';
+import { invalidateQueries } from '@/lib/queryCache';
+export { invalidateQueries };
 export { isHttpError } from '@/lib/fetchClient';
 
 const API_BASE_URL = 'https://stagingapi2.suprsend.com';
@@ -563,6 +564,160 @@ export const useInboxTags = (search: string) => {
   return useQuery({
     queryKey: ['inbox_tags', search],
     queryFn: () => getInboxTags({ workspaceUid, search }),
+  });
+};
+
+// vendor approval api
+const getVendorsForApproval = async ({
+  workspaceUid,
+  channelSlug,
+  tenantId,
+}: {
+  workspaceUid: string;
+  channelSlug: string;
+  tenantId: string;
+}) => {
+  const url = `${API_BASE_URL}/v1/${workspaceUid}/tenant/${tenantId}/vendor/${channelSlug}/for_template_approval/`;
+  const resp = await fetchClient.get(url);
+  return resp.data;
+};
+
+export const useVendorsForApproval = (channelSlug: string) => {
+  const { workspaceUid, tenantId } = useTemplateEditorContext();
+  const tenant = tenantId || 'default';
+
+  return useQuery({
+    queryKey: [
+      `${workspaceUid}/tenant/${tenant}/vendor/${channelSlug}/for_template_approval`,
+    ],
+    queryFn: () =>
+      getVendorsForApproval({ workspaceUid, channelSlug, tenantId: tenant }),
+  });
+};
+
+// vendor approval api
+export interface VendorApprovalPayload {
+  approval_status: 'pending' | 'sent_for_approval' | 'approved' | 'rejected';
+  vendor_slug: string;
+  vendor_uid: string;
+  vendor_template_name: string;
+  vendor_template_id?: string;
+  vendor_locale_code?: string;
+  vendor_template_category?: string;
+  comment?: string;
+}
+
+const startVendorApproval = async ({
+  workspaceUid,
+  templateSlug,
+  channelSlug,
+  variantId,
+  isPrivate,
+  version,
+  payload,
+}: {
+  workspaceUid: string;
+  templateSlug: string;
+  channelSlug: string;
+  variantId: string;
+  isPrivate: boolean;
+  version?: string;
+  payload: VendorApprovalPayload;
+}) => {
+  const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
+  const url = `${base}/channel/${channelSlug}/variant/${variantId}/vendor_approval/?mode=live`;
+  const resp = await fetchClient.patch(url, payload);
+  return resp.data;
+};
+
+export const useStartVendorApproval = ({
+  templateSlug,
+  channelSlug,
+  variantId,
+}: {
+  templateSlug: string;
+  channelSlug: string;
+  variantId: string;
+}) => {
+  const { workspaceUid, isPrivate, version, mode } =
+    useTemplateEditorContext();
+
+  return useMutation({
+    mutationFn: (payload: VendorApprovalPayload) =>
+      startVendorApproval({
+        workspaceUid,
+        templateSlug,
+        channelSlug,
+        variantId,
+        isPrivate,
+        version,
+        payload,
+      }),
+    onSuccess: () => {
+      invalidateQueries([
+        `template/${templateSlug}/channel/${channelSlug}/variant/${variantId}`,
+        mode,
+        version,
+      ]);
+    },
+  });
+};
+
+// discard vendor approval api
+const discardVendorApproval = async ({
+  workspaceUid,
+  templateSlug,
+  channelSlug,
+  variantId,
+  isPrivate,
+  version,
+  payload,
+}: {
+  workspaceUid: string;
+  templateSlug: string;
+  channelSlug: string;
+  variantId: string;
+  isPrivate: boolean;
+  version?: string;
+  payload: { discard_comment: string };
+}) => {
+  const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
+  const modeParam = version ? '' : '?mode=live';
+  const url = `${base}/channel/${channelSlug}/variant/${variantId}/discard/${modeParam}`;
+  const resp = await fetchClient.patch(url, payload);
+  return resp.data;
+};
+
+export const useDiscardVendorApproval = ({
+  templateSlug,
+  channelSlug,
+  variantId,
+}: {
+  templateSlug: string;
+  channelSlug: string;
+  variantId: string;
+}) => {
+  const { workspaceUid, isPrivate, version, mode } =
+    useTemplateEditorContext();
+
+  return useMutation({
+    mutationFn: (payload: { discard_comment: string }) =>
+      discardVendorApproval({
+        workspaceUid,
+        templateSlug,
+        channelSlug,
+        variantId,
+        isPrivate,
+        version,
+        payload,
+      }),
+    onSuccess: () => {
+      invalidateQueries([
+        `template/${templateSlug}/channel/${channelSlug}/variant/${variantId}`,
+        mode,
+        version,
+      ]);
+    },
   });
 };
 
