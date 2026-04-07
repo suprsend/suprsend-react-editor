@@ -13,7 +13,7 @@ import { useUpdateVariantContent, useSMSHeaders } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import SaveIndicator from '@/components/custom-ui/SaveIndicator';
 import type { SMSChannelProps, SMSFormValues } from '@/types';
-import VendorApprovalBanner from '@/components/custom-ui/VendorApprovalBanner';
+import VendorApprovalBanner from '@/templates/vendor-approval/VendorApprovalBanner';
 import SMSPreview from './Preview';
 
 const CATEGORY_OPTIONS = [

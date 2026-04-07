@@ -741,3 +741,73 @@ export interface ChannelVariantMockTestParams extends BaseApiParams {
 export interface TestButtonProps {
   onTestSent?: () => void;
 }
+
+// --- Vendor Approval ---
+
+export type VendorApprovalChannelContent = IWhatsappContent | ISMSContent;
+
+export interface VendorFromAPI {
+  id: string;
+  nickname: string;
+  unique_identifier: string | null;
+  vendor: {
+    name: string;
+    slug: string;
+    logo: string;
+    is_template_approval_required: boolean;
+  };
+  is_enabled: boolean;
+}
+
+export interface MergedVendorRow {
+  key: string;
+  label: string;
+  approval: VendorApproval | null;
+  hasVendor: boolean;
+}
+
+export type VendorApprovalModalState =
+  | { type: 'closed' }
+  | { type: 'approve'; approval: VendorApproval; readOnly: boolean }
+  | { type: 'updateStatus'; approval: VendorApproval; defaultStatus: 'approved' | 'rejected' };
+
+export interface VendorApproveModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  approval: VendorApproval;
+  content: IWhatsappContent | ISMSContent;
+  sysgenTemplateName: string;
+  locale: string;
+  channelSlug: string;
+  readOnly?: boolean;
+  onConfirmSuccess?: () => void;
+}
+
+export interface UpdateStatusFormValues {
+  status: 'approved' | 'rejected';
+  templateName: string;
+  templateId: string;
+  language: string;
+  category: string;
+  providerTemplateId: string;
+  rejectionReason: string;
+}
+
+export interface UpdateStatusModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  approval: VendorApproval;
+  channelSlug: string;
+  sysgenTemplateName: string;
+  locale?: string;
+  contentCategory?: string;
+  defaultStatus?: 'approved' | 'rejected';
+}
+
+export interface VendorApprovalBannerProps {
+  channelSlug: string;
+  vendorApprovals?: VendorApproval[];
+  sysgenTemplateName?: string;
+  locale?: string;
+  content?: VendorApprovalChannelContent;
+}

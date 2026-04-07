@@ -24,7 +24,7 @@ import {
   ReactSelect,
   type DefaultOption,
 } from '@/components/custom-ui/ReactSelect';
-import VendorApprovalBanner from '@/components/custom-ui/VendorApprovalBanner';
+import VendorApprovalBanner from '@/templates/vendor-approval/VendorApprovalBanner';
 // --- Validation helpers ---
 
 const EMOJI_REGEX = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u;

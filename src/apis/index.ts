@@ -21,7 +21,8 @@ import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { useQuery } from '@/lib/useQuery';
 import { useMutation } from '@/lib/useMutation';
 import { FetchClient } from '@/lib/fetchClient';
-export { invalidateQueries } from '@/lib/queryCache';
+import { invalidateQueries } from '@/lib/queryCache';
+export { invalidateQueries };
 export { isHttpError } from '@/lib/fetchClient';
 
 const API_BASE_URL = 'https://stagingapi2.suprsend.com';
@@ -638,7 +639,8 @@ export const useStartVendorApproval = ({
   channelSlug: string;
   variantId: string;
 }) => {
-  const { workspaceUid, isPrivate, version } = useTemplateEditorContext();
+  const { workspaceUid, isPrivate, version, mode } =
+    useTemplateEditorContext();
 
   return useMutation({
     mutationFn: (payload: VendorApprovalPayload) =>
@@ -651,6 +653,13 @@ export const useStartVendorApproval = ({
         version,
         payload,
       }),
+    onSuccess: () => {
+      invalidateQueries([
+        `template/${templateSlug}/channel/${channelSlug}/variant/${variantId}`,
+        mode,
+        version,
+      ]);
+    },
   });
 };
 
