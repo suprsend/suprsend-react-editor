@@ -176,7 +176,7 @@ function EmailMetaDataModal({
         <DialogTitle className="suprsend-pb-2">Email Settings</DialogTitle>
       </DialogHeader>
 
-      <div className="suprsend-space-y-6 suprsend-pb-6 suprsend-overflow-y-auto suprsend-flex-1 suprsend-min-h-0">
+      <div className="suprsend-space-y-6 suprsend-pb-6 suprsend-overflow-y-auto suprsend-flex-1 suprsend-min-h-0 suprsend-px-1 -suprsend-mx-1">
         <div className="suprsend-space-y-2">
           <Controller
             name="subject"
