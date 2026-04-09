@@ -639,8 +639,7 @@ export const useStartVendorApproval = ({
   channelSlug: string;
   variantId: string;
 }) => {
-  const { workspaceUid, isPrivate, version, mode } =
-    useTemplateEditorContext();
+  const { workspaceUid, isPrivate, version, mode } = useTemplateEditorContext();
 
   return useMutation({
     mutationFn: (payload: VendorApprovalPayload) =>
@@ -697,8 +696,7 @@ export const useDiscardVendorApproval = ({
   channelSlug: string;
   variantId: string;
 }) => {
-  const { workspaceUid, isPrivate, version, mode } =
-    useTemplateEditorContext();
+  const { workspaceUid, isPrivate, version, mode } = useTemplateEditorContext();
 
   return useMutation({
     mutationFn: (payload: { discard_comment: string }) =>
@@ -725,12 +723,38 @@ export const useDiscardVendorApproval = ({
 const renderJsonnet = async (
   body: JsonnetRenderBody
 ): Promise<JsonnetRenderResponse> => {
-  const resp = await fetchClient.post(`${JSONNET_API_BASE_URL}/jsonnet/v2/render/`, body);
+  const resp = await fetchClient.post(
+    `${JSONNET_API_BASE_URL}/jsonnet/v2/render/`,
+    body
+  );
   return resp.data as JsonnetRenderResponse;
 };
 
 export const useJsonnetRender = () => {
   return useMutation({
     mutationFn: (body: JsonnetRenderBody) => renderJsonnet(body),
+  });
+};
+
+// translation locale data api
+const getTranslationLocaleData = async ({
+  workspaceUid,
+  locale,
+}: {
+  workspaceUid: string;
+  locale: string;
+}) => {
+  const url = `${API_BASE_URL}/v1/${workspaceUid}/translation/locale_data/?locale=${locale}`;
+  const resp = await fetchClient.get(url);
+  return resp.data;
+};
+
+export const useTranslationLocaleData = (locale: string | undefined) => {
+  const { workspaceUid } = useTemplateEditorContext();
+
+  return useQuery({
+    queryKey: [`${workspaceUid}/translations_locale_data/`, locale],
+    queryFn: () => getTranslationLocaleData({ workspaceUid, locale: locale! }),
+    enabled: !!locale,
   });
 };

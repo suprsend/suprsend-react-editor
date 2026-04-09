@@ -100,6 +100,7 @@ export interface SuprSendTemplateEditorProviderProps {
   channels: ChannelId[];
   tenantId: string | null;
   locale: string;
+  translationLocale?: string;
   theme?: 'light' | 'dark' | 'system';
   themeOverrides?: ThemeOverrides;
   mode?: TemplateMode;
@@ -194,7 +195,8 @@ export interface UseVariantDetailsParams {
   variantId: string;
 }
 
-export interface GetVariantDetailsParams extends UseVariantDetailsParams, BaseApiParams {}
+export interface GetVariantDetailsParams
+  extends UseVariantDetailsParams, BaseApiParams {}
 
 export interface EmailMetaDataFormValues {
   subject: string;
@@ -466,7 +468,8 @@ export interface PhoneFrameProps {
   className?: string;
 }
 
-export type AndroidPushPreviewProps = ChannelPreviewProps<AndroidPushFormValues>;
+export type AndroidPushPreviewProps =
+  ChannelPreviewProps<AndroidPushFormValues>;
 
 // --- WhatsApp ---
 
@@ -772,7 +775,11 @@ export interface MergedVendorRow {
 export type VendorApprovalModalState =
   | { type: 'closed' }
   | { type: 'approve'; approval: VendorApproval; readOnly: boolean }
-  | { type: 'updateStatus'; approval: VendorApproval; defaultStatus: 'approved' | 'rejected' };
+  | {
+      type: 'updateStatus';
+      approval: VendorApproval;
+      defaultStatus: 'approved' | 'rejected';
+    };
 
 export interface VendorApproveModalProps {
   open: boolean;
