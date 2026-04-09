@@ -26,7 +26,7 @@ export { invalidateQueries };
 export { isHttpError } from '@/lib/fetchClient';
 
 const API_BASE_URL = 'https://stagingapi2.suprsend.com';
-const JSONNET_API_BASE_URL = 'https://stagingapi.suprsend.com/jsonnet';
+const JSONNET_API_BASE_URL = 'https://stagingapi.suprsend.com/jsonnet/v2';
 
 export const fetchClient = new FetchClient({
   baseURL: API_BASE_URL,

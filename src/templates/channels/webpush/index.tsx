@@ -151,7 +151,7 @@ export default function WebpushChannel({
                   mandatory={false}
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder="Launch URL"
+                  placeholder="Redirect link on card click"
                   enableHighlighting
                   enableSuggestions
                   variables={variables}

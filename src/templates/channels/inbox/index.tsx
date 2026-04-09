@@ -6,7 +6,13 @@ import SuggestionInputWithEmoji from '@/components/custom-ui/SuggestionInputWith
 import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent, useInboxTags } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import { X, Plus, ChevronRight, HelpCircle, ExternalLink } from '@/assets/icons';
+import {
+  X,
+  Plus,
+  ChevronRight,
+  HelpCircle,
+  ExternalLink,
+} from '@/assets/icons';
 import SaveIndicator from '@/components/custom-ui/SaveIndicator';
 import type { InboxChannelProps, InboxFormValues } from '@/types';
 import InboxPreview from './Preview';
@@ -60,38 +66,39 @@ export default function InboxChannel({
   const initialTags =
     content?.tags?.map((tag) => ({ label: tag, value: tag })) || [];
 
-  const { watch, control, setValue, getValues, trigger } = useForm<InboxFormValues>({
-    mode: 'onChange',
-    values: {
-      header: content?.header ?? '',
-      body: content?.body ?? '',
-      action_url: content?.action_url ?? '',
-      open_in_new_tab: content?.open_in_new_tab ?? false,
-      avatar: {
-        image_url: content?.avatar?.image_url ?? '',
-        url: content?.avatar?.url ?? '',
+  const { watch, control, setValue, getValues, trigger } =
+    useForm<InboxFormValues>({
+      mode: 'onChange',
+      values: {
+        header: content?.header ?? '',
+        body: content?.body ?? '',
+        action_url: content?.action_url ?? '',
+        open_in_new_tab: content?.open_in_new_tab ?? false,
+        avatar: {
+          image_url: content?.avatar?.image_url ?? '',
+          url: content?.avatar?.url ?? '',
+        },
+        subtext: {
+          text: content?.subtext?.text ?? '',
+          url: content?.subtext?.url ?? '',
+        },
+        buttons: content?.buttons ?? [],
+        is_pinned: content?.is_pinned ?? false,
+        is_expiry_enabled: content?.is_expiry_enabled ?? false,
+        expiry: {
+          expiry_type: content?.expiry?.expiry_type ?? 'fixed',
+          format: content?.expiry?.format ?? 'relative',
+          value: content?.expiry?.value ?? '',
+          is_expiry_visible: content?.expiry?.is_expiry_visible ?? false,
+        },
+        importance: content?.importance ?? 'default',
+        tags: initialTags,
+        extra_data: content?.extra_data ?? '',
       },
-      subtext: {
-        text: content?.subtext?.text ?? '',
-        url: content?.subtext?.url ?? '',
+      resetOptions: {
+        keepDirtyValues: true,
       },
-      buttons: content?.buttons ?? [],
-      is_pinned: content?.is_pinned ?? false,
-      is_expiry_enabled: content?.is_expiry_enabled ?? false,
-      expiry: {
-        expiry_type: content?.expiry?.expiry_type ?? 'fixed',
-        format: content?.expiry?.format ?? 'relative',
-        value: content?.expiry?.value ?? '',
-        is_expiry_visible: content?.expiry?.is_expiry_visible ?? false,
-      },
-      importance: content?.importance ?? 'default',
-      tags: initialTags,
-      extra_data: content?.extra_data ?? '',
-    },
-    resetOptions: {
-      keepDirtyValues: true,
-    },
-  });
+    });
 
   const {
     fields: buttonFields,
@@ -106,13 +113,14 @@ export default function InboxChannel({
 
   const handleAutosave = useCallback(
     (data: InboxFormValues) => {
-      const { tags: formTags, buttons, ...rest } = data;
+      const { tags: formTags, buttons, expiry, ...rest } = data;
 
       mutate({
         content: {
           ...rest,
           buttons: buttons?.filter((b) => b.text || b.url) ?? [],
           tags: formTags?.map((t) => t.value) ?? [],
+          expiry: data.is_expiry_enabled ? expiry : null,
         },
       });
     },
@@ -365,7 +373,6 @@ export default function InboxChannel({
                             value={f.value}
                             onChange={(val) => {
                               f.onChange(val);
-                              trigger(`buttons.${index}.url`);
                             }}
                             placeholder={`Button ${index + 1} Title`}
                             error={fieldState.error?.message}
@@ -381,13 +388,6 @@ export default function InboxChannel({
                       <Controller
                         name={`buttons.${index}.url`}
                         control={control}
-                        rules={{
-                          validate: (value) => {
-                            const text = getValues(`buttons.${index}.text`);
-                            if (text && !value) return 'Link is required';
-                            return true;
-                          },
-                        }}
                         render={({ field: f, fieldState }) => (
                           <SuggestionInput
                             value={f.value}
@@ -480,7 +480,9 @@ export default function InboxChannel({
                           </span>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>Used to filter and organize notifications in tabs</p>
+                          <p>
+                            Used to filter and organize notifications in tabs
+                          </p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -539,7 +541,12 @@ export default function InboxChannel({
                           </span>
                         </TooltipTrigger>
                         <TooltipContent className="suprsend-max-w-64">
-                          <p>Pin critical messages to the top of Inbox. Doesn't move down in order when new notification arrives. Combine with expiry to auto remove pinned notification after some time.</p>
+                          <p>
+                            Pin critical messages to the top of Inbox. Doesn't
+                            move down in order when new notification arrives.
+                            Combine with expiry to auto remove pinned
+                            notification after some time.
+                          </p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -577,7 +584,10 @@ export default function InboxChannel({
                             </span>
                           </TooltipTrigger>
                           <TooltipContent className="suprsend-max-w-64">
-                            <p>Notification is auto-deleted after a time. You can decide to show or hide expiry timer to user.</p>
+                            <p>
+                              Notification is auto-deleted after a time. You can
+                              decide to show or hide expiry timer to user.
+                            </p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>

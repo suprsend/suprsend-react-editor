@@ -28,6 +28,7 @@ export { default as Maximize2 } from './maximize2.svg?react';
 export { default as Mic } from './mic.svg?react';
 export { default as MoreHorizontal } from './more-horizontal.svg?react';
 export { default as Pencil } from './pencil.svg?react';
+export { default as Pin } from './pin.svg?react';
 export { default as Phone } from './phone.svg?react';
 export { default as Plus } from './plus.svg?react';
 export { default as RefreshCw } from './refresh-cw.svg?react';
