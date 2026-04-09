@@ -108,6 +108,21 @@ export default function EmailTemplatePlayground({
     [saveContent, post, variables]
   );
 
+  // --- Sync variables to iframe when they change after initial load ---
+  const variablesInitRef = useRef(true);
+  useEffect(() => {
+    if (variablesInitRef.current) {
+      variablesInitRef.current = false;
+      return;
+    }
+    post('BRAND_CONFIG', { brandData: variables });
+    post('INIT_MERGE_TAGS', {
+      variables,
+      mergeTagsList: mergeTagsListRef.current,
+      designerMergeTags: variablesToDesignerMergeTags(variables),
+    });
+  }, [variables, post]);
+
   // --- Designer HTML export ---
   useEffect(() => {
     exportHtmlRef.current = () => {

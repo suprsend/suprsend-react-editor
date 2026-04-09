@@ -171,12 +171,12 @@ function EmailMetaDataModal({
   }, [getValues, onSave, onFieldsChange, onClose]);
 
   return (
-    <DialogContent aria-describedby={undefined} className="!suprsend-max-w-3xl !suprsend-max-h-[90vh] !suprsend-border-0 suprsend-flex suprsend-flex-col">
+    <DialogContent aria-describedby={undefined} className="!suprsend-max-w-3xl !suprsend-max-h-[90vh] !suprsend-border-0 !suprsend-flex !suprsend-flex-col suprsend-overflow-hidden">
       <DialogHeader className="suprsend-pb-2">
         <DialogTitle className="suprsend-pb-2">Email Settings</DialogTitle>
       </DialogHeader>
 
-      <div className="suprsend-space-y-6 suprsend-pb-6 suprsend-overflow-y-auto suprsend-flex-1 suprsend-min-h-0 suprsend-px-1 -suprsend-mx-1">
+      <div className="suprsend-space-y-6 suprsend-overflow-y-auto suprsend-flex-1 suprsend-min-h-0 suprsend-px-1 -suprsend-mx-1">
         <div className="suprsend-space-y-2">
           <Controller
             name="subject"
@@ -454,7 +454,7 @@ function EmailMetaDataModal({
           )}
         </div>
       </div>
-      <DialogFooter>
+      <DialogFooter className="suprsend-border-t suprsend-pt-4 -suprsend-mx-6 suprsend-px-6">
         <Button variant="outline" onClick={onClose}>
           Cancel
         </Button>

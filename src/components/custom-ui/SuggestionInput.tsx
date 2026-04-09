@@ -53,16 +53,18 @@ function highlightHandlebars(
   flattenedVars: Record<string, unknown>
 ): string {
   if (!text) return '';
+  let blockDepth = 0;
   return text
     .split(/(\{\{\{.*?\}\}\}|\{\{.*?\}\})/g)
     .map((part) => {
       if (/^\{\{\{.*\}\}\}$/.test(part) || /^\{\{.*\}\}$/.test(part)) {
-        // Skip highlighting for helper handlebars
+        const inner = part.slice(2, -2).trim();
+        if (inner.startsWith('#')) { blockDepth++; return escapeHtml(part); }
+        if (inner.startsWith('/')) { blockDepth = Math.max(0, blockDepth - 1); return escapeHtml(part); }
         if (isHelperHandlebar(part)) return escapeHtml(part);
+        if (blockDepth > 0) return escapeHtml(part);
         const isValid = isValidVariable(part, flattenedVars);
-        const color = isValid
-          ? 'var(--primary)'
-          : 'var(--destructive)';
+        const color = isValid ? 'var(--primary)' : 'var(--destructive)';
         return `<mark style="background:transparent;color:${color}">${escapeHtml(part)}</mark>`;
       }
       return escapeHtml(part);
