@@ -542,8 +542,9 @@ export default function EmailChannel({
       />}
 
       <div
-        className={`suprsend-min-h-0 suprsend-overflow-hidden ${editorWarning ? 'suprsend-flex-[0.95]' : 'suprsend-flex-1'}`}
+        className="suprsend-min-h-0 suprsend-overflow-hidden suprsend-flex-1 suprsend-flex suprsend-flex-col"
       >
+        <div className="suprsend-flex-1 suprsend-min-h-0 suprsend-relative">
         <EmailTemplatePlayground
           editorMode={editorMode}
           activeTab={activeTab}
@@ -565,12 +566,17 @@ export default function EmailChannel({
           disabled={isLive}
           onWarningChange={setEditorWarning}
         />
+        </div>
+        {activeTab !== 'editor' || editorMode !== 'design' ? (
+          <div className="suprsend-h-8 suprsend-shrink-0">
+            {editorWarning && (
+              <p className="suprsend-text-sm suprsend-px-3 suprsend-py-1 suprsend-text-destructive">
+                {editorWarning}
+              </p>
+            )}
+          </div>
+        ) : null}
       </div>
-      {editorWarning && (
-        <p className="suprsend-text-sm suprsend-px-3 suprsend-py-1 suprsend-text-destructive suprsend-shrink-0">
-          {editorWarning}
-        </p>
-      )}
 
       <ModeSwitchModal
         open={switchModalOpen}

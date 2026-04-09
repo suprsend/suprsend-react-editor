@@ -183,11 +183,7 @@ export default function SuggestionCodeEditor({
     (update: ViewUpdate) => {
       if (update.focusChanged) {
         if (update.view.hasFocus) {
-          setWarning('');
-          if (debounceValidateRef.current) {
-            clearTimeout(debounceValidateRef.current);
-            debounceValidateRef.current = null;
-          }
+          // Don't clear warning on focus — only clear on doc change
         } else {
           // Editor lost focus — validate handlebars syntax immediately
           if (debounceValidateRef.current) {
