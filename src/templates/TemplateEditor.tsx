@@ -17,7 +17,12 @@ import type {
   SuprSendTemplateEditorProps,
 } from '@/types';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
-import { useMockData, useVariantDetails, isHttpError } from '@/apis';
+import {
+  useMockData,
+  useVariantDetails,
+  useTranslationLocaleData,
+  isHttpError,
+} from '@/apis';
 import { FileX, Loader2, Pencil, X } from '@/assets/icons';
 import { Button } from '@/components/ui/button';
 
@@ -72,6 +77,7 @@ export default function SuprSendTemplateEditor({
     setMode,
     selectedChannel,
     setSelectedChannel,
+    translationLocale,
   } = useTemplateEditorContext();
 
   const { data: variantData, error: variantError } = useVariantDetails({
@@ -81,6 +87,15 @@ export default function SuprSendTemplateEditor({
   });
 
   const { data: mockData } = useMockData({ templateSlug });
+  const { data: translationLocaleData } =
+    useTranslationLocaleData(translationLocale);
+
+  const variables: Record<string, unknown> = {
+    ...(mockData?.transformed_data ?? {}),
+    ...(translationLocaleData?.translations && {
+      __translations: translationLocaleData.translations,
+    }),
+  };
 
   useEffect(() => {
     if (channels.length > 0) {
@@ -136,58 +151,31 @@ export default function SuprSendTemplateEditor({
       )}
       <div className="suprsend-flex-1 suprsend-min-h-0 suprsend-overflow-hidden">
         {selectedChannel === 'email' && (
-          <EmailChannel
-            variantData={variantData}
-            variables={mockData?.transformed_data ?? {}}
-          />
+          <EmailChannel variantData={variantData} variables={variables} />
         )}
         {selectedChannel === 'sms' && (
-          <SMSChannel
-            variantData={variantData}
-            variables={mockData?.transformed_data ?? {}}
-          />
+          <SMSChannel variantData={variantData} variables={variables} />
         )}
         {selectedChannel === 'inbox' && (
-          <InboxChannel
-            variantData={variantData}
-            variables={mockData?.transformed_data ?? {}}
-          />
+          <InboxChannel variantData={variantData} variables={variables} />
         )}
         {selectedChannel === 'whatsapp' && (
-          <WhatsappChannel
-            variantData={variantData}
-            variables={mockData?.transformed_data ?? {}}
-          />
+          <WhatsappChannel variantData={variantData} variables={variables} />
         )}
         {selectedChannel === 'slack' && (
-          <SlackChannel
-            variantData={variantData}
-            variables={mockData?.transformed_data ?? {}}
-          />
+          <SlackChannel variantData={variantData} variables={variables} />
         )}
         {selectedChannel === 'ms_teams' && (
-          <MSTeamsChannel
-            variantData={variantData}
-            variables={mockData?.transformed_data ?? {}}
-          />
+          <MSTeamsChannel variantData={variantData} variables={variables} />
         )}
         {selectedChannel === 'androidpush' && (
-          <AndroidPushChannel
-            variantData={variantData}
-            variables={mockData?.transformed_data ?? {}}
-          />
+          <AndroidPushChannel variantData={variantData} variables={variables} />
         )}
         {selectedChannel === 'iospush' && (
-          <IOSPushChannel
-            variantData={variantData}
-            variables={mockData?.transformed_data ?? {}}
-          />
+          <IOSPushChannel variantData={variantData} variables={variables} />
         )}
         {selectedChannel === 'webpush' && (
-          <WebpushChannel
-            variantData={variantData}
-            variables={mockData?.transformed_data ?? {}}
-          />
+          <WebpushChannel variantData={variantData} variables={variables} />
         )}
       </div>
     </div>
