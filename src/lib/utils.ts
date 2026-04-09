@@ -195,7 +195,7 @@ export function htmlToText(html: string): string {
   doc.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((el: Element) => {
     const text: string = (el.textContent || '').trim();
     if (text) {
-      el.textContent = text.toUpperCase();
+      el.textContent = text;
     }
   });
 

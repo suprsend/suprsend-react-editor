@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { X } from '@/assets/icons';
+import { X, CircleCheck, AlertCircle } from '@/assets/icons';
 
 // --- Types ---
 type ToastVariant = 'default' | 'success' | 'destructive';
@@ -92,14 +92,6 @@ export function Toaster({ children }: { children?: React.ReactNode }) {
 }
 
 // --- Toast Item ---
-const variantStyles: Record<ToastVariant, string> = {
-  default:
-    'suprsend-bg-background suprsend-text-foreground suprsend-border-border',
-  success:
-    'suprsend-bg-background suprsend-text-foreground suprsend-border-green-500',
-  destructive:
-    'suprsend-bg-destructive suprsend-text-destructive-foreground suprsend-border-destructive',
-};
 
 function ToastItem({
   toast,
@@ -115,12 +107,16 @@ function ToastItem({
       className={cn(
         'suprsend-pointer-events-auto suprsend-relative suprsend-flex suprsend-items-start suprsend-gap-3 suprsend-rounded-md suprsend-border suprsend-p-4 suprsend-shadow-lg suprsend-transition-all',
         'suprsend-animate-in suprsend-slide-in-from-right-full',
-        variantStyles[variant]
+        'suprsend-bg-background suprsend-text-foreground suprsend-border-border'
       )}
     >
       <div className="suprsend-flex-1 suprsend-space-y-1">
         {toast.title && (
-          <p className="suprsend-text-sm suprsend-font-semibold">{toast.title}</p>
+          <p className="suprsend-text-sm suprsend-font-semibold suprsend-flex suprsend-items-center suprsend-gap-1.5">
+            {variant === 'success' && <CircleCheck className="suprsend-h-4 suprsend-w-4 suprsend-text-green-500 suprsend-shrink-0" />}
+            {variant === 'destructive' && <AlertCircle className="suprsend-h-4 suprsend-w-4 suprsend-text-destructive suprsend-shrink-0" />}
+            {toast.title}
+          </p>
         )}
         {toast.description && (
           <p className="suprsend-text-sm suprsend-opacity-90">{toast.description}</p>
