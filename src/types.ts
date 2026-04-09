@@ -371,6 +371,7 @@ export interface SlackTextPreviewProps {
 
 export interface SlackBlockPreviewProps {
   bodyBlock: string;
+  variables: Record<string, unknown>;
 }
 
 // --- JSONNET Render ---
@@ -573,7 +574,7 @@ export interface IInboxContent {
   buttons: IInboxButton[];
   is_pinned: boolean;
   is_expiry_enabled: boolean;
-  expiry: IInboxExpiry;
+  expiry: IInboxExpiry | null;
   importance: string;
   tags: string[];
   extra_data: string;

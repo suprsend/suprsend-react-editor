@@ -93,9 +93,22 @@ export default function MSTeamsChannel({
 
           {/* Helper text */}
           <p className="suprsend-text-xs suprsend-text-muted-foreground">
-            {isCard
-              ? 'Add variable in JSONNET as data.key or data["$batched_events"].key'
-              : 'Add variable in handlebars format as {{...}}. Enclose variable containing special characters in {{{...}}}'}
+            {isCard ? (
+              <>
+                Add variable in JSONNET as data.key or data["$batched_events"]
+                .key. Design template in{' '}
+                <a
+                  href="https://adaptivecards.io/designer"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="suprsend-text-primary hover:suprsend-underline"
+                >
+                  Adaptive Card Builder
+                </a>
+              </>
+            ) : (
+              'Add variable in handlebars format as {{...}}. Enclose variable containing special characters in {{{...}}}'
+            )}
           </p>
 
           {/* Editor */}

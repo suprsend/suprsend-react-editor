@@ -93,9 +93,22 @@ export default function SlackChannel({
 
           {/* Helper text */}
           <p className="suprsend-text-xs suprsend-text-muted-foreground">
-            {isBlock
-              ? 'Add variable in JSONNET as data.key or data["$batched_events"].key'
-              : 'Add variable in handlebars format as {{...}}. Enclose variable containing special characters in {{{...}}}'}
+            {isBlock ? (
+              <>
+                Add variable in JSONNET as data.key or data["$batched_events"]
+                .key. Design template in{' '}
+                <a
+                  href="https://app.slack.com/block-kit-builder"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="suprsend-text-primary hover:suprsend-underline"
+                >
+                  Slack Block Kit Builder
+                </a>
+              </>
+            ) : (
+              'Add variable in handlebars format as {{...}}. Enclose variable containing special characters in {{{...}}}'
+            )}
           </p>
 
           {/* Editor */}
@@ -106,7 +119,6 @@ export default function SlackChannel({
               onChange={(val) =>
                 setValue('body_block', val, { shouldDirty: true })
               }
-              placeholder="Add template blocks array [...], instead of blocks object {blocks:[...]}"
               height="500px"
               disabled={isLive}
             />
