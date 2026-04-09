@@ -174,9 +174,7 @@ function BlockPreview({ bodyBlock, variables }: SlackBlockPreviewProps) {
               size="sm"
               onClick={() => {
                 const domain = 'https://app.slack.com/block-kit-builder/#';
-                const path = window.encodeURI(
-                  `{"blocks": ${previewState.data}}`
-                );
+                const path = window.encodeURI(previewState.data!);
                 window.open(`${domain}${path}`, '_blank');
               }}
             >

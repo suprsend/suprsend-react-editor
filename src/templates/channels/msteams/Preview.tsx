@@ -6,7 +6,11 @@ import MarkdownRenderer, {
 import { renderHandlebars } from '@/components/custom-ui/HandlebarsRenderer';
 import { useJsonnetRender } from '@/apis';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Loader2, MSTeamsPreviewIcon as MSTeamsIcon } from '@/assets/icons';
+import {
+  RefreshCw,
+  Loader2,
+  MSTeamsPreviewIcon as MSTeamsIcon,
+} from '@/assets/icons';
 import type {
   MSTeamsPreviewProps,
   JsonnetPreviewState,
@@ -131,7 +135,7 @@ function JsonnetPreview({ bodyCard, variables }: JsonnetPreviewProps) {
     jsonnetRender.mutate(body, {
       onSuccess: (data) => {
         if (data.success && data.result) {
-          const cardJson = data.result[0];
+          const cardJson = data.result;
           const result = renderAdaptiveCard(cardJson);
           if (result.success) {
             setPreviewState({ success: true, html: result.html, error: null });
@@ -181,7 +185,9 @@ function JsonnetPreview({ bodyCard, variables }: JsonnetPreviewProps) {
           </div>
         ) : (
           <MessageBubble>
-            <div dangerouslySetInnerHTML={{ __html: previewState.html ?? '' }} />
+            <div
+              dangerouslySetInnerHTML={{ __html: previewState.html ?? '' }}
+            />
           </MessageBubble>
         )}
       </div>
