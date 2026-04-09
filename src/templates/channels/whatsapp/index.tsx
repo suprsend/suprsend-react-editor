@@ -254,7 +254,6 @@ export default function WhatsappChannel({
               <Button
                 variant="outline"
                 size="sm"
-                className="suprsend-text-destructive suprsend-border-destructive hover:suprsend-bg-destructive/10"
                 onClick={() => setDiscardOpen(true)}
               >
                 Cancel Approval
@@ -264,7 +263,7 @@ export default function WhatsappChannel({
           </div>
         </div>
         <div className="suprsend-max-w-2xl suprsend-space-y-6">
-          {isLive && isPrivate && variantData?.needs_vendor_approval && (
+          {isLive && isPrivate && variantData?.needs_vendor_approval && variantData?.approval_status !== 'discarded' && (
             <VendorApprovalBanner
               channelSlug="whatsapp"
               vendorApprovals={variantData?.vendor_approvals}

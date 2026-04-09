@@ -14,6 +14,7 @@ export { default as Clipboard } from './clipboard.svg?react';
 export { default as CodeXml } from './code-xml.svg?react';
 export { default as Ellipsis } from './ellipsis.svg?react';
 export { default as ExternalLink } from './external-link.svg?react';
+export { default as Eye } from './eye.svg?react';
 export { default as FileText } from './file-text.svg?react';
 export { default as FlaskConical } from './flask-conical.svg?react';
 export { default as FileX } from './file-x.svg?react';

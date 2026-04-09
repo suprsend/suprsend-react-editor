@@ -14,7 +14,7 @@ import {
   TooltipContent,
   TooltipProvider,
 } from '@/components/ui/tooltip';
-import { HelpCircle, Plus, Clipboard, Check, RefreshCw } from '@/assets/icons';
+import { HelpCircle, Plus, Clipboard, Check, RefreshCw, Eye } from '@/assets/icons';
 import VendorApproveModal from './VendorApproveModal';
 import UpdateStatusModal from './UpdateStatusModal';
 import { useStartVendorApproval } from '@/apis';
@@ -38,7 +38,7 @@ function getStatusConfig(
     pending: {
       label: 'Approval Pending',
       className: 'suprsend-bg-amber-50 suprsend-border-amber-200 suprsend-text-amber-700',
-      tooltip: `${channel} template will need to be approved on DLT portal to go live. Until then, last live version will be sent to users.`,
+      tooltip: `${channel} template will need to be approved on your vendor portal to go live. Until then, last live version will be sent to users.`,
     },
     sent_for_approval: {
       label: 'Sent for Approval',
@@ -149,10 +149,21 @@ function RowActions({
   if (isAutoApproval) {
     if (approval_status === 'sent_for_approval') {
       return (
-        <Button variant="outline" size="sm" disabled>
-          <RefreshCw className="suprsend-w-3.5 suprsend-h-3.5" />
-          Auto-approval
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button variant="outline" size="sm" disabled>
+                  <RefreshCw className="suprsend-w-3.5 suprsend-h-3.5" />
+                  Auto-approval
+                </Button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent className="suprsend-max-w-xs">
+              <p>Template will be auto-approved. Set up the SuprSend webhook in your vendor portal to sync approval status. If status doesn't update in 10–15 mins, verify the webhook setup.</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       );
     }
     return null;
@@ -170,11 +181,12 @@ function RowActions({
           Update Status
         </Button>
         <Button
-          variant="outline"
-          size="sm"
+          variant="ghost"
+          size="icon"
+          className="!suprsend-h-7 !suprsend-w-7"
           onClick={() => onModal({ type: 'approve', approval, readOnly: true })}
         >
-          Message Template
+          <Eye className="suprsend-w-4 suprsend-h-4 suprsend-text-muted-foreground" />
         </Button>
       </div>
     );
@@ -238,7 +250,7 @@ function AddVendorRow({
       <div>
         <Button variant="outline" size="sm" onClick={() => setIsOpen(true)}>
           <Plus className="suprsend-w-4 suprsend-h-4" />
-          Add vendors
+          Add vendor approval
         </Button>
       </div>
     );
@@ -337,12 +349,12 @@ export default function VendorApprovalBanner({
                 key={row.key}
                 className="suprsend-rounded-lg suprsend-border suprsend-border-border suprsend-bg-background"
               >
-                <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-px-4 suprsend-py-3">
+                <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-px-3 suprsend-py-2">
                   <div className="suprsend-flex suprsend-items-center suprsend-gap-3 suprsend-min-w-0">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span className="suprsend-text-sm suprsend-font-semibold suprsend-text-foreground suprsend-truncate suprsend-max-w-[200px]">
+                          <span className="suprsend-font-semibold suprsend-text-foreground suprsend-truncate suprsend-max-w-[200px]" style={{ fontSize: '12px' }}>
                             {row.label}
                           </span>
                         </TooltipTrigger>
@@ -356,7 +368,8 @@ export default function VendorApprovalBanner({
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <span
-                              className={`suprsend-inline-flex suprsend-items-center suprsend-gap-1 suprsend-rounded-md suprsend-border suprsend-px-2 suprsend-py-0.5 suprsend-text-xs suprsend-font-medium ${statusConfig.className}`}
+                              className={`suprsend-inline-flex suprsend-items-center suprsend-gap-1 suprsend-rounded-md suprsend-border suprsend-px-2 suprsend-py-0.5 suprsend-font-medium ${statusConfig.className}`}
+                              style={{ fontSize: '11px' }}
                             >
                               {statusConfig.label}
                               <HelpCircle className="suprsend-w-3 suprsend-h-3" />

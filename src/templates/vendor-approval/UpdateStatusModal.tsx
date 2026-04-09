@@ -114,8 +114,8 @@ export default function UpdateStatusModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="suprsend-max-w-2xl suprsend-max-h-[85vh] suprsend-flex suprsend-flex-col suprsend-gap-0">
-        <DialogHeader className="suprsend-pb-4 suprsend-border-b suprsend-border-border suprsend--mx-6 suprsend-px-6">
+      <DialogContent className="!suprsend-max-w-3xl suprsend-max-h-[85vh] !suprsend-p-0 !suprsend-gap-0 suprsend-overflow-hidden">
+        <DialogHeader className="suprsend-pb-4 suprsend-pt-6 suprsend-px-6 suprsend-border-b suprsend-border-border">
           <DialogTitle>
             Update approval status from your vendor portal
           </DialogTitle>
@@ -129,7 +129,7 @@ export default function UpdateStatusModal({
           onSubmit={handleSubmit(onSubmit)}
           className="suprsend-flex suprsend-flex-col suprsend-flex-1 suprsend-overflow-hidden"
         >
-          <div className="suprsend-flex-1 suprsend-overflow-y-auto suprsend-space-y-6 suprsend-py-4 suprsend--mx-6 suprsend-px-6">
+          <div className="suprsend-flex-1 suprsend-overflow-y-auto suprsend-space-y-6 suprsend-pt-4 suprsend-pb-4 suprsend-px-6">
             <div className="suprsend-space-y-2">
               <Label>Status</Label>
               <Controller
@@ -329,7 +329,7 @@ export default function UpdateStatusModal({
             )}
           </div>
 
-          <DialogFooter className="suprsend-pt-4 suprsend-border-t suprsend-border-border suprsend--mx-6 suprsend-px-6">
+          <DialogFooter className="suprsend-pt-4 suprsend-pb-6 suprsend-px-6 suprsend-border-t suprsend-border-border">
             <Button
               type="button"
               variant="outline"
