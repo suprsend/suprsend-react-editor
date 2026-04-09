@@ -26,7 +26,7 @@ export { invalidateQueries };
 export { isHttpError } from '@/lib/fetchClient';
 
 const API_BASE_URL = 'https://stagingapi2.suprsend.com';
-const JSONNET_API_BASE_URL = 'https://stagingapi.suprsend.com/jsonnet/v2';
+const JSONNET_API_BASE_URL = 'https://stagingapi.suprsend.com';
 
 export const fetchClient = new FetchClient({
   baseURL: API_BASE_URL,
@@ -725,7 +725,7 @@ export const useDiscardVendorApproval = ({
 const renderJsonnet = async (
   body: JsonnetRenderBody
 ): Promise<JsonnetRenderResponse> => {
-  const resp = await fetchClient.post(`${JSONNET_API_BASE_URL}/render/`, body);
+  const resp = await fetchClient.post(`${JSONNET_API_BASE_URL}/jsonnet/v2/render/`, body);
   return resp.data as JsonnetRenderResponse;
 };
 
