@@ -250,7 +250,7 @@ export default function WhatsappChannel({
             {isLive && <ApprovalStatusBadge approvalStatus={variantData?.approval_status} discardComment={variantData?.discard_comment} />}
           </div>
           <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
-            {isLive && variantData?.needs_vendor_approval && !['approved', 'rejected', 'discarded'].includes(variantData?.approval_status ?? '') && (
+            {isLive && variantData?.needs_vendor_approval && ['pending', 'sent_for_approval'].includes(variantData?.approval_status ?? '') && (
               <Button
                 variant="outline"
                 size="sm"
