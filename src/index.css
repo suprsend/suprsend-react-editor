@@ -285,7 +285,7 @@
 }
 
 .suprsend-root :disabled {
-  cursor: default;
+  cursor: not-allowed;
 }
 
 .suprsend-root img,

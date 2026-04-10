@@ -109,6 +109,7 @@ function StyledControl({
   innerRef,
   innerProps,
   isFocused,
+  isDisabled,
 }: SharedControlProps) {
   return (
     <div
@@ -116,7 +117,8 @@ function StyledControl({
       {...innerProps}
       className={cn(
         'suprsend-flex suprsend-min-h-9 suprsend-w-full suprsend-items-center suprsend-justify-between suprsend-gap-1 suprsend-rounded-md suprsend-border suprsend-border-input suprsend-bg-transparent suprsend-px-3 suprsend-py-1.5 suprsend-text-sm suprsend-shadow-sm suprsend-ring-offset-background',
-        isFocused && 'suprsend-outline-none suprsend-ring-1 suprsend-ring-ring'
+        isFocused && 'suprsend-outline-none suprsend-ring-1 suprsend-ring-ring',
+        isDisabled && 'suprsend-bg-muted suprsend-cursor-not-allowed'
       )}
     >
       {children}
