@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { makeAbsoluteUrl } from '@/lib/utils';
 import HandlebarsRenderer, {
   renderHandlebars,
 } from '@/components/custom-ui/HandlebarsRenderer';
@@ -31,7 +30,7 @@ export default function WebpushPreview({
   const [activeTab, setActiveTab] = useState<PreviewTab>('windows');
 
   const resolvedImageUrl = formValues.image_url
-    ? makeAbsoluteUrl(renderHandlebars(formValues.image_url, variables))
+    ? renderHandlebars(formValues.image_url, variables)
     : '';
 
   return (

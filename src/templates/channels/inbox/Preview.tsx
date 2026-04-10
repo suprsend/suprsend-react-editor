@@ -4,7 +4,6 @@ import HandlebarsRenderer, {
   renderHandlebars,
 } from '@/components/custom-ui/HandlebarsRenderer';
 import { InboxMarkdownRenderer } from '@/components/custom-ui/MarkdownRenderer';
-import { makeAbsoluteUrl } from '@/lib/utils';
 import type { IInboxExpiry, InboxPreviewProps } from '@/types';
 import defaultAvatar from '@/assets/defaultPreviewIcon.png';
 
@@ -42,7 +41,7 @@ export default function InboxPreview({
     const url = formValues.avatar?.image_url;
     if (!url) return defaultAvatar;
     const rendered = renderHandlebars(url, variables);
-    return rendered ? makeAbsoluteUrl(rendered) : defaultAvatar;
+    return rendered || defaultAvatar;
   }, [formValues.avatar?.image_url, variables]);
 
   const resolvedHeader = useMemo(

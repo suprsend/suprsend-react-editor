@@ -21,14 +21,6 @@ export function createQueryParams(params: Record<string, unknown>): string {
   return qs ? `?${qs}` : '';
 }
 
-const IMG_HOST = 'https://ik.imagekit.io/l0quatz6utm/';
-
-export function makeAbsoluteUrl(url: string, transform = '') {
-  return url?.startsWith('http://') || url?.startsWith('https://')
-    ? url
-    : `${IMG_HOST}${transform}${url}`;
-}
-
 export function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     const r = (Math.random() * 16) | 0;
