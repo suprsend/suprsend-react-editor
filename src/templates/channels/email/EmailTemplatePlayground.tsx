@@ -390,7 +390,7 @@ export default function EmailTemplatePlayground({
           )}
           <iframe
             ref={iframeRef}
-            src={`http://localhost:5173/?userId=${encodeURIComponent(userId ?? '')}`}
+            src={`https://suprsend-unlayer-editor.pages.dev?userId=${encodeURIComponent(userId ?? '')}`}
             className="suprsend-w-full suprsend-flex-1 suprsend-min-h-0"
           />
         </div>

@@ -55,6 +55,11 @@ function getStatusConfig(
       className: 'suprsend-bg-red-50 suprsend-border-red-200 suprsend-text-red-700',
       tooltip: `${channel} template was rejected by this vendor.`,
     },
+    upload_failed: {
+      label: 'Upload Failed',
+      className: 'suprsend-bg-red-50 suprsend-border-red-200 suprsend-text-red-700',
+      tooltip: `${channel} template upload failed for this vendor.`,
+    },
   };
 
   return config[status] ?? {
@@ -121,11 +126,12 @@ function StatusTooltipContent({
   if (approval.approval_status === 'approved') {
     return <ApprovedTooltip approval={approval} />;
   }
-  if (approval.approval_status === 'rejected') {
+  if (approval.approval_status === 'rejected' || approval.approval_status === 'upload_failed') {
     return (
       <div className="suprsend-space-y-1">
         <p>
-          Rejection reason: <strong>{approval.comment || 'No reason provided'}</strong>
+          {approval.approval_status === 'upload_failed' ? 'Failure reason' : 'Rejection reason'}:{' '}
+          <strong>{approval.comment || 'No reason provided'}</strong>
         </p>
         <p>Fix and republish the template</p>
       </div>
