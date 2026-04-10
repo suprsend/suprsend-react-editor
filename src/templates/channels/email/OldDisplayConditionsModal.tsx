@@ -185,7 +185,7 @@ export default function OldDisplayConditionsModal({
                   : 'suprsend-border-border hover:suprsend-bg-muted/50',
                 dirty &&
                   !isAddNew &&
-                  'suprsend-opacity-40 suprsend-cursor-not-allowed'
+                  'suprsend-opacity-50 suprsend-cursor-not-allowed'
               )}
             >
               <span className="suprsend-font-medium suprsend-text-foreground">
@@ -206,7 +206,7 @@ export default function OldDisplayConditionsModal({
                     : 'suprsend-border-border hover:suprsend-bg-muted/50',
                   dirty &&
                     selected?.label !== condition.label &&
-                    'suprsend-opacity-40 suprsend-cursor-not-allowed'
+                    'suprsend-opacity-50 suprsend-cursor-not-allowed'
                 )}
               >
                 <span className="suprsend-font-medium suprsend-text-foreground suprsend-block">

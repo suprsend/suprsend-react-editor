@@ -62,10 +62,14 @@ function buildDecorations(
     const text = view.state.doc.sliceString(from, to);
     HANDLEBAR_REGEX.lastIndex = 0;
     let match: RegExpExecArray | null;
+    let blockDepth = 0;
 
     while ((match = HANDLEBAR_REGEX.exec(text)) !== null) {
-      // Skip helper handlebars — no highlighting for helpers
+      const inner = match[0].slice(2, -2).trim();
+      if (inner.startsWith('#')) { blockDepth++; continue; }
+      if (inner.startsWith('/')) { blockDepth = Math.max(0, blockDepth - 1); continue; }
       if (isHelperHandlebar(match[0])) continue;
+      if (blockDepth > 0) continue;
       const start = from + match.index;
       const end = start + match[0].length;
       const isValid = isValidVariable(match[0], flattenedVars);
@@ -142,6 +146,7 @@ export default function SuggestionCodeEditor({
     setWarningState(w);
     onWarningChange?.(w);
   }, [onWarningChange]);
+  const debounceValidateRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Variables without __translations for suggestions
   const modifiedVariables = useMemo(() => {
@@ -178,9 +183,13 @@ export default function SuggestionCodeEditor({
     (update: ViewUpdate) => {
       if (update.focusChanged) {
         if (update.view.hasFocus) {
-          setWarning('');
+          // Don't clear warning on focus — only clear on doc change
         } else {
-          // Editor lost focus — validate handlebars syntax
+          // Editor lost focus — validate handlebars syntax immediately
+          if (debounceValidateRef.current) {
+            clearTimeout(debounceValidateRef.current);
+            debounceValidateRef.current = null;
+          }
           setShowSuggestions(false);
           const docText = update.state.doc.toString();
           if (hasInvalidHandlebarsSyntax(docText)) {
@@ -189,6 +198,24 @@ export default function SuggestionCodeEditor({
             );
           }
         }
+      }
+
+      // Debounced validation while typing
+      if (update.docChanged) {
+        if (debounceValidateRef.current) {
+          clearTimeout(debounceValidateRef.current);
+        }
+        debounceValidateRef.current = setTimeout(() => {
+          debounceValidateRef.current = null;
+          const docText = update.state.doc.toString();
+          if (hasInvalidHandlebarsSyntax(docText)) {
+            setWarning(
+              "Invalid Handlebars syntax. Not sure what's wrong? Ask AI for the correct format."
+            );
+          } else {
+            setWarning('');
+          }
+        }, 500);
       }
 
       if (!enableSuggestions || disabled) return;
@@ -212,8 +239,17 @@ export default function SuggestionCodeEditor({
         setShowSuggestions(false);
       }
     },
-    [enableSuggestions, disabled]
+    [enableSuggestions, disabled, setWarning]
   );
+
+  // Clean up debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceValidateRef.current) {
+        clearTimeout(debounceValidateRef.current);
+      }
+    };
+  }, []);
 
   // Close suggestions when clicking outside the editor and suggestions portal
   useEffect(() => {

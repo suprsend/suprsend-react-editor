@@ -424,7 +424,7 @@ function ConditionRow({
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Add static values as "string", 12, true, null</p>
-                    <p>and variable as variable_key (without brackets)</p>
+                    <p>and variable as variable_key (without inverted commas)</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

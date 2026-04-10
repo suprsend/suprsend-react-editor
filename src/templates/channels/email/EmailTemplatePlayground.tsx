@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { Loader2 } from '@/assets/icons';
+import { Loader2, AlertCircle } from '@/assets/icons';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
 import { usePostMessageBridge } from '@/lib/usePostMessageBridge';
 import { useUploadFile } from '@/apis';
@@ -60,6 +60,9 @@ export default function EmailTemplatePlayground({
     apiBody?.designer?.html ?? ''
   );
 
+  // --- Preview error from Unlayer ---
+  const [previewHtmlError, setPreviewHtmlError] = useState<string | null>(null);
+
   // --- Display conditions ---
   const displayConditionInfoRef = useRef<DisplayConditionInfo | null>(null);
   const [displayConditionOpen, setDisplayConditionOpen] = useState(false);
@@ -107,6 +110,21 @@ export default function EmailTemplatePlayground({
     },
     [saveContent, post, variables]
   );
+
+  // --- Sync variables to iframe when they change after initial load ---
+  const variablesInitRef = useRef(true);
+  useEffect(() => {
+    if (variablesInitRef.current) {
+      variablesInitRef.current = false;
+      return;
+    }
+    post('BRAND_CONFIG', { brandData: variables });
+    post('INIT_MERGE_TAGS', {
+      variables,
+      mergeTagsList: mergeTagsListRef.current,
+      designerMergeTags: variablesToDesignerMergeTags(variables),
+    });
+  }, [variables, post]);
 
   // --- Designer HTML export ---
   useEffect(() => {
@@ -177,6 +195,7 @@ export default function EmailTemplatePlayground({
       designerHtmlRef.current = html;
       designJsonRef.current = design_json;
       setLatestDesignerHtml(html);
+      setPreviewHtmlError(null);
       saveContent({
         content: {
           body: {
@@ -225,6 +244,11 @@ export default function EmailTemplatePlayground({
       setMergeTagModalOpen(true);
     });
 
+    const unsubPreviewError = on('PREVIEW_HTML_ERROR', (payload) => {
+      const { error } = payload as { error: string | null };
+      setPreviewHtmlError(error);
+    });
+
     const unsubUpload = on('IMAGE_UPLOAD', async (payload) => {
       const { file, requestId } = payload as { file: File; requestId: string };
       try {
@@ -243,6 +267,7 @@ export default function EmailTemplatePlayground({
       unsubUpdate();
       unsubDisplayCondition();
       unsubMergeTag();
+      unsubPreviewError();
       unsubUpload();
     };
   }, [on, post, saveContent, designerHtmlRef, uploadFile, variables]);
@@ -281,10 +306,20 @@ export default function EmailTemplatePlayground({
     [saveContent, onPlainTextOnlyTextChange]
   );
 
-  const resolvedDesignerHtml = useMemo(() => {
-    if (!disabled || editorMode !== 'design') return '';
+  const { resolvedDesignerHtml, designerHtmlError } = useMemo(() => {
+    if (!disabled || editorMode !== 'design')
+      return { resolvedDesignerHtml: '', designerHtmlError: null };
     const html = apiBody?.designer?.html ?? '';
-    return html ? renderHandlebars(html, variables) : '';
+    if (!html) return { resolvedDesignerHtml: '', designerHtmlError: null };
+    let error: string | null = null;
+    const onError = (e: unknown) => {
+      error = e instanceof Error ? e.message : String(e);
+    };
+    const result = renderHandlebars(html, variables, {
+      onCompileError: onError,
+      onRenderError: onError,
+    });
+    return { resolvedDesignerHtml: result, designerHtmlError: error };
   }, [disabled, editorMode, apiBody?.designer?.html, variables]);
 
   // Auto-generated plain text from HTML (shown when plain text field is empty)
@@ -332,9 +367,19 @@ export default function EmailTemplatePlayground({
       {/* Designer iframe – always mounted in design mode (non-live), hidden when not active */}
       {editorMode === 'design' && !disabled && (
         <div
-          className="suprsend-absolute suprsend-inset-0"
+          className="suprsend-absolute suprsend-inset-0 suprsend-flex suprsend-flex-col"
           style={showDesignerIframe ? undefined : hiddenStyle}
         >
+          {previewHtmlError && (
+            <div className="suprsend-shrink-0 suprsend-p-2">
+              <div className="suprsend-flex suprsend-items-start suprsend-gap-2 suprsend-px-3 suprsend-py-2 suprsend-bg-destructive/10 suprsend-border suprsend-border-destructive/20 suprsend-rounded-md suprsend-text-destructive">
+                <AlertCircle className="suprsend-w-4 suprsend-h-4 suprsend-shrink-0 suprsend-mt-0.5" />
+                <p className="suprsend-text-xs suprsend-m-0 suprsend-break-words suprsend-min-w-0">
+                  {previewHtmlError}
+                </p>
+              </div>
+            </div>
+          )}
           {iframeLoading && (
             <div className="suprsend-absolute suprsend-inset-0 suprsend-flex suprsend-items-center suprsend-justify-center suprsend-bg-background suprsend-z-10">
               <Loader2
@@ -345,8 +390,8 @@ export default function EmailTemplatePlayground({
           )}
           <iframe
             ref={iframeRef}
-            src={`https://suprsend-unlayer-editor.pages.dev?userId=${encodeURIComponent(userId ?? '')}`}
-            className="suprsend-w-full suprsend-h-full"
+            src={`http://localhost:5173/?userId=${encodeURIComponent(userId ?? '')}`}
+            className="suprsend-w-full suprsend-flex-1 suprsend-min-h-0"
           />
         </div>
       )}
@@ -354,13 +399,23 @@ export default function EmailTemplatePlayground({
       {/* Designer live mode: HTML preview */}
       {editorMode === 'design' && disabled && (
         <div
-          className="suprsend-absolute suprsend-inset-0"
+          className="suprsend-absolute suprsend-inset-0 suprsend-flex suprsend-flex-col"
           style={showDesignerIframe ? undefined : hiddenStyle}
         >
+          {designerHtmlError && (
+            <div className="suprsend-shrink-0 suprsend-p-2">
+              <div className="suprsend-flex suprsend-items-start suprsend-gap-2 suprsend-px-3 suprsend-py-2 suprsend-bg-destructive/10 suprsend-border suprsend-border-destructive/20 suprsend-rounded-md suprsend-text-destructive">
+                <AlertCircle className="suprsend-w-4 suprsend-h-4 suprsend-shrink-0 suprsend-mt-0.5" />
+                <p className="suprsend-text-xs suprsend-m-0 suprsend-break-words suprsend-min-w-0">
+                  {designerHtmlError}
+                </p>
+              </div>
+            </div>
+          )}
           <iframe
             srcDoc={resolvedDesignerHtml}
             title="Email preview"
-            className="suprsend-w-full suprsend-h-full suprsend-border-0"
+            className="suprsend-w-full suprsend-flex-1 suprsend-border-0"
           />
         </div>
       )}

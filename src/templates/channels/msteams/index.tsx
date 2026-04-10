@@ -131,7 +131,7 @@ export default function MSTeamsChannel({
               }
               variables={variables}
               as="textarea"
-              rows={19}
+              className="!suprsend-h-[500px]"
               disabled={isLive}
             />
           )}

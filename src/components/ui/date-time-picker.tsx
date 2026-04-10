@@ -56,7 +56,7 @@ function TimeField({
   }
 
   return (
-    <div className="suprsend-inline-flex suprsend-h-9 suprsend-w-[70px] suprsend-items-center suprsend-justify-center suprsend-rounded-md suprsend-border suprsend-border-input suprsend-bg-transparent suprsend-shadow-sm focus-within:suprsend-ring-1 focus-within:suprsend-ring-ring">
+    <div className={cn("suprsend-inline-flex suprsend-h-9 suprsend-w-[70px] suprsend-items-center suprsend-justify-center suprsend-rounded-md suprsend-border suprsend-border-input suprsend-bg-transparent suprsend-shadow-sm focus-within:suprsend-ring-1 focus-within:suprsend-ring-ring", disabled && "suprsend-bg-muted suprsend-cursor-not-allowed")}>
       <input
         type="text"
         inputMode="numeric"
@@ -159,7 +159,7 @@ function DateTimePicker({
               variant="outline"
               disabled={disabled}
               className={cn(
-                'suprsend-w-[180px] suprsend-justify-between suprsend-font-normal',
+                'suprsend-w-[180px] suprsend-justify-between suprsend-font-normal disabled:suprsend-bg-muted disabled:suprsend-opacity-100',
                 !value && 'suprsend-text-muted-foreground'
               )}
             >
@@ -229,7 +229,7 @@ function DatePicker({
           variant="outline"
           disabled={disabled}
           className={cn(
-            'suprsend-w-full suprsend-justify-start suprsend-text-left suprsend-font-normal',
+            'suprsend-w-full suprsend-justify-start suprsend-text-left suprsend-font-normal disabled:suprsend-bg-muted disabled:suprsend-opacity-100',
             !value && 'suprsend-text-muted-foreground',
             className
           )}

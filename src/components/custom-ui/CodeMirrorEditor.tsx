@@ -175,6 +175,7 @@ function CodeMirrorEditorInner(
       ref={containerRef}
       className={cn(
         'suprsend-rounded-md suprsend-border suprsend-overflow-hidden suprsend-bg-background',
+        disabled && 'suprsend-bg-muted suprsend-cursor-not-allowed',
         className
       )}
       style={height ? { height } : undefined}

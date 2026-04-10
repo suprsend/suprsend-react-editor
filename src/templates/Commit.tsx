@@ -53,10 +53,7 @@ function VariantRow({
   checked: boolean;
   onToggle: () => void;
 }) {
-  const [showErrors, setShowErrors] = useState(false);
-  const errorCount = getErrorCount(variant.errors);
   const isDeleted = variant.is_deleted;
-  const hasErrors = errorCount > 0;
   const key = `${variant.channel}:${variant.id}`;
   const displayName = variant.name || variant.id;
   const channelName = variant.channel;
@@ -66,9 +63,9 @@ function VariantRow({
       <div className="suprsend-flex suprsend-items-center suprsend-gap-3">
         <Checkbox
           id={key}
-          checked={hasErrors ? false : isDeleted ? true : checked}
+          checked={isDeleted ? true : checked}
           onCheckedChange={onToggle}
-          disabled={hasErrors || isDeleted}
+          disabled={isDeleted}
           className=""
         />
         <Label
@@ -83,20 +80,42 @@ function VariantRow({
           <span className="suprsend-text-muted-foreground">&gt;</span>
           {displayName}
         </Label>
-        {hasErrors && (
-          <button
-            type="button"
-            className="suprsend-flex suprsend-items-center suprsend-gap-1 suprsend-text-xs suprsend-text-destructive suprsend-bg-transparent suprsend-border-none suprsend-cursor-pointer suprsend-p-0"
-            onClick={() => setShowErrors((v) => !v)}
-          >
-            <AlertCircle className="suprsend-h-3.5 suprsend-w-3.5" />
-            <span>error</span>
-          </button>
-        )}
       </div>
-      {hasErrors && showErrors && (
-        <div className="suprsend-ml-7 suprsend-mt-2 suprsend-rounded suprsend-bg-muted suprsend-p-3 suprsend-text-xs suprsend-font-mono suprsend-text-muted-foreground">
-          {JSON.stringify(variant.errors, null, 2)}
+    </div>
+  );
+}
+
+function ErrorVariantRow({ variant }: { variant: CommitVariant }) {
+  const [showErrors, setShowErrors] = useState(false);
+  const displayName = variant.name || variant.id;
+  const channelName = variant.channel;
+
+  return (
+    <div className="suprsend-border-b suprsend-border-destructive/20 last:suprsend-border-b-0">
+      <button
+        type="button"
+        className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-w-full suprsend-bg-transparent suprsend-border-none suprsend-cursor-pointer suprsend-px-3 suprsend-py-2 suprsend-gap-2"
+        onClick={() => setShowErrors((v) => !v)}
+      >
+        <div className="suprsend-flex suprsend-items-center suprsend-gap-1.5 suprsend-min-w-0">
+          <ChevronDown
+            className={`suprsend-h-3.5 suprsend-w-3.5 suprsend-shrink-0 suprsend-text-destructive suprsend-transition-transform ${
+              !showErrors ? 'suprsend--rotate-90' : ''
+            }`}
+          />
+          <span className="suprsend-text-xs suprsend-text-destructive suprsend-truncate">
+            {channelName}
+            <span> &gt; </span>
+            {displayName}
+          </span>
+        </div>
+        <AlertCircle className="suprsend-h-3.5 suprsend-w-3.5 suprsend-shrink-0 suprsend-text-destructive" />
+      </button>
+      {showErrors && (
+        <div className="suprsend-px-3 suprsend-pb-2">
+          <div className="suprsend-ml-5 suprsend-rounded suprsend-bg-destructive/5 suprsend-p-2 suprsend-text-xs suprsend-font-mono suprsend-text-destructive">
+            {JSON.stringify(variant.errors, null, 2)}
+          </div>
         </div>
       )}
     </div>
@@ -124,6 +143,16 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
   const variants: CommitVariant[] = useMemo(
     () => data?.variants ?? [],
     [data?.variants]
+  );
+
+  const committableVariants = useMemo(
+    () => variants.filter((v) => getErrorCount(v.errors) === 0),
+    [variants]
+  );
+
+  const errorVariants = useMemo(
+    () => variants.filter((v) => getErrorCount(v.errors) > 0),
+    [variants]
   );
 
   // Changed properties
@@ -164,21 +193,18 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
   );
 
   // Count edited, deleted, and error variants
-  const { editedCount, deletedCount, errorCount } = useMemo(() => {
+  const { editedCount, deletedCount } = useMemo(() => {
     let edited = 0;
     let deleted = 0;
-    let errors = 0;
-    for (const v of variants) {
-      if (getErrorCount(v.errors) > 0) {
-        errors++;
-      } else if (v.is_deleted) {
+    for (const v of committableVariants) {
+      if (v.is_deleted) {
         deleted++;
       } else {
         edited++;
       }
     }
-    return { editedCount: edited, deletedCount: deleted, errorCount: errors };
-  }, [variants]);
+    return { editedCount: edited, deletedCount: deleted };
+  }, [committableVariants]);
 
   // Count total changes (properties with has_diff + variants)
   const totalChanges = useMemo(() => {
@@ -219,7 +245,7 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!suprsend-max-w-[700px]">
+      <DialogContent className="!suprsend-max-w-[700px] suprsend-max-h-[85vh] suprsend-overflow-y-auto">
         <DialogHeader className="suprsend-pb-4">
           <DialogTitle>Commit changes</DialogTitle>
         </DialogHeader>
@@ -260,7 +286,7 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
                 </p>
               )}
 
-              {variants.length > 0 && (
+              {committableVariants.length > 0 && (
                 <Collapsible open={variantsOpen} onOpenChange={setVariantsOpen}>
                   <CollapsibleTrigger className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-w-full suprsend-bg-transparent suprsend-border-none suprsend-cursor-pointer suprsend-p-0 suprsend-group">
                     <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
@@ -285,16 +311,11 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
                           deleted: {deletedCount}
                         </span>
                       )}
-                      {errorCount > 0 && (
-                        <span className="suprsend-text-xs suprsend-font-medium suprsend-text-destructive suprsend-bg-destructive/10 suprsend-px-2.5 suprsend-py-0.5 suprsend-rounded">
-                          error: {errorCount}
-                        </span>
-                      )}
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <div className="suprsend-ml-10 suprsend-mt-1 suprsend-space-y-1 suprsend-max-h-40 suprsend-always-show-scrollbar">
-                      {variants.map((variant) => {
+                      {committableVariants.map((variant) => {
                         const key = getVariantKey(variant);
                         return (
                           <VariantRow
@@ -310,10 +331,39 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
                 </Collapsible>
               )}
 
+              {errorVariants.length > 0 && (
+                <Collapsible defaultOpen={false}>
+                  <div className="suprsend-rounded-lg suprsend-border suprsend-border-destructive/30 suprsend-bg-destructive/5">
+                    <CollapsibleTrigger className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-w-full suprsend-bg-transparent suprsend-border-none suprsend-cursor-pointer suprsend-px-3 suprsend-py-2">
+                      <div className="suprsend-flex suprsend-items-center suprsend-gap-1.5">
+                        <ChevronDown className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-destructive suprsend-transition-transform group-data-[state=closed]:suprsend--rotate-90" />
+                        <AlertCircle className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-destructive" />
+                        <span className="suprsend-text-xs suprsend-font-semibold suprsend-text-destructive">
+                          {errorVariants.length} variant{errorVariants.length !== 1 ? 's' : ''} with errors
+                        </span>
+                      </div>
+                      <span className="suprsend-text-xs suprsend-text-destructive">
+                        Won't be committed
+                      </span>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="suprsend-border-t suprsend-border-destructive/20">
+                        {errorVariants.map((variant) => (
+                          <ErrorVariantRow
+                            key={getVariantKey(variant)}
+                            variant={variant}
+                          />
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </div>
+                </Collapsible>
+              )}
+
               {changedProperties.length > 0 && (
                 <Collapsible open={settingsOpen} onOpenChange={setSettingsOpen}>
-                  <CollapsibleTrigger className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-w-full suprsend-bg-transparent suprsend-border-none suprsend-cursor-pointer suprsend-p-0">
-                    <TooltipProvider delayDuration={0}>
+                  <CollapsibleTrigger className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-w-full suprsend-bg-transparent suprsend-border-none suprsend-cursor-pointer suprsend-p-0 suprsend-mt-3">
+                    <TooltipProvider delayDuration={300}>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
@@ -343,19 +393,28 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
                     <div className="suprsend-ml-10 suprsend-mt-1 suprsend-space-y-1">
                       {changedProperties.map((propKey) => (
                         <div key={propKey} className="suprsend-py-2">
-                          <div className="suprsend-flex suprsend-items-center suprsend-gap-3">
-                            <Checkbox
-                              id={`prop:${propKey}`}
-                              checked={true}
-                              disabled
-                            />
-                            <Label
-                              htmlFor={`prop:${propKey}`}
-                              className="suprsend-text-sm suprsend-font-normal suprsend-cursor-pointer"
-                            >
-                              {propKey}
-                            </Label>
-                          </div>
+                          <TooltipProvider delayDuration={300}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="suprsend-flex suprsend-items-center suprsend-gap-3">
+                                  <Checkbox
+                                    id={`prop:${propKey}`}
+                                    checked={true}
+                                    disabled
+                                  />
+                                  <Label
+                                    htmlFor={`prop:${propKey}`}
+                                    className="suprsend-text-sm suprsend-font-normal suprsend-cursor-pointer"
+                                  >
+                                    {propKey}
+                                  </Label>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                Template changes will always be pushed on commit
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
                       ))}
                     </div>

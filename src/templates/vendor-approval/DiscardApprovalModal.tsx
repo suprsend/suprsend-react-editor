@@ -51,7 +51,7 @@ export default function DiscardApprovalModal({
         <DialogHeader>
           <DialogTitle>Cancel Approval</DialogTitle>
           <DialogDescription>
-            Are you sure you want to cancel the approval?
+            This will discard the current version. You can make edits and resubmit the template for approval.
           </DialogDescription>
         </DialogHeader>
         <div className="suprsend-space-y-2">
@@ -74,7 +74,7 @@ export default function DiscardApprovalModal({
           <Button
             variant="destructive"
             onClick={handleSubmit}
-            disabled={isPending}
+            disabled={isPending || !reason.trim()}
           >
             {isPending ? 'Submitting...' : 'Submit'}
           </Button>
