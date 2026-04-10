@@ -26,6 +26,10 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
     label: 'Discarded',
     className: 'suprsend-bg-red-50 suprsend-border-red-200 suprsend-text-red-700',
   },
+  upload_failed: {
+    label: 'Upload Failed',
+    className: 'suprsend-bg-red-50 suprsend-border-red-200 suprsend-text-red-700',
+  },
 };
 
 export default function ApprovalStatusBadge({
@@ -50,13 +54,17 @@ export default function ApprovalStatusBadge({
     </span>
   );
 
-  if (approvalStatus === 'rejected') {
+  if (approvalStatus === 'rejected' || approvalStatus === 'upload_failed') {
     return (
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>{badge}</TooltipTrigger>
           <TooltipContent>
-            <p>Rejection reasons are provided against each vendor</p>
+            <p>
+              {approvalStatus === 'upload_failed'
+                ? 'Failure reasons are provided against each vendor'
+                : 'Rejection reasons are provided against each vendor'}
+            </p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
