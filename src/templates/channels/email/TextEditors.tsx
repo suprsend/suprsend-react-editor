@@ -33,13 +33,18 @@ export default function TextEditors({
   const [localValue, setLocalValue] = useState(displayValue);
   const localValueRef = useRef(displayValue);
   const lastExternalRef = useRef(displayValue);
+  const prevIsAutoModeRef = useRef(isAutoMode);
 
   // Smart sync: only apply external value change if the user hasn't locally diverged.
+  // Force-update when transitioning into auto mode (user cleared custom text).
   useEffect(() => {
+    const wasAutoMode = prevIsAutoModeRef.current;
+    prevIsAutoModeRef.current = isAutoMode;
+
     const prev = lastExternalRef.current;
     const newDisplay = isAutoMode ? autoValue : value;
     lastExternalRef.current = newDisplay;
-    if (localValueRef.current === prev) {
+    if ((!wasAutoMode && isAutoMode) || localValueRef.current === prev) {
       localValueRef.current = newDisplay;
       setLocalValue(newDisplay);
     }
