@@ -56,6 +56,7 @@ export interface ChannelPreviewProps<T> {
 // --- Common API params ---
 
 export interface BaseApiParams {
+  apiHost: string;
   workspaceUid: string;
   templateSlug: string;
   isPrivate: boolean;
@@ -93,7 +94,14 @@ export interface ThemeOverrides {
   radius?: string;
 }
 
+export interface HostConfig {
+  apiHost?: string;
+  jsonnetApiHost?: string;
+  designerEditorHost?: string;
+}
+
 export interface SuprSendTemplateEditorProviderProps {
+  host?: HostConfig;
   workspaceUid: string;
   templateSlug: string;
   variantId: string;
@@ -126,6 +134,9 @@ export interface TemplateEditorContextValue extends SuprSendTemplateEditorProvid
   setMode: (mode: TemplateMode) => void;
   selectedChannel: ChannelId | null;
   setSelectedChannel: (channel: ChannelId) => void;
+  apiHost: string;
+  jsonnetApiHost: string;
+  designerEditorHost: string;
 }
 
 export interface SuprSendTemplateEditorProps {

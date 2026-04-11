@@ -39,7 +39,7 @@ export default function EmailTemplatePlayground({
   disabled = false,
   onWarningChange,
 }: EmailTemplatePlaygroundProps) {
-  const { isPrivate } = useTemplateEditorContext();
+  const { isPrivate, designerEditorHost } = useTemplateEditorContext();
 
   const generatedIdRef = useRef(generateUUID());
   const userId = isPrivate
@@ -390,7 +390,7 @@ export default function EmailTemplatePlayground({
           )}
           <iframe
             ref={iframeRef}
-            src={`https://suprsend-unlayer-editor.pages.dev?userId=${encodeURIComponent(userId ?? '')}`}
+            src={`${designerEditorHost}?userId=${encodeURIComponent(userId ?? '')}`}
             className="suprsend-w-full suprsend-flex-1 suprsend-min-h-0"
           />
         </div>

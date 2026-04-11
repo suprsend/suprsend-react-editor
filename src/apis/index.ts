@@ -25,28 +25,33 @@ import { invalidateQueries } from '@/lib/queryCache';
 export { invalidateQueries };
 export { isHttpError } from '@/lib/fetchClient';
 
-const API_BASE_URL = 'https://stagingapi2.suprsend.com';
-const JSONNET_API_BASE_URL = 'https://stagingapi.suprsend.com';
-
 export const fetchClient = new FetchClient({
-  baseURL: API_BASE_URL,
+  baseURL: '',
   credentials: 'include',
 });
 
-function templateBasePath(
-  workspaceUid: string,
-  templateSlug: string,
-  isPrivate: boolean,
-  version?: string
-) {
+function templateBasePath({
+  apiHost,
+  workspaceUid,
+  templateSlug,
+  isPrivate,
+  version,
+}: {
+  apiHost: string;
+  workspaceUid: string;
+  templateSlug: string;
+  isPrivate: boolean;
+  version?: string;
+}) {
   const versionSegment = version ? `/version/${version}` : '';
   return isPrivate
-    ? `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}${versionSegment}`
-    : `${API_BASE_URL}/v2/${workspaceUid}/template/${templateSlug}${versionSegment}/embedded`;
+    ? `${apiHost}/v2/${workspaceUid}/template/${templateSlug}${versionSegment}`
+    : `${apiHost}/v2/${workspaceUid}/template/${templateSlug}${versionSegment}/embedded`;
 }
 
 // variant details api
 const getVariantDetails = async ({
+  apiHost,
   templateSlug,
   chanelSlug,
   variantId,
@@ -73,7 +78,7 @@ const getVariantDetails = async ({
         variant_id: variantId,
         fallback_variant_id: fallbackVariantId,
       });
-  const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
+  const base = templateBasePath({ apiHost, workspaceUid, templateSlug, isPrivate, version });
   const url = `${base}/channel/${chanelSlug}/variant/${variantId}/${qp}`;
 
   const resp = await fetchClient.get(url);
@@ -96,6 +101,7 @@ export const useVariantDetails = ({
     recipientDistinctId,
     actorDistinctId,
     fallbackVariantId,
+    apiHost,
   } = useTemplateEditorContext();
 
   return useQuery({
@@ -106,6 +112,7 @@ export const useVariantDetails = ({
     ],
     queryFn: () =>
       getVariantDetails({
+        apiHost,
         templateSlug,
         chanelSlug,
         variantId,
@@ -125,6 +132,7 @@ export const useVariantDetails = ({
 
 // update variant details api
 const updateVariantContent = async ({
+  apiHost,
   templateSlug,
   chanelSlug,
   variantId,
@@ -150,7 +158,7 @@ const updateVariantContent = async ({
         variant_id: variantId,
         fallback_variant_id: fallbackVariantId,
       });
-  const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
+  const base = templateBasePath({ apiHost, workspaceUid, templateSlug, isPrivate, version });
   const url = `${base}/channel/${chanelSlug}/variant/${variantId}/content/${qp}`;
 
   const resp = await fetchClient.patch(url, payload);
@@ -172,11 +180,13 @@ export const useUpdateVariantContent = ({
     recipientDistinctId,
     actorDistinctId,
     fallbackVariantId,
+    apiHost,
   } = useTemplateEditorContext();
 
   return useMutation({
     mutationFn: (payload: ChannelContentPayload) =>
       updateVariantContent({
+        apiHost,
         templateSlug,
         chanelSlug,
         variantId,
@@ -196,6 +206,7 @@ export const useUpdateVariantContent = ({
 
 // get mock data api
 const getMockData = async ({
+  apiHost,
   templateSlug,
   workspaceUid,
   tenantId,
@@ -224,7 +235,7 @@ const getMockData = async ({
   }
 
   const qp = createQueryParams({ ...queryObject, mode });
-  const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
+  const base = templateBasePath({ apiHost, workspaceUid, templateSlug, isPrivate, version });
   const url = `${base}/mock_data/${qp}`;
 
   const resp = await fetchClient.get(url);
@@ -244,11 +255,13 @@ export const useMockData = ({ templateSlug }: UseMockDataParams) => {
     fallbackVariantId,
     locale,
     conditions,
+    apiHost,
   } = useTemplateEditorContext();
   return useQuery({
     queryKey: [`template/${templateSlug}/mock_data`, mode, version],
     queryFn: () =>
       getMockData({
+        apiHost,
         templateSlug,
         workspaceUid,
         tenantId,
@@ -267,6 +280,7 @@ export const useMockData = ({ templateSlug }: UseMockDataParams) => {
 
 // precommit validation api
 const getPreCommitValidate = async ({
+  apiHost,
   templateSlug,
   workspaceUid,
   isPrivate,
@@ -293,7 +307,7 @@ const getPreCommitValidate = async ({
         variant_id: variantId,
         fallback_variant_id: fallbackVariantId,
       });
-  const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
+  const base = templateBasePath({ apiHost, workspaceUid, templateSlug, isPrivate, version });
   const url = `${base}/pre_commit_validate/${qp}`;
   const body = !isPrivate
     ? { variants: [{ id: variantId, channel }] }
@@ -322,11 +336,13 @@ export const usePreCommitValidate = ({
     actorDistinctId,
     mode,
     selectedChannel,
+    apiHost,
   } = useTemplateEditorContext();
   return useQuery({
     queryKey: [`template/${templateSlug}/pre_commit_validate`, version],
     queryFn: () =>
       getPreCommitValidate({
+        apiHost,
         templateSlug,
         workspaceUid,
         isPrivate,
@@ -347,6 +363,7 @@ export const usePreCommitValidate = ({
 
 // commit template
 const commitTemplate = async ({
+  apiHost,
   templateSlug,
   workspaceUid,
   isPrivate,
@@ -376,7 +393,7 @@ const commitTemplate = async ({
         variant_id: variantId,
         fallback_variant_id: fallbackVariantId,
       });
-  const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
+  const base = templateBasePath({ apiHost, workspaceUid, templateSlug, isPrivate, version });
   const url = `${base}/commit/${qp}`;
 
   const body = !isPrivate
@@ -402,10 +419,12 @@ export const useCommitTemplate = ({
     actorDistinctId,
     mode,
     selectedChannel,
+    apiHost,
   } = useTemplateEditorContext();
   return useMutation({
     mutationFn: ({ commitMessage, variants }: CommitTemplateMutationPayload) =>
       commitTemplate({
+        apiHost,
         templateSlug,
         workspaceUid,
         isPrivate,
@@ -427,6 +446,7 @@ export const useCommitTemplate = ({
 
 // test template
 const channelVariantMockTest = async ({
+  apiHost,
   workspaceUid,
   templateSlug,
   channel,
@@ -454,7 +474,7 @@ const channelVariantMockTest = async ({
         variant_id: variantId,
         fallback_variant_id: fallbackVariantId,
       });
-  const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
+  const base = templateBasePath({ apiHost, workspaceUid, templateSlug, isPrivate, version });
   const url = `${base}/channel/${channel}/variant/${variantId}/mock_test/${qp}`;
   const resp = await fetchClient.post(url, payload);
   return resp.data;
@@ -472,6 +492,7 @@ export const useChannelVariantMockTest = () => {
     recipientDistinctId,
     actorDistinctId,
     fallbackVariantId,
+    apiHost,
   } = useTemplateEditorContext();
   return useMutation({
     mutationFn: ({
@@ -486,6 +507,7 @@ export const useChannelVariantMockTest = () => {
       payload: MockTestPayload;
     }) =>
       channelVariantMockTest({
+        apiHost,
         workspaceUid,
         templateSlug,
         channel,
@@ -505,85 +527,92 @@ export const useChannelVariantMockTest = () => {
 };
 
 // upload file api
-const uploadFile = async ({ workspaceUid, file }: UploadFileParams) => {
+const uploadFile = async ({ apiHost, workspaceUid, file }: UploadFileParams & { apiHost: string }) => {
   const formData = new FormData();
   formData.append('file', file);
-  const url = `${API_BASE_URL}/v1/${workspaceUid}/public/upload_file/`;
+  const url = `${apiHost}/v1/${workspaceUid}/public/upload_file/`;
   const resp = await fetchClient.put(url, formData);
   return resp.data;
 };
 
 export const useUploadFile = (workspaceUid: string) => {
+  const { apiHost } = useTemplateEditorContext();
   return useMutation({
-    mutationFn: (file: File) => uploadFile({ workspaceUid, file }),
+    mutationFn: (file: File) => uploadFile({ apiHost, workspaceUid, file }),
   });
 };
 
 // sms template headers api
 const getSMSHeaders = async ({
+  apiHost,
   workspaceUid,
   notifCategory,
 }: {
+  apiHost: string;
   workspaceUid: string;
   notifCategory: string;
 }) => {
-  const url = `${API_BASE_URL}/v1/${workspaceUid}/tenant/default/vendor/sms_headers/?root_category=${notifCategory}`;
+  const url = `${apiHost}/v1/${workspaceUid}/tenant/default/vendor/sms_headers/?root_category=${notifCategory}`;
   const resp = await fetchClient.get(url);
   return resp.data;
 };
 
 export const useSMSHeaders = (notifCategory: string) => {
-  const { workspaceUid } = useTemplateEditorContext();
+  const { workspaceUid, apiHost } = useTemplateEditorContext();
 
   return useQuery({
     queryKey: [
       `${workspaceUid}/tenant/default/vendor/sms_headers`,
       notifCategory,
     ],
-    queryFn: () => getSMSHeaders({ workspaceUid, notifCategory }),
+    queryFn: () => getSMSHeaders({ apiHost, workspaceUid, notifCategory }),
     enabled: !!notifCategory,
   });
 };
 
 // inbox tags api
 const getInboxTags = async ({
+  apiHost,
   workspaceUid,
   search,
 }: {
+  apiHost: string;
   workspaceUid: string;
   search: string;
 }) => {
-  const url = `${API_BASE_URL}/v1/${workspaceUid}/inbox_tag/?search=${encodeURIComponent(search)}&limit=50`;
+  const url = `${apiHost}/v1/${workspaceUid}/inbox_tag/?search=${encodeURIComponent(search)}&limit=50`;
   const resp = await fetchClient.get(url);
   return resp.data;
 };
 
 export const useInboxTags = (search: string) => {
-  const { workspaceUid } = useTemplateEditorContext();
+  const { workspaceUid, apiHost } = useTemplateEditorContext();
 
   return useQuery({
     queryKey: ['inbox_tags', search],
-    queryFn: () => getInboxTags({ workspaceUid, search }),
+    queryFn: () => getInboxTags({ apiHost, workspaceUid, search }),
   });
 };
 
 // vendor approval api
 const getVendorsForApproval = async ({
+  apiHost,
   workspaceUid,
   channelSlug,
   tenantId,
 }: {
+  apiHost: string;
   workspaceUid: string;
   channelSlug: string;
   tenantId: string;
 }) => {
-  const url = `${API_BASE_URL}/v1/${workspaceUid}/tenant/${tenantId}/vendor/${channelSlug}/for_template_approval/`;
+  const url = `${apiHost}/v1/${workspaceUid}/tenant/${tenantId}/vendor/${channelSlug}/for_template_approval/`;
   const resp = await fetchClient.get(url);
   return resp.data;
 };
 
 export const useVendorsForApproval = (channelSlug: string) => {
-  const { workspaceUid, tenantId } = useTemplateEditorContext();
+  const { workspaceUid, tenantId, apiHost } = useTemplateEditorContext();
   const tenant = tenantId || 'default';
 
   return useQuery({
@@ -591,7 +620,7 @@ export const useVendorsForApproval = (channelSlug: string) => {
       `${workspaceUid}/tenant/${tenant}/vendor/${channelSlug}/for_template_approval`,
     ],
     queryFn: () =>
-      getVendorsForApproval({ workspaceUid, channelSlug, tenantId: tenant }),
+      getVendorsForApproval({ apiHost, workspaceUid, channelSlug, tenantId: tenant }),
   });
 };
 
@@ -608,6 +637,7 @@ export interface VendorApprovalPayload {
 }
 
 const startVendorApproval = async ({
+  apiHost,
   workspaceUid,
   templateSlug,
   channelSlug,
@@ -616,6 +646,7 @@ const startVendorApproval = async ({
   version,
   payload,
 }: {
+  apiHost: string;
   workspaceUid: string;
   templateSlug: string;
   channelSlug: string;
@@ -624,7 +655,7 @@ const startVendorApproval = async ({
   version?: string;
   payload: VendorApprovalPayload;
 }) => {
-  const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
+  const base = templateBasePath({ apiHost, workspaceUid, templateSlug, isPrivate, version });
   const url = `${base}/channel/${channelSlug}/variant/${variantId}/vendor_approval/?mode=live`;
   const resp = await fetchClient.patch(url, payload);
   return resp.data;
@@ -639,11 +670,12 @@ export const useStartVendorApproval = ({
   channelSlug: string;
   variantId: string;
 }) => {
-  const { workspaceUid, isPrivate, version, mode } = useTemplateEditorContext();
+  const { workspaceUid, isPrivate, version, mode, apiHost } = useTemplateEditorContext();
 
   return useMutation({
     mutationFn: (payload: VendorApprovalPayload) =>
       startVendorApproval({
+        apiHost,
         workspaceUid,
         templateSlug,
         channelSlug,
@@ -664,6 +696,7 @@ export const useStartVendorApproval = ({
 
 // discard vendor approval api
 const discardVendorApproval = async ({
+  apiHost,
   workspaceUid,
   templateSlug,
   channelSlug,
@@ -672,6 +705,7 @@ const discardVendorApproval = async ({
   version,
   payload,
 }: {
+  apiHost: string;
   workspaceUid: string;
   templateSlug: string;
   channelSlug: string;
@@ -680,7 +714,7 @@ const discardVendorApproval = async ({
   version?: string;
   payload: { discard_comment: string };
 }) => {
-  const base = templateBasePath(workspaceUid, templateSlug, isPrivate, version);
+  const base = templateBasePath({ apiHost, workspaceUid, templateSlug, isPrivate, version });
   const modeParam = version ? '' : '?mode=live';
   const url = `${base}/channel/${channelSlug}/variant/${variantId}/discard/${modeParam}`;
   const resp = await fetchClient.patch(url, payload);
@@ -696,11 +730,12 @@ export const useDiscardVendorApproval = ({
   channelSlug: string;
   variantId: string;
 }) => {
-  const { workspaceUid, isPrivate, version, mode } = useTemplateEditorContext();
+  const { workspaceUid, isPrivate, version, mode, apiHost } = useTemplateEditorContext();
 
   return useMutation({
     mutationFn: (payload: { discard_comment: string }) =>
       discardVendorApproval({
+        apiHost,
         workspaceUid,
         templateSlug,
         channelSlug,
@@ -721,40 +756,44 @@ export const useDiscardVendorApproval = ({
 
 // jsonnet render api
 const renderJsonnet = async (
+  jsonnetApiHost: string,
   body: JsonnetRenderBody
 ): Promise<JsonnetRenderResponse> => {
   const resp = await fetchClient.post(
-    `${JSONNET_API_BASE_URL}/jsonnet/v2/render/`,
+    `${jsonnetApiHost}/jsonnet/v2/render/`,
     body
   );
   return resp.data as JsonnetRenderResponse;
 };
 
 export const useJsonnetRender = () => {
+  const { jsonnetApiHost } = useTemplateEditorContext();
   return useMutation({
-    mutationFn: (body: JsonnetRenderBody) => renderJsonnet(body),
+    mutationFn: (body: JsonnetRenderBody) => renderJsonnet(jsonnetApiHost, body),
   });
 };
 
 // translation locale data api
 const getTranslationLocaleData = async ({
+  apiHost,
   workspaceUid,
   locale,
 }: {
+  apiHost: string;
   workspaceUid: string;
   locale: string;
 }) => {
-  const url = `${API_BASE_URL}/v1/${workspaceUid}/translation/locale_data/?locale=${locale}`;
+  const url = `${apiHost}/v1/${workspaceUid}/translation/locale_data/?locale=${locale}`;
   const resp = await fetchClient.get(url);
   return resp.data;
 };
 
 export const useTranslationLocaleData = (locale: string | undefined) => {
-  const { workspaceUid } = useTemplateEditorContext();
+  const { workspaceUid, apiHost } = useTemplateEditorContext();
 
   return useQuery({
     queryKey: [`${workspaceUid}/translations_locale_data/`, locale],
-    queryFn: () => getTranslationLocaleData({ workspaceUid, locale: locale! }),
+    queryFn: () => getTranslationLocaleData({ apiHost, workspaceUid, locale: locale! }),
     enabled: !!locale,
   });
 };
