@@ -70,8 +70,8 @@ export default function SuggestionInputWithUpload({
       )}
       <div
         className={cn(
-          'suprsend-flex suprsend-gap-1 suprsend-mt-1',
-          isTextarea ? 'suprsend-items-start' : 'suprsend-items-center'
+          'suprsend-flex suprsend-gap-1 suprsend-items-start',
+          label && 'suprsend-mt-1'
         )}
       >
         <div className="suprsend-flex-1 suprsend-min-w-0">
@@ -94,8 +94,7 @@ export default function SuggestionInputWithUpload({
               disabled={isPending}
               onClick={handleUploadClick}
               className={cn(
-                'suprsend-text-muted-foreground hover:suprsend-text-foreground suprsend-transition-colors suprsend-shrink-0 disabled:suprsend-opacity-50 disabled:suprsend-cursor-not-allowed',
-                isTextarea && 'suprsend-mt-2'
+                'suprsend-text-muted-foreground hover:suprsend-text-foreground suprsend-transition-colors suprsend-shrink-0 disabled:suprsend-opacity-50 disabled:suprsend-cursor-not-allowed suprsend-mt-3'
               )}
             >
               {isPending ? (

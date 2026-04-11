@@ -437,69 +437,69 @@ export default function AndroidPushChannel({
                 </div>
 
                 <div className="suprsend-space-y-3">
-                    <p className="suprsend-text-sm suprsend-font-semibold suprsend-text-foreground">
-                      Custom key-value pairs
-                    </p>
+                  <p className="suprsend-text-sm suprsend-font-semibold suprsend-text-foreground">
+                    Custom key-value pairs
+                  </p>
 
-                    {extraPayloadFields.map((field, index) => (
-                      <div
-                        key={field.id}
-                        className="suprsend-flex suprsend-items-center suprsend-gap-1"
-                      >
-                        <div className="suprsend-flex-1 suprsend-min-w-0">
-                          <Controller
-                            name={`extra_payload.${index}.key`}
-                            control={control}
-                            render={({ field: f }) => (
-                              <SuggestionInput
-                                value={f.value}
-                                onChange={f.onChange}
-                                placeholder="Key"
-                                enableHighlighting
-                                enableSuggestions
-                                variables={variables}
-                                disabled={isLive}
-                              />
-                            )}
-                          />
-                        </div>
-                        <div className="suprsend-flex-1 suprsend-min-w-0">
-                          <Controller
-                            name={`extra_payload.${index}.value`}
-                            control={control}
-                            render={({ field: f }) => (
-                              <SuggestionInput
-                                value={f.value}
-                                onChange={f.onChange}
-                                placeholder="Value"
-                                enableHighlighting
-                                enableSuggestions
-                                variables={variables}
-                                disabled={isLive}
-                              />
-                            )}
-                          />
-                        </div>
-                        {!isLive && (
-                          <X
-                            className="suprsend-w-4 suprsend-h-4 suprsend-cursor-pointer suprsend-text-muted-foreground"
-                            onClick={() => removePayload(index)}
-                          />
-                        )}
-                      </div>
-                    ))}
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={isLive}
-                      onClick={() => appendPayload({ key: '', value: '' })}
+                  {extraPayloadFields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="suprsend-flex suprsend-items-center suprsend-gap-1"
                     >
-                      <Plus className="suprsend-w-4 suprsend-h-4 suprsend-text-muted-foreground" />
-                      Add key-value pair
-                    </Button>
-                  </div>
+                      <div className="suprsend-flex-1 suprsend-min-w-0">
+                        <Controller
+                          name={`extra_payload.${index}.key`}
+                          control={control}
+                          render={({ field: f }) => (
+                            <SuggestionInput
+                              value={f.value}
+                              onChange={f.onChange}
+                              placeholder="Key"
+                              enableHighlighting
+                              enableSuggestions
+                              variables={variables}
+                              disabled={isLive}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div className="suprsend-flex-1 suprsend-min-w-0">
+                        <Controller
+                          name={`extra_payload.${index}.value`}
+                          control={control}
+                          render={({ field: f }) => (
+                            <SuggestionInput
+                              value={f.value}
+                              onChange={f.onChange}
+                              placeholder="Value"
+                              enableHighlighting
+                              enableSuggestions
+                              variables={variables}
+                              disabled={isLive}
+                            />
+                          )}
+                        />
+                      </div>
+                      {!isLive && (
+                        <X
+                          className="suprsend-w-4 suprsend-h-4 suprsend-cursor-pointer suprsend-text-muted-foreground"
+                          onClick={() => removePayload(index)}
+                        />
+                      )}
+                    </div>
+                  ))}
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={isLive}
+                    onClick={() => appendPayload({ key: '', value: '' })}
+                  >
+                    <Plus className="suprsend-w-4 suprsend-h-4 suprsend-text-muted-foreground" />
+                    Add key-value pair
+                  </Button>
                 </div>
+              </div>
             </CollapsibleContent>
           </Collapsible>
         </div>

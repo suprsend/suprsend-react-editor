@@ -172,11 +172,10 @@ export default function InboxPreview({
                 {showExpiry && (
                   <div className="suprsend-mt-2">
                     <span
-                      className={`suprsend-inline-block suprsend-text-xs suprsend-text-foreground suprsend-rounded suprsend-px-2 suprsend-py-0.5 ${
-                        getExpirySeconds(formValues.expiry!) <= 86400
-                          ? 'suprsend-bg-destructive/20'
-                          : 'suprsend-bg-muted'
-                      }`}
+                      className="suprsend-inline-block suprsend-text-xs suprsend-rounded suprsend-px-2 suprsend-py-0.5"
+                      style={getExpirySeconds(formValues.expiry!) <= 3600
+                        ? { color: 'rgb(180, 35, 24)', backgroundColor: 'rgba(217, 45, 32, 0.09)' }
+                        : { color: 'rgb(71, 85, 105)', backgroundColor: 'rgba(100, 116, 139, 0.09)' }}
                     >
                       Expires in {formatExpiry(formValues.expiry!)}
                     </span>
