@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
   Info,
@@ -60,6 +60,15 @@ export default function EmailSettingsPreviewBanner({
     from_address: emailContent?.from_address ?? '',
     subject: emailContent?.subject ?? '',
   });
+
+  // Sync preview when variantData changes (e.g. after refetch/import)
+  useEffect(() => {
+    setPreviewMeta({
+      from_name: emailContent?.from_name ?? '',
+      from_address: emailContent?.from_address ?? '',
+      subject: emailContent?.subject ?? '',
+    });
+  }, [emailContent?.from_name, emailContent?.from_address, emailContent?.subject]);
 
   return (
     <div className="suprsend-flex suprsend-px-3 suprsend-py-2.5 suprsend-items-center suprsend-text-sm suprsend-border">

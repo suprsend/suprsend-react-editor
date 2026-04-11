@@ -143,14 +143,30 @@ export default function EmailTemplatePlayground({
   }, [on, post, exportHtmlRef]);
 
   // --- Sync refs from API data ---
+  const iframeReadyRef = useRef(false);
   useEffect(() => {
     if (apiBody?.type === 'designer' && apiBody?.designer?.design_json) {
       designJsonRef.current = apiBody.designer.design_json;
+      // If iframe is already loaded, push the updated design into it
+      if (iframeReadyRef.current) {
+        post('LOAD_DESIGN', { design_json: apiBody.designer.design_json });
+      }
     }
     if (apiBody?.type === 'designer' && apiBody?.designer?.html) {
       setLatestDesignerHtml(apiBody.designer.html);
     }
-  }, [apiBody?.designer?.design_json, apiBody?.designer?.html, apiBody?.type]);
+    if (apiBody?.type === 'designer') {
+      const conditions =
+        (apiBody?.designer?.display_conditions as DisplayConditionData[]) ?? [];
+      displayConditionsListRef.current = conditions;
+      setDisplayConditionsList(conditions);
+
+      const tags =
+        (apiBody?.designer?.merge_tags as MergeTagData[]) ?? [];
+      mergeTagsListRef.current = tags;
+      setMergeTagsList(tags);
+    }
+  }, [apiBody?.designer?.design_json, apiBody?.designer?.html, apiBody?.designer?.display_conditions, apiBody?.designer?.merge_tags, apiBody?.type, post]);
 
   useEffect(() => {
     if (apiBody?.type === 'raw' && apiBody?.raw?.html !== undefined) {
@@ -175,6 +191,7 @@ export default function EmailTemplatePlayground({
     });
 
     const unsubReady = on('EDITOR_READY', () => {
+      iframeReadyRef.current = true;
       setIframeLoading(false);
       const designJson = designJsonRef.current;
       if (designJson && Object.keys(designJson).length > 0) {

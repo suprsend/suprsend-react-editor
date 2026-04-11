@@ -175,11 +175,14 @@ export default function EmailChannel({
     setEditorWarning('');
   }, [activeTab, editorMode]);
 
-  // --- One-time sync when API data arrives after mount ---
-  const initializedRef = useRef(!!apiBodyType);
+  // --- Sync state when variant data changes (initial load or refetch after import) ---
+  // variantData only changes from API fetches, not from local mutations (which don't refetch),
+  // so it's safe to re-sync local state whenever the reference changes.
+  const prevVariantDataRef = useRef(variantData);
   useEffect(() => {
-    if (initializedRef.current || !apiBodyType) return;
-    initializedRef.current = true;
+    if (!apiBodyType) return;
+    if (prevVariantDataRef.current === variantData) return;
+    prevVariantDataRef.current = variantData;
     setEditorMode(apiBodyType === 'raw' ? 'html' : 'design');
     setHasEditorTab(apiBodyType !== 'plain_text');
     setActiveTab(apiBodyType === 'plain_text' ? 'plain_text' : 'editor');
@@ -187,6 +190,8 @@ export default function EmailChannel({
     setDesignerText(variantData?.content?.body?.designer?.text ?? '');
     setRawText(variantData?.content?.body?.raw?.text ?? '');
     setPlainTextOnlyText(variantData?.content?.body?.plain_text?.text ?? '');
+    designerHtmlRef.current = variantData?.content?.body?.designer?.html ?? '';
+    rawHtmlRef.current = variantData?.content?.body?.raw?.html ?? '';
   }, [apiBodyType, variantData]);
 
   // --- Handlers ---

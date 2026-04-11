@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ReactSelect } from '@/components/custom-ui/ReactSelect';
 import { useAutosave } from '@/lib/useAutosave';
 import { useUpdateVariantContent, useSMSHeaders } from '@/apis';
 import { useTemplateEditorContext } from '@/lib/TemplateEditorContext';
@@ -179,28 +180,21 @@ export default function SMSChannel({
                         *
                       </span>
                     </label>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={isLive || !formValues.category}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select header" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {smsHeaders.length > 0 ? (
-                          smsHeaders.map((header) => (
-                            <SelectItem key={header} value={header}>
-                              {header}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <p className="suprsend-px-2 suprsend-py-1.5 suprsend-text-sm suprsend-text-muted-foreground suprsend-italic">
-                            No headers available
-                          </p>
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <ReactSelect
+                      value={
+                        field.value
+                          ? { label: field.value, value: field.value }
+                          : null
+                      }
+                      onChange={(opt) => field.onChange(opt?.value ?? '')}
+                      options={smsHeaders.map((header) => ({
+                        label: header,
+                        value: header,
+                      }))}
+                      placeholder="Select header"
+                      isDisabled={isLive || !formValues.category}
+                      isClearable={false}
+                    />
                     {fieldState.error?.message && (
                       <p className="suprsend-text-sm suprsend-text-destructive">
                         {fieldState.error.message}
