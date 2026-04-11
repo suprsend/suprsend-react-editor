@@ -248,6 +248,11 @@ export default function EmailChannel({
       const copyHtml = checkedOptions.copy_html ?? false;
       const copyText = checkedOptions.copy_text ?? false;
 
+      // When plain text is in "auto" mode the stored value is empty.
+      // Resolve to auto-generated text so copying carries the visible content.
+      const effectiveDesignerText = designerText || htmlToText(designerHtmlRef.current);
+      const effectiveRawText = rawText || htmlToText(rawHtmlValue);
+
       switch (switchDirection) {
         case 'design_to_html': {
           // Copy designer HTML into raw HTML field
@@ -261,16 +266,16 @@ export default function EmailChannel({
             setEditorMode('html');
             const payload: Record<string, unknown> = { type: 'raw', raw: { html } };
             if (copyText) {
-              payload.raw = { ...payload.raw as object, text: designerText };
-              setRawText(designerText);
+              payload.raw = { ...payload.raw as object, text: effectiveDesignerText };
+              setRawText(effectiveDesignerText);
             }
             mutate({ content: { body: payload } });
           } else {
             if (copyText) {
-              setRawText(designerText);
+              setRawText(effectiveDesignerText);
               flushSave();
               setEditorMode('html');
-              mutate({ content: { body: { type: 'raw', raw: { text: designerText } } } });
+              mutate({ content: { body: { type: 'raw', raw: { text: effectiveDesignerText } } } });
             } else {
               handleSwitchToHtml();
             }
@@ -281,10 +286,10 @@ export default function EmailChannel({
           flushSave();
           const body: Record<string, unknown> = { type: 'plain_text' };
           if (copyText) {
-            // Copy existing designer plain text value
-            setPlainTextOnlyText(designerText);
-            if (designerText) {
-              body.plain_text = { text: designerText };
+            // Copy designer plain text (or auto-generated) value
+            setPlainTextOnlyText(effectiveDesignerText);
+            if (effectiveDesignerText) {
+              body.plain_text = { text: effectiveDesignerText };
             }
           }
           setHasEditorTab(false);
@@ -295,10 +300,10 @@ export default function EmailChannel({
         case 'html_to_design': {
           flushSave();
           if (copyText) {
-            // Copy raw plain text value to designer plain text
-            setDesignerText(rawText);
+            // Copy raw plain text (or auto-generated) value to designer plain text
+            setDesignerText(effectiveRawText);
             setEditorMode('design');
-            mutate({ content: { body: { type: 'designer', designer: { text: rawText } } } });
+            mutate({ content: { body: { type: 'designer', designer: { text: effectiveRawText } } } });
           } else {
             handleSwitchToDesign();
           }
@@ -308,10 +313,10 @@ export default function EmailChannel({
           flushSave();
           const body: Record<string, unknown> = { type: 'plain_text' };
           if (copyText) {
-            // Copy raw plain text value to plain_text mode
-            setPlainTextOnlyText(rawText);
-            if (rawText) {
-              body.plain_text = { text: rawText };
+            // Copy raw plain text (or auto-generated) value to plain_text mode
+            setPlainTextOnlyText(effectiveRawText);
+            if (effectiveRawText) {
+              body.plain_text = { text: effectiveRawText };
             }
           }
           setHasEditorTab(false);
@@ -353,6 +358,7 @@ export default function EmailChannel({
       mutate,
       designerText,
       rawText,
+      rawHtmlValue,
       plainTextOnlyText,
       handleSwitchToHtml,
       handleSwitchToDesign,
