@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
   Info,
@@ -60,6 +60,15 @@ export default function EmailSettingsPreviewBanner({
     from_address: emailContent?.from_address ?? '',
     subject: emailContent?.subject ?? '',
   });
+
+  // Sync preview when variantData changes (e.g. after refetch/import)
+  useEffect(() => {
+    setPreviewMeta({
+      from_name: emailContent?.from_name ?? '',
+      from_address: emailContent?.from_address ?? '',
+      subject: emailContent?.subject ?? '',
+    });
+  }, [emailContent?.from_name, emailContent?.from_address, emailContent?.subject]);
 
   return (
     <div className="suprsend-flex suprsend-px-3 suprsend-py-2.5 suprsend-items-center suprsend-text-sm suprsend-border">
@@ -138,7 +147,7 @@ function EmailMetaDataModal({
     () => localStorage.getItem('ss_email_banner_metadata_dismissed') !== 'true'
   );
 
-  const { getValues, control } = useForm<EmailMetaDataFormValues>({
+  const { control, handleSubmit } = useForm<EmailMetaDataFormValues>({
     mode: 'onChange',
     values: {
       subject: emailContent?.subject ?? '',
@@ -156,19 +165,21 @@ function EmailMetaDataModal({
     },
   });
 
-  const handleSave = useCallback(() => {
-    const data = getValues();
-    const { preheader, email_markup, ...rest } = data;
-    const content: EmailContentPayload['content'] = { ...rest };
-    content.body = { preheader, email_markup };
-    onSave({ content });
-    onFieldsChange({
-      subject: data.subject,
-      from_name: data.from_name,
-      from_address: data.from_address,
-    });
-    onClose();
-  }, [getValues, onSave, onFieldsChange, onClose]);
+  const handleSave = useCallback(
+    handleSubmit((data) => {
+      const { preheader, email_markup, ...rest } = data;
+      const content: EmailContentPayload['content'] = { ...rest };
+      content.body = { preheader, email_markup };
+      onSave({ content });
+      onFieldsChange({
+        subject: data.subject,
+        from_name: data.from_name,
+        from_address: data.from_address,
+      });
+      onClose();
+    }),
+    [handleSubmit, onSave, onFieldsChange, onClose]
+  );
 
   return (
     <DialogContent aria-describedby={undefined} className="!suprsend-max-w-3xl !suprsend-max-h-[90vh] !suprsend-border-0 !suprsend-p-0 !suprsend-gap-0 suprsend-overflow-hidden">

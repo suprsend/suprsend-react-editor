@@ -18,7 +18,6 @@ import {
 } from '@/assets/icons';
 import { cn } from '@/lib/utils';
 import { renderHandlebars } from '@/components/custom-ui/HandlebarsRenderer';
-import { makeAbsoluteUrl } from '@/lib/utils';
 import type { WhatsappPreviewProps, PhoneFrameProps } from '@/types';
 
 // --- Helpers ---
@@ -150,7 +149,7 @@ export default function WhatsappPreview({
     : '';
 
   const resolvedMediaUrl = formValues.header_media_url
-    ? makeAbsoluteUrl(renderHandlebars(formValues.header_media_url, variables))
+    ? renderHandlebars(formValues.header_media_url, variables)
     : '';
 
   const resolvedFilename = formValues.header_document_filename

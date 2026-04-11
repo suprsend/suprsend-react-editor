@@ -109,7 +109,6 @@ function ErrorVariantRow({ variant }: { variant: CommitVariant }) {
             {displayName}
           </span>
         </div>
-        <AlertCircle className="suprsend-h-3.5 suprsend-w-3.5 suprsend-shrink-0 suprsend-text-destructive" />
       </button>
       {showErrors && (
         <div className="suprsend-px-3 suprsend-pb-2">
@@ -286,7 +285,7 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
                 </p>
               )}
 
-              {committableVariants.length > 0 && (
+              {(committableVariants.length > 0 || errorVariants.length > 0) && (
                 <Collapsible open={variantsOpen} onOpenChange={setVariantsOpen}>
                   <CollapsibleTrigger className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-w-full suprsend-bg-transparent suprsend-border-none suprsend-cursor-pointer suprsend-p-0 suprsend-group">
                     <div className="suprsend-flex suprsend-items-center suprsend-gap-2">
@@ -314,49 +313,50 @@ function CommitModal({ open, onOpenChange, onCommit }: CommitModalProps) {
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <div className="suprsend-ml-10 suprsend-mt-1 suprsend-space-y-1 suprsend-max-h-40 suprsend-always-show-scrollbar">
-                      {committableVariants.map((variant) => {
-                        const key = getVariantKey(variant);
-                        return (
-                          <VariantRow
-                            key={key}
-                            variant={variant}
-                            checked={!!selectedVariants[key]}
-                            onToggle={() => handleVariantToggle(key)}
-                          />
-                        );
-                      })}
-                    </div>
+                    {committableVariants.length > 0 && (
+                      <div className="suprsend-ml-10 suprsend-mt-1 suprsend-space-y-1 suprsend-max-h-40 suprsend-always-show-scrollbar">
+                        {committableVariants.map((variant) => {
+                          const key = getVariantKey(variant);
+                          return (
+                            <VariantRow
+                              key={key}
+                              variant={variant}
+                              checked={!!selectedVariants[key]}
+                              onToggle={() => handleVariantToggle(key)}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                    {errorVariants.length > 0 && (
+                      <Collapsible defaultOpen={false}>
+                        <div className="suprsend-rounded-lg suprsend-border suprsend-border-destructive/30 suprsend-bg-destructive/5 suprsend-ml-10 suprsend-mt-2">
+                          <CollapsibleTrigger className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-w-full suprsend-bg-transparent suprsend-border-none suprsend-cursor-pointer suprsend-px-3 suprsend-py-2">
+                            <div className="suprsend-flex suprsend-items-center suprsend-gap-1.5">
+                              <ChevronDown className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-destructive suprsend-transition-transform group-data-[state=closed]:suprsend--rotate-90" />
+                              <AlertCircle className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-destructive" />
+                              <span className="suprsend-text-xs suprsend-font-semibold suprsend-text-destructive">
+                                {errorVariants.length} variant{errorVariants.length !== 1 ? 's' : ''} with errors
+                              </span>
+                            </div>
+                            <span className="suprsend-text-xs suprsend-text-destructive">
+                              Won't be committed
+                            </span>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="suprsend-border-t suprsend-border-destructive/20">
+                              {errorVariants.map((variant) => (
+                                <ErrorVariantRow
+                                  key={getVariantKey(variant)}
+                                  variant={variant}
+                                />
+                              ))}
+                            </div>
+                          </CollapsibleContent>
+                        </div>
+                      </Collapsible>
+                    )}
                   </CollapsibleContent>
-                </Collapsible>
-              )}
-
-              {errorVariants.length > 0 && (
-                <Collapsible defaultOpen={false}>
-                  <div className="suprsend-rounded-lg suprsend-border suprsend-border-destructive/30 suprsend-bg-destructive/5">
-                    <CollapsibleTrigger className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-w-full suprsend-bg-transparent suprsend-border-none suprsend-cursor-pointer suprsend-px-3 suprsend-py-2">
-                      <div className="suprsend-flex suprsend-items-center suprsend-gap-1.5">
-                        <ChevronDown className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-destructive suprsend-transition-transform group-data-[state=closed]:suprsend--rotate-90" />
-                        <AlertCircle className="suprsend-h-3.5 suprsend-w-3.5 suprsend-text-destructive" />
-                        <span className="suprsend-text-xs suprsend-font-semibold suprsend-text-destructive">
-                          {errorVariants.length} variant{errorVariants.length !== 1 ? 's' : ''} with errors
-                        </span>
-                      </div>
-                      <span className="suprsend-text-xs suprsend-text-destructive">
-                        Won't be committed
-                      </span>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="suprsend-border-t suprsend-border-destructive/20">
-                        {errorVariants.map((variant) => (
-                          <ErrorVariantRow
-                            key={getVariantKey(variant)}
-                            variant={variant}
-                          />
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  </div>
                 </Collapsible>
               )}
 

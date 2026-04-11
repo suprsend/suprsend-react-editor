@@ -38,7 +38,12 @@ export default function SuprSendTemplateProvider({
   version,
   notificationCategory,
   fallbackVariantId,
+  host,
 }: FullSuprSendTemplateEditorProviderProps) {
+  const apiHost = host?.apiHost || import.meta.env.VITE_API_BASE_URL;
+  const jsonnetApiHost = host?.jsonnetApiHost || import.meta.env.VITE_JSONNET_API_BASE_URL;
+  const designerEditorHost = host?.designerEditorHost || import.meta.env.VITE_DESIGNER_EDITOR_URL;
+
   const [selectedChannel, setSelectedChannel] = useState<string | null>(
     channels.length > 0 ? channels[0] : null
   );
@@ -91,6 +96,9 @@ export default function SuprSendTemplateProvider({
       version,
       notificationCategory,
       fallbackVariantId,
+      apiHost,
+      jsonnetApiHost,
+      designerEditorHost,
     }),
     [
       workspaceUid,
@@ -114,6 +122,9 @@ export default function SuprSendTemplateProvider({
       version,
       notificationCategory,
       fallbackVariantId,
+      apiHost,
+      jsonnetApiHost,
+      designerEditorHost,
     ]
   );
 

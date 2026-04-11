@@ -142,15 +142,17 @@ export function getOptionsList({
       $hosted_preference_url: '{{$hosted_preference_url}}',
     };
   } else if (selectedSection === 'data') {
-    if (variables.$batched_events_count) {
-      return flatten({
-        $batched_events: variables.$batched_events,
-        $batched_events_count: variables.$batched_events_count,
-      } as Record<string, unknown>);
-    }
+    const isBatch = Boolean(variables.__is_batch);
     const filtered: Record<string, unknown> = {};
     for (const key of Object.keys(variables)) {
-      if (!key.startsWith('$')) {
+      if (key.startsWith('__')) continue;
+      if (key.startsWith('$')) {
+        if (isBatch && key.startsWith('$batched_')) {
+          filtered[key] = variables[key];
+        }
+        continue;
+      }
+      if (!isBatch) {
         filtered[key] = variables[key];
       }
     }

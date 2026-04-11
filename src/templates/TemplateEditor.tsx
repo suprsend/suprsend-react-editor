@@ -90,11 +90,15 @@ export default function SuprSendTemplateEditor({
   const { data: translationLocaleData } =
     useTranslationLocaleData(translationLocale);
 
+  const mockDataObj = mockData as Record<string, unknown> | undefined;
+  const isBatch = !!(mockDataObj?.data as Record<string, unknown>)?.is_batch;
+
   const variables: Record<string, unknown> = {
     ...(mockData?.transformed_data ?? {}),
     ...(translationLocaleData?.translations && {
       __translations: translationLocaleData.translations,
     }),
+    ...(isBatch && { __is_batch: true }),
   };
 
   useEffect(() => {

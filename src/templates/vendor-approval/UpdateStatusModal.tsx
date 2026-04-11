@@ -81,7 +81,11 @@ export default function UpdateStatusModal({
 
   const status = watch('status');
   const { templateSlug, variantId } = useTemplateEditorContext();
-  const { mutate, isPending } = useStartVendorApproval({ templateSlug, channelSlug, variantId });
+  const { mutate, isPending } = useStartVendorApproval({
+    templateSlug,
+    channelSlug,
+    variantId,
+  });
 
   const onSubmit = (data: FormValues) => {
     mutate(
@@ -257,7 +261,7 @@ export default function UpdateStatusModal({
                                 <div
                                   ref={innerRef}
                                   {...innerProps}
-                                  className="suprsend-max-h-[150px] suprsend-overflow-y-auto suprsend-p-1"
+                                  className="suprsend-max-h-[100px] suprsend-overflow-y-auto suprsend-p-1"
                                 >
                                   {children}
                                 </div>

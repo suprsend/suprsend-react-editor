@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 import HandlebarsRenderer, {
   renderHandlebars,
 } from '@/components/custom-ui/HandlebarsRenderer';
-import { makeAbsoluteUrl } from '@/lib/utils';
 import type { PhoneFrameProps, IOSPushPreviewProps } from '@/types';
 
 // --- iPhone Frame (reusable) ---
@@ -115,7 +114,7 @@ export default function IOSPushPreview({
   variables,
 }: IOSPushPreviewProps) {
   const resolvedImageUrl = formValues.image_url
-    ? makeAbsoluteUrl(renderHandlebars(formValues.image_url, variables))
+    ? renderHandlebars(formValues.image_url, variables)
     : '';
 
   return (

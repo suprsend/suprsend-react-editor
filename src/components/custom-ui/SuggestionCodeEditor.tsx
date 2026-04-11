@@ -161,7 +161,7 @@ export default function SuggestionCodeEditor({
     if (!enableHighlighting || !variables) return {};
     const filtered: Record<string, unknown> = {};
     for (const key of Object.keys(variables)) {
-      if (key !== '__translations') {
+      if (key !== '__translations' && key !== '__is_batch') {
         filtered[key] = variables[key];
       }
     }

@@ -58,6 +58,8 @@ function AutoPlainTextBanner({
         <Info className="suprsend-w-3.5 suprsend-h-3.5 suprsend-shrink-0" />
         <span>
           Auto-generated from your design. Updates each time you save.
+          Sent alongside HTML and displayed when HTML is blocked in the
+          email client.
         </span>
       </div>
       {onEditManually && (
@@ -85,6 +87,8 @@ function CustomPlainTextBanner({
         <Pencil className="suprsend-w-3.5 suprsend-h-3.5 suprsend-shrink-0" />
         <span>
           Custom plain text. Won't update when you change your design.
+          Sent alongside HTML and displayed when HTML is blocked in the
+          email client.
         </span>
       </div>
       {onResetToAuto && (
