@@ -101,18 +101,6 @@ export function AndroidFrame({ children, className }: PhoneFrameProps) {
   );
 }
 
-function BrandLogo({ logo }: { logo?: string }) {
-  if (logo) {
-    return (
-      <img
-        src={logo}
-        alt="brand logo"
-        className="suprsend-w-[14px] suprsend-h-[14px] suprsend-rounded-[3px] suprsend-shrink-0 suprsend-object-cover"
-      />
-    );
-  }
-  return null;
-}
 
 export default function AndroidPushPreview({
   formValues,
@@ -168,12 +156,13 @@ export default function AndroidPushPreview({
 
           {/* Right: logo + chevron */}
           <div className="suprsend-flex suprsend-items-center suprsend-gap-1.5 suprsend-shrink-0">
-            <BrandLogo
-              logo={
-                (variables as Record<string, Record<string, string>>)?.$brand
-                  ?.logo
-              }
-            />
+            {(variables as Record<string, Record<string, string>>)?.$brand?.logo && (
+              <img
+                src={(variables as Record<string, Record<string, string>>).$brand.logo}
+                alt="brand logo"
+                className="suprsend-w-[14px] suprsend-h-[14px] suprsend-rounded-[3px] suprsend-shrink-0 suprsend-object-cover"
+              />
+            )}
             {isExpanded ? (
               <ChevronUp className="suprsend-w-[12px] suprsend-h-[12px] suprsend-text-muted-foreground" />
             ) : (
