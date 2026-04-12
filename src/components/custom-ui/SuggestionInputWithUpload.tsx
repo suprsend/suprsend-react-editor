@@ -33,7 +33,6 @@ export default function SuggestionInputWithUpload({
   disabled,
   ...rest
 }: SuggestionInputWithUploadProps) {
-  const isTextarea = as === 'textarea';
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { workspaceUid } = useTemplateEditorContext();
