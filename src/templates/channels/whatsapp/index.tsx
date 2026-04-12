@@ -596,7 +596,7 @@ export default function WhatsappChannel({
                         rules={{
                           required: 'Phone number is required',
                           pattern: {
-                            value: /^(\+?)[0-9]{10,20}$/,
+                            value: /^\+?[\d\s]{10,20}$/,
                             message: 'Invalid phone number',
                           },
                         }}

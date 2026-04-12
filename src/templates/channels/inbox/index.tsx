@@ -223,10 +223,7 @@ export default function InboxChannel({
                   render={({ field, fieldState }) => (
                     <SuggestionInputWithUpload
                       value={field.value}
-                      onChange={(val) => {
-                        field.onChange(val);
-                        trigger('avatar.url');
-                      }}
+                      onChange={field.onChange}
                       placeholder="https://example.com/profile-image.png"
                       mandatory={false}
                       error={fieldState.error?.message}
@@ -246,7 +243,10 @@ export default function InboxChannel({
                   render={({ field }) => (
                     <SuggestionInput
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={(val) => {
+                        field.onChange(val);
+                        trigger('avatar.image_url');
+                      }}
                       placeholder="Redirection Link on avatar click"
                       mandatory={false}
                       enableHighlighting
@@ -277,10 +277,7 @@ export default function InboxChannel({
                   render={({ field, fieldState }) => (
                     <SuggestionInput
                       value={field.value}
-                      onChange={(val) => {
-                        field.onChange(val);
-                        trigger('subtext.url');
-                      }}
+                      onChange={field.onChange}
                       placeholder="Text shown below body"
                       mandatory={false}
                       error={fieldState.error?.message}
@@ -299,7 +296,10 @@ export default function InboxChannel({
                   render={({ field }) => (
                     <SuggestionInput
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={(val) => {
+                        field.onChange(val);
+                        trigger('subtext.text');
+                      }}
                       placeholder="Redirection Link on subtext click"
                       mandatory={false}
                       enableHighlighting

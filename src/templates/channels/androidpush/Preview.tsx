@@ -1,13 +1,18 @@
-import { useMemo } from 'react';
-import { Phone, Camera, Signal, BatteryFull, ChevronUp } from '@/assets/icons';
+import { useMemo, useState } from 'react';
+import {
+  Phone,
+  Camera,
+  Signal,
+  BatteryFull,
+  Bell,
+  ChevronDown,
+  ChevronUp,
+} from '@/assets/icons';
 import { cn } from '@/lib/utils';
 import HandlebarsRenderer, {
   renderHandlebars,
 } from '@/components/custom-ui/HandlebarsRenderer';
 import type { PhoneFrameProps, AndroidPushPreviewProps } from '@/types';
-
-// --- Android Phone Frame (reusable) ---
-
 
 function useCurrentDateTime() {
   return useMemo(() => {
@@ -35,13 +40,10 @@ export function AndroidFrame({ children, className }: PhoneFrameProps) {
         className
       )}
     >
-      {/* Side buttons — power + volume on right */}
       <div className="suprsend-absolute suprsend-bg-[#3a3a3a] suprsend-rounded-r-sm suprsend-right-[-2px] suprsend-top-[120px] suprsend-w-[2px] suprsend-h-[35px]" />
       <div className="suprsend-absolute suprsend-bg-[#3a3a3a] suprsend-rounded-r-sm suprsend-right-[-2px] suprsend-top-[175px] suprsend-w-[2px] suprsend-h-[55px]" />
 
-      {/* Screen */}
       <div className="suprsend-relative suprsend-w-full suprsend-h-full suprsend-rounded-[2.3rem] suprsend-overflow-hidden suprsend-bg-black">
-        {/* Wallpaper — purple/blue gradient matching the screenshot */}
         <div
           className="suprsend-absolute suprsend-inset-0"
           style={{
@@ -66,7 +68,6 @@ export function AndroidFrame({ children, className }: PhoneFrameProps) {
 
         {/* Lock screen content */}
         <div className="suprsend-relative suprsend-flex suprsend-flex-col suprsend-h-full suprsend-z-10">
-          {/* Time & Date */}
           <div className="suprsend-text-center suprsend-mt-6">
             <p className="suprsend-text-white suprsend-font-bold suprsend-leading-none suprsend-text-[64px]">
               {timeStr}
@@ -76,14 +77,11 @@ export function AndroidFrame({ children, className }: PhoneFrameProps) {
             </p>
           </div>
 
-          {/* Notification area */}
           <div className="suprsend-flex-1 suprsend-px-3 suprsend-mt-6 suprsend-overflow-y-auto suprsend-min-h-0">
             {children}
           </div>
 
-          {/* Bottom bar */}
           <div className="suprsend-pb-3">
-            {/* Phone & Camera shortcuts */}
             <div className="suprsend-flex suprsend-items-center suprsend-justify-between suprsend-px-8 suprsend-mb-6">
               <div className="suprsend-w-10 suprsend-h-10 suprsend-rounded-full suprsend-bg-white/15 suprsend-backdrop-blur suprsend-flex suprsend-items-center suprsend-justify-center">
                 <Phone className="suprsend-w-4 suprsend-h-4 suprsend-text-white" />
@@ -92,8 +90,6 @@ export function AndroidFrame({ children, className }: PhoneFrameProps) {
                 <Camera className="suprsend-w-4 suprsend-h-4 suprsend-text-white" />
               </div>
             </div>
-
-            {/* Home indicator */}
             <div className="suprsend-flex suprsend-justify-center">
               <div className="suprsend-w-28 suprsend-h-1 suprsend-bg-white suprsend-rounded-full" />
             </div>
@@ -104,72 +100,140 @@ export function AndroidFrame({ children, className }: PhoneFrameProps) {
   );
 }
 
-// --- Notification Preview ---
 
 export default function AndroidPushPreview({
   formValues,
   variables,
 }: AndroidPushPreviewProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const resolvedImageUrl = formValues.image_url
     ? renderHandlebars(formValues.image_url, variables)
     : '';
 
+  const title = formValues.header || 'Notification Title';
+  const body = formValues.body || 'Notification body text';
+  const subtext = formValues.subtext || '';
+  const activeButtons = formValues.buttons?.filter((b) => b.text) ?? [];
+  const hasButtons = activeButtons.length > 0;
+
   return (
     <AndroidFrame>
-      <div className="suprsend-bg-white suprsend-rounded-lg suprsend-shadow-lg suprsend-max-h-[320px] suprsend-flex suprsend-flex-col suprsend-overflow-hidden">
-        {/* Scrollable content */}
-        <div className="suprsend-overflow-y-auto suprsend-flex-1 suprsend-min-h-0">
-        {/* Content */}
-        <div className="suprsend-px-3.5 suprsend-pt-3 suprsend-pb-2">
-          {/* Title row */}
-          <div className="suprsend-flex suprsend-items-start suprsend-justify-between suprsend-gap-2">
-            <HandlebarsRenderer
-              template={formValues.header || 'Notification Title'}
-              data={variables}
-              className="suprsend-m-0 suprsend-text-[13px] suprsend-font-semibold suprsend-text-foreground suprsend-break-all suprsend-flex-1 suprsend-min-w-0"
-            />
-            <div className="suprsend-flex suprsend-items-center suprsend-gap-1 suprsend-shrink-0">
-              <span className="suprsend-text-[10px] suprsend-text-muted-foreground">
-                now
-              </span>
-              <ChevronUp className="suprsend-w-3.5 suprsend-h-3.5 suprsend-text-muted-foreground" />
-            </div>
+      {/* Notification card */}
+      <div className="suprsend-rounded-2xl suprsend-overflow-hidden suprsend-bg-secondary">
+        {/* ── Top bar: bell | app-name subtext | logo | chevron ── */}
+        <div
+          className="suprsend-flex suprsend-items-center suprsend-gap-2 suprsend-px-3 suprsend-pt-2.5 suprsend-pb-1 suprsend-cursor-pointer"
+          onClick={() => setIsExpanded((v) => !v)}
+        >
+          {/* Red bell circle */}
+          <div className="suprsend-w-[18px] suprsend-h-[18px] suprsend-rounded-full suprsend-bg-[#d94f4f] suprsend-flex suprsend-items-center suprsend-justify-center suprsend-shrink-0">
+            <Bell className="suprsend-w-[10px] suprsend-h-[10px] suprsend-text-white" />
           </div>
 
-          {/* Body */}
-          <HandlebarsRenderer
-            template={formValues.body || 'Notification body text'}
-            data={variables}
-            className="suprsend-m-0 suprsend-text-[12px] suprsend-text-muted-foreground suprsend-break-all suprsend-mt-0.5"
-          />
-
-          {/* Banner image */}
-          {resolvedImageUrl && (
-            <img
-              src={resolvedImageUrl}
-              alt="notification banner"
-              className="suprsend-w-full suprsend-max-h-[140px] suprsend-object-cover suprsend-rounded-lg suprsend-mt-2"
-            />
-          )}
-        </div>
-
-        {/* Action buttons */}
-        {formValues.buttons?.some((b) => b.text) && (
-          <div className="suprsend-flex suprsend-justify-around suprsend-gap-4 suprsend-px-3.5 suprsend-pb-3 suprsend-pt-1">
-            {formValues.buttons.map(
-              (btn, i) =>
-                btn.text && (
-                  <HandlebarsRenderer
-                    key={i}
-                    template={btn.text}
-                    data={variables}
-                    className="suprsend-m-0 suprsend-text-[12px] suprsend-font-medium suprsend-text-primary suprsend-break-all"
-                  />
-                )
+          {/* App name + subtext */}
+          <div className="suprsend-flex suprsend-items-center suprsend-gap-1.5 suprsend-flex-1 suprsend-min-w-0">
+            <span className="suprsend-text-[9px] suprsend-text-muted-foreground suprsend-font-medium suprsend-truncate suprsend-max-w-[100px]">
+              {
+                (variables as Record<string, Record<string, string>>)?.$brand
+                  ?.brand_name
+              }
+            </span>
+            {subtext && (
+              <>
+                <span className="suprsend-text-[9px] suprsend-text-muted-foreground suprsend-shrink-0">
+                  ·
+                </span>
+                <HandlebarsRenderer
+                  template={subtext}
+                  data={variables}
+                  className="suprsend-m-0 suprsend-text-[9px] suprsend-text-muted-foreground suprsend-truncate suprsend-max-w-[80px]"
+                />
+              </>
             )}
           </div>
-        )}
+
+          {/* Right: logo + chevron */}
+          <div className="suprsend-flex suprsend-items-center suprsend-gap-1.5 suprsend-shrink-0">
+            {(variables as Record<string, Record<string, string>>)?.$brand?.logo && (
+              <img
+                src={(variables as Record<string, Record<string, string>>).$brand.logo}
+                alt="brand logo"
+                className="suprsend-w-[14px] suprsend-h-[14px] suprsend-rounded-[3px] suprsend-shrink-0 suprsend-object-cover"
+              />
+            )}
+            {isExpanded ? (
+              <ChevronUp className="suprsend-w-[12px] suprsend-h-[12px] suprsend-text-muted-foreground" />
+            ) : (
+              <ChevronDown className="suprsend-w-[12px] suprsend-h-[12px] suprsend-text-muted-foreground" />
+            )}
+          </div>
         </div>
+
+        {/* ── Title + body (always visible, indented to align with app name) ── */}
+        <div
+          className="suprsend-flex suprsend-gap-2 suprsend-px-3 suprsend-pb-2.5 suprsend-cursor-pointer"
+          onClick={() => setIsExpanded((v) => !v)}
+        >
+          {/* Spacer matching bell width so text aligns with app name above */}
+          <div className="suprsend-w-[18px] suprsend-shrink-0" />
+          <div className="suprsend-flex-1 suprsend-min-w-0">
+            <HandlebarsRenderer
+              template={title}
+              data={variables}
+              className={cn(
+                'suprsend-m-0 suprsend-text-[13px] suprsend-font-semibold suprsend-text-foreground suprsend-leading-tight',
+                !isExpanded ? 'suprsend-truncate' : 'suprsend-break-words'
+              )}
+            />
+            <HandlebarsRenderer
+              template={body}
+              data={variables}
+              className={cn(
+                'suprsend-m-0 suprsend-text-[11px] suprsend-text-muted-foreground suprsend-mt-0.5 suprsend-leading-snug',
+                !isExpanded ? 'suprsend-truncate' : 'suprsend-break-words'
+              )}
+            />
+          </div>
+        </div>
+
+        {/* ── Expanded: image + buttons ── */}
+        {isExpanded && (
+          <>
+            {resolvedImageUrl && (
+              <div
+                className="suprsend-pb-2"
+                style={{ paddingLeft: 38, paddingRight: 12 }}
+              >
+                <img
+                  src={resolvedImageUrl}
+                  alt="notification banner"
+                  className="suprsend-w-full suprsend-max-h-[100px] suprsend-object-cover suprsend-rounded-lg"
+                />
+              </div>
+            )}
+
+            {hasButtons && (
+              <div className="suprsend-flex suprsend-items-center">
+                {activeButtons.map((btn, i) => (
+                  <div
+                    key={i}
+                    className="suprsend-flex suprsend-items-center suprsend-flex-1 suprsend-min-w-0"
+                  >
+                    {i > 0 && (
+                      <div className="suprsend-w-px suprsend-h-3 suprsend-bg-border suprsend-shrink-0" />
+                    )}
+                    <HandlebarsRenderer
+                      template={btn.text}
+                      data={variables}
+                      className="suprsend-m-0 suprsend-flex-1 suprsend-min-w-0 suprsend-py-2 suprsend-px-1.5 suprsend-text-[10px] suprsend-font-medium suprsend-text-foreground suprsend-truncate suprsend-text-center"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </AndroidFrame>
   );
